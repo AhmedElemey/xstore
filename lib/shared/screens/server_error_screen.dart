@@ -6,6 +6,7 @@ import '../../core/network/server_error_provider.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/utils/extensions/context_extensions.dart';
 import '../widgets/error_state_widget.dart';
+import '../widgets/orbit_background.dart';
 
 /// Full-screen fallback shown whenever any API call fails with an HTTP 5xx
 /// status — see [serverErrorProvider] and the redirect in `app_router.dart`.
@@ -17,14 +18,16 @@ class ServerErrorScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: SafeArea(
-        child: ErrorStateWidget(
-          message: context.l10n.serverErrorMessage,
-          retryLabel: context.l10n.goHome,
-          onRetry: () {
-            ref.read(serverErrorProvider.notifier).clear();
-            context.go(AppRoutes.home);
-          },
+      body: OrbitBackground(
+        child: SafeArea(
+          child: ErrorStateWidget(
+            message: context.l10n.serverErrorMessage,
+            retryLabel: context.l10n.goHome,
+            onRetry: () {
+              ref.read(serverErrorProvider.notifier).clear();
+              context.go(AppRoutes.home);
+            },
+          ),
         ),
       ),
     );

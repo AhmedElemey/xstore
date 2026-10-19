@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -69,19 +68,31 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            OutlinedButton(
-              onPressed: () async {
+            // Read-only field with the same decoration as the two above.
+            InkWell(
+              borderRadius: BorderRadius.circular(AppSpacing.lg),
+              onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
                   firstDate: DateTime.now(),
                   lastDate: DateTime.now().add(const Duration(days: 30)),
                   initialDate: _date,
                 );
+                if (!mounted) return;
                 if (picked != null) setState(() => _date = picked);
               },
-              child: Text(
-                '${context.l10n.ordersEstimatedDeliveryLabel}: '
-                '${DateFormat('EEEE, MMM d, yyyy').format(_date)}',
+              child: InputDecorator(
+                // Label stays inline like the text fields above (a floated
+                // label would straddle the top border); the picked date sits
+                // at the trailing end next to the calendar icon.
+                isEmpty: true,
+                decoration: InputDecoration(
+                  labelText: context.l10n.ordersEstimatedDeliveryLabel,
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  suffixIcon: DateFieldSuffix(
+                    text: context.formatMediumDate(_date),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -127,6 +138,31 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The picked date (when there is one) at the trailing end of an
+/// inline-label date field, followed by the calendar icon.
+class DateFieldSuffix extends StatelessWidget {
+  const DateFieldSuffix({super.key, this.text});
+
+  final String? text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: AppSpacing.md),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (text != null) ...[
+            Text(text!, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          const Icon(Icons.calendar_today_outlined),
+        ],
       ),
     );
   }

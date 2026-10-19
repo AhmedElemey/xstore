@@ -27,11 +27,6 @@ abstract interface class ProfileRemoteDataSource {
     required UserEntity sessionUser,
   });
 
-  Future<String> updateAvatar({
-    required String userId,
-    required String filePath,
-  });
-
   Future<void> deleteAccount({
     required String password,
     required String confirmationText,
@@ -56,6 +51,12 @@ String? _optTrimmed(String? value) {
   return trimmed.isEmpty ? null : trimmed;
 }
 
+/// Multipart cannot send JSON null; `''` is the clear signal. A missing
+/// image URL plus no new file means "remove", not "leave unchanged".
+bool _clearsProfileImage({required String? url, required String? path}) {
+  return _optTrimmed(url) == null && _optTrimmed(path) == null;
+}
+
 String? _birthDateWire(DateTime? date) {
   if (date == null) return null;
   final y = date.year.toString().padLeft(4, '0');
@@ -64,14 +65,28 @@ String? _birthDateWire(DateTime? date) {
   return '$y-$m-$d';
 }
 
+// TODO(backend): `avatarUrl`, `storeLogoUrl` and the `*ByGoogleMaps` fields below are undocumented
+// in the collection — confirm them and how to clear an image.
 /// Wire map for PUT `/api/auth/update-profile` (camelCase JSON fields).
 /// Exposed for unit tests; live calls use [updateProfileFormData].
 Map<String, dynamic> updateProfileWireFields(UpdateProfileRequest request) {
   return {
     if (_optTrimmed(request.fullNameEn) != null)
       'fullName': _optTrimmed(request.fullNameEn),
-    'userImageUrl': request.userImageUrl,
-    'storeImageUrl': request.storeImageUrl,
+    // Empty string, not JSON null: a missing multipart key means "keep the
+    // current image"; get-profile reads `store.storeLogoUrl` / `user.avatarUrl`.
+    'userImageUrl': request.userImageUrl ?? '',
+    'storeImageUrl': request.storeImageUrl ?? '',
+    if (_clearsProfileImage(
+      url: request.userImageUrl,
+      path: request.userImagePath,
+    ))
+      'avatarUrl': '',
+    if (_clearsProfileImage(
+      url: request.storeImageUrl,
+      path: request.storeImagePath,
+    ))
+      'storeLogoUrl': '',
     if (_optTrimmed(request.storeName) != null)
       'storeName': _optTrimmed(request.storeName),
     if (_optTrimmed(request.storeDescription) != null)
@@ -208,6 +223,28 @@ Future<FormData> updateProfileFormData(UpdateProfileRequest request) async {
     );
   }
   return FormData.fromMap(map);
+}
+
+UserModel _applyClearedProfileImages(
+  UserModel parsed,
+  UpdateProfileRequest request,
+) {
+  var next = parsed;
+  if (_clearsProfileImage(
+        url: request.userImageUrl,
+        path: request.userImagePath,
+      ) &&
+      next.avatarUrl != null) {
+    next = next.copyWith(avatarUrl: null);
+  }
+  if (_clearsProfileImage(
+        url: request.storeImageUrl,
+        path: request.storeImagePath,
+      ) &&
+      next.storeLogoUrl != null) {
+    next = next.copyWith(storeLogoUrl: null);
+  }
+  return next;
 }
 
 UserEntity _entityFromUpdateRequest(
@@ -399,14 +436,16 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           storeSaveCount: 89,
           storeActiveListings: 18,
           responseRatePercent: 89,
+          isEmailVerified: user.isVerified || user.isEmailVerified,
+          isPhoneVerified: user.isVerified || user.isPhoneVerified,
         );
       }
       final user = _mergeConsumerMock(sessionUser);
       return ProfileModel(
         user: _mockUserModelFromEntity(user),
-        ordersCount: 12,
         wishlistCount: 5,
-        savedAmountDzd: 23000,
+        isEmailVerified: user.isVerified || user.isEmailVerified,
+        isPhoneVerified: user.isVerified || user.isPhoneVerified,
       );
     }
     try {
@@ -463,7 +502,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         merged = merged.copyWith(storeLogoUrl: MockImages.avatar(99));
       }
       final model = await MockConfig.simulate(_mockUserModelFromEntity(merged));
-      return model;
+      return _applyClearedProfileImages(model, request);
     }
     try {
       final wireFields = updateProfileWireFields(request);
@@ -478,9 +517,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty response');
-      final parsed = userModelFromProfileResponse(
-        data,
-        fallbackUserId: sessionUser.id,
+      final parsed = _applyClearedProfileImages(
+        userModelFromProfileResponse(data, fallbackUserId: sessionUser.id),
+        request,
       );
       _debugLogProfileFields(
         tag: 'PUT update-profile (response ${response.statusCode})',
@@ -497,60 +536,6 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<String> updateAvatar({
-    required String userId,
-    required String filePath,
-  }) async {
-    if (MockConfig.useMock) {
-      return MockConfig.simulate(MockImages.avatar(99));
-    }
-    try {
-      // Multipart upload via the generic uploads endpoint. CONFIRMED
-      // (Postman collection): POST /api/uploads/{entityType}, file field
-      // key `file` — supersedes the old /api/auth/avatar + `profileImage`
-      // guess, which was never confirmed against the backend. The route
-      // is token-scoped (the X-Auth-Token interceptor identifies the
-      // user), so `userId` is not sent — it stays on the signature in
-      // case the route ever becomes user-scoped. Returns the stored
-      // avatar URL, which the caller then persists via update-profile's
-      // `avatarUrl`.
-      final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          filePath,
-          // image_picker returns POSIX-style paths on iOS/Android.
-          filename: filePath.split('/').last,
-        ),
-      });
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.apiUpload('avatar'),
-        data: formData,
-        options: ApiAuthHeaders.authenticated(),
-      );
-      final url = _avatarUrlFromResponse(response.data);
-      if (url == null || url.isEmpty) {
-        throw const ServerException('Avatar upload returned no URL.');
-      }
-      return url;
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  /// Reads the uploaded avatar URL from tolerant response shapes: a bare
-  /// `{avatarUrl|url|imageUrl}`, or a `{user:{avatarUrl}}` profile wrapper.
-  String? _avatarUrlFromResponse(Map<String, dynamic>? data) {
-    if (data == null) return null;
-    final direct = data['avatarUrl'] ?? data['url'] ?? data['imageUrl'];
-    if (direct is String && direct.isNotEmpty) return direct;
-    final user = data['user'];
-    if (user is Map) {
-      final nested = user['avatarUrl'];
-      if (nested is String && nested.isNotEmpty) return nested;
-    }
-    return null;
-  }
-
-  @override
   Future<void> deleteAccount({
     required String password,
     required String confirmationText,
@@ -561,12 +546,16 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     }
     try {
       // CONFIRMED (Postman collection): DELETE /api/auth/delete-account,
-      // JSON body {password, confirmationText}.
-      await _dio.delete<void>(
+      // JSON body {password, confirmationText}. A wrong password can come
+      // back as a 2xx `{isSuccess: false}` envelope — that must not count
+      // as deleted (the UI would log out while the account still exists).
+      final response = await _dio.delete<dynamic>(
         ApiEndpoints.deleteAccount,
         data: {'password': password, 'confirmationText': confirmationText},
         options: ApiAuthHeaders.authenticated(),
       );
+      final failure = envelopeFailure(response.data);
+      if (failure != null) throw failure;
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -643,6 +632,11 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return _publicSellerMaps!;
     }
     List<Map<String, dynamic>> maps = const [];
+    // TODO(backend): GET /api/listings?storeId= would filter server-side, but
+    // the store screen only has the seller's user id, not the numeric store
+    // id. Until it is available here, this fetches one page and filters by
+    // userId client-side, so a seller whose listings aren't in the first 50
+    // rows is under-reported.
     try {
       maps = _listingMapsFromResponse(
         await _dio.get<dynamic>(

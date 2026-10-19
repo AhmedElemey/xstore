@@ -172,23 +172,6 @@ final verifyForgotPasswordOtpUseCaseProvider =
 
 typedef VerifyForgotPasswordOtpUseCaseRef
     = AutoDisposeProviderRef<VerifyForgotPasswordOtpUseCase>;
-String _$refreshTokenUseCaseHash() =>
-    r'c168419b5d4712e004270dc3a4c6db067941322e';
-
-/// See also [refreshTokenUseCase].
-@ProviderFor(refreshTokenUseCase)
-final refreshTokenUseCaseProvider =
-    AutoDisposeProvider<RefreshTokenUseCase>.internal(
-  refreshTokenUseCase,
-  name: r'refreshTokenUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$refreshTokenUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef RefreshTokenUseCaseRef = AutoDisposeProviderRef<RefreshTokenUseCase>;
 String _$sendEmailOtpUseCaseHash() =>
     r'372ac4cffefa408d1cf1b83399dd2de10727a422';
 
@@ -292,41 +275,6 @@ final googleSignInUseCaseProvider =
 );
 
 typedef GoogleSignInUseCaseRef = AutoDisposeProviderRef<GoogleSignInUseCase>;
-String _$appleSignInUseCaseHash() =>
-    r'a866a853ac9ccfe703cb99160e204e6dd5531ac1';
-
-/// See also [appleSignInUseCase].
-@ProviderFor(appleSignInUseCase)
-final appleSignInUseCaseProvider =
-    AutoDisposeProvider<AppleSignInUseCase>.internal(
-  appleSignInUseCase,
-  name: r'appleSignInUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$appleSignInUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef AppleSignInUseCaseRef = AutoDisposeProviderRef<AppleSignInUseCase>;
-String _$facebookSignInUseCaseHash() =>
-    r'a3685af1393801b5431bc7144460a52a0511e904';
-
-/// See also [facebookSignInUseCase].
-@ProviderFor(facebookSignInUseCase)
-final facebookSignInUseCaseProvider =
-    AutoDisposeProvider<FacebookSignInUseCase>.internal(
-  facebookSignInUseCase,
-  name: r'facebookSignInUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$facebookSignInUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef FacebookSignInUseCaseRef
-    = AutoDisposeProviderRef<FacebookSignInUseCase>;
 String _$sendLoginOtpUseCaseHash() =>
     r'e6025345e5b49a993511ca6ee2a7999008faed15';
 
@@ -379,7 +327,7 @@ final googleLoginUseCaseProvider =
 
 typedef GoogleLoginUseCaseRef = AutoDisposeProviderRef<GoogleLoginUseCase>;
 String _$checkGoogleUserUseCaseHash() =>
-    r'0000000000000000000000000000000000000a';
+    r'5e39ed74e888a83a6c5febc7fd27c16088be0a2d';
 
 /// See also [checkGoogleUserUseCase].
 @ProviderFor(checkGoogleUserUseCase)
@@ -396,7 +344,7 @@ final checkGoogleUserUseCaseProvider =
 
 typedef CheckGoogleUserUseCaseRef
     = AutoDisposeProviderRef<CheckGoogleUserUseCase>;
-String _$authHash() => r'd22d2a8bab0138b678fa54a0e80edc2d6b030378';
+String _$authHash() => r'3b5def3be6e133efcd18ee76eec8b01156a229cc';
 
 /// See also [Auth].
 @ProviderFor(Auth)
@@ -426,7 +374,7 @@ final loginNotifierProvider =
 );
 
 typedef _$LoginNotifier = AutoDisposeNotifier<LoginState>;
-String _$registerNotifierHash() => r'351a80401a4173ee148c3e24bfeb861a1f72a27b';
+String _$registerNotifierHash() => r'8afee8aa6b27b56b5c34d44b27605ff2e157c2d8';
 
 /// See also [RegisterNotifier].
 @ProviderFor(RegisterNotifier)

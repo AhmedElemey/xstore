@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../constants/app_spacing.dart';
 import '../constants/app_typography.dart';
+import '../utils/extensions/context_extensions.dart';
 import 'app_animations.dart';
 
 /// Press feedback: scale down while pointer is down.
@@ -140,8 +141,8 @@ class AnimatedCounter extends StatelessWidget {
       tween: IntTween(end: value),
       duration: duration,
       curve: AppAnimations.smooth,
-      builder: (_, val, __) => Text(
-        '$prefix$val$suffix',
+      builder: (context, val, __) => Text(
+        '$prefix${context.formatInt(val)}$suffix',
         style: style,
       ),
     );

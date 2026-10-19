@@ -8,9 +8,10 @@ part 'profile_entity.freezed.dart';
 class ProfileEntity with _$ProfileEntity {
   const factory ProfileEntity({
     required UserEntity user,
-    @Default(0) int ordersCount,
     @Default(0) int wishlistCount,
-    @Default(0) int savedAmountDzd,
+
+    /// Null when the backend doesn't provide it (live get-profile never does).
+    int? savedAmountDzd,
     @Default(0) int storeViewCount,
     @Default(0) int storeSaveCount,
     @Default(0) int storeActiveListings,
@@ -19,6 +20,7 @@ class ProfileEntity with _$ProfileEntity {
     @Default(false) bool isPhoneVerificationRequired,
     @Default(false) bool isEmailVerified,
     @Default(false) bool isPhoneVerified,
+
     /// Social-only accounts send `hasPassword: "No"` and skip current-password.
     @Default(true) bool hasPassword,
   }) = _ProfileEntity;

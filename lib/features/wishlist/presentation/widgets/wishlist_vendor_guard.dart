@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -13,8 +13,8 @@ class WishlistVendorGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: context.backgroundColor,
+    return Material(
+      type: MaterialType.transparency,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),

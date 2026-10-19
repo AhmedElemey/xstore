@@ -9,8 +9,11 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/product_skeleton_card.dart';
+import '../../../home/presentation/providers/home_dependencies.dart';
 import '../../../home/presentation/providers/recommended_provider.dart';
 import '../../../home/presentation/widgets/product_card.dart';
+import '../../../listing/domain/entities/listing_entity.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class CartRecommendedStrip extends ConsumerWidget {
   const CartRecommendedStrip({super.key});
@@ -24,8 +27,9 @@ class CartRecommendedStrip extends ConsumerWidget {
       children: [
         Text(
           context.l10n.cartYouMayAlsoLike,
-          style: AppTypography.titleMedium.copyWith(
-            fontWeight: FontWeight.w700,
+          style: AppTypography.headlineSmall.copyWith(
+            fontSize: 18,
+            color: context.textPrimary,
           ),
         ),
         const Gap(AppSpacing.md),
@@ -50,9 +54,9 @@ class CartRecommendedStrip extends ConsumerWidget {
                           : null,
                       discountPercent: 0,
                       listingId: listing.id,
-                      onTap: () => context.push(
-                        '${AppRoutes.product}/${listing.id}',
-                      ),
+                      isSoldOut: isSoldOutListing(status: listing.status),
+                      onTap: () =>
+                          context.push('${AppRoutes.product}/${listing.id}'),
                     ),
                   );
                 },
@@ -72,8 +76,8 @@ class CartRecommendedStrip extends ConsumerWidget {
             ),
           ),
           error: (e, _) => ErrorStateWidget(
-            message: e.toString(),
-            onRetry: () => ref.invalidate(recommendedProvider),
+            message: userErrorMessage(e),
+            onRetry: () => ref.invalidate(homeFeedProvider),
           ),
         ),
       ],

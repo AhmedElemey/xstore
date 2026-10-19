@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
+import '../../../../core/firebase/firebase_options.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/network/dio_provider.dart';
@@ -24,13 +25,10 @@ import '../../domain/usecases/register_vendor_usecase.dart';
 import '../../domain/usecases/change_password_usecase.dart';
 import '../../domain/usecases/forgot_password_usecase.dart';
 import '../../domain/usecases/verify_forgot_password_otp_usecase.dart';
-import '../../domain/usecases/refresh_token_usecase.dart';
 import '../../domain/usecases/send_email_otp_usecase.dart';
 import '../../domain/usecases/verify_email_otp_usecase.dart';
 import '../../domain/usecases/send_phone_otp_backend_usecase.dart';
 import '../../domain/usecases/verify_phone_otp_backend_usecase.dart';
-import '../../domain/usecases/apple_sign_in_usecase.dart';
-import '../../domain/usecases/facebook_sign_in_usecase.dart';
 import '../../domain/usecases/google_sign_in_usecase.dart';
 import '../../domain/usecases/send_login_otp_usecase.dart';
 import '../../domain/usecases/login_with_otp_usecase.dart';
@@ -38,7 +36,6 @@ import '../../domain/usecases/google_login_usecase.dart';
 import '../../domain/usecases/check_google_user_usecase.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../listing/presentation/providers/listing_dependencies.dart';
-import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../delivery/data/delivery_backend_session.dart';
 import '../../../notifications/presentation/providers/fcm_device_token_sync_provider.dart';
 import 'auth_states.dart';
@@ -105,11 +102,6 @@ VerifyForgotPasswordOtpUseCase verifyForgotPasswordOtpUseCase(
 }
 
 @riverpod
-RefreshTokenUseCase refreshTokenUseCase(RefreshTokenUseCaseRef ref) {
-  return RefreshTokenUseCase(ref.watch(authRepositoryProvider));
-}
-
-@riverpod
 SendEmailOtpUseCase sendEmailOtpUseCase(SendEmailOtpUseCaseRef ref) {
   return SendEmailOtpUseCase(ref.watch(authRepositoryProvider));
 }
@@ -141,16 +133,6 @@ LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) {
 @riverpod
 GoogleSignInUseCase googleSignInUseCase(GoogleSignInUseCaseRef ref) {
   return GoogleSignInUseCase(ref.watch(authRepositoryProvider));
-}
-
-@riverpod
-AppleSignInUseCase appleSignInUseCase(AppleSignInUseCaseRef ref) {
-  return AppleSignInUseCase(ref.watch(authRepositoryProvider));
-}
-
-@riverpod
-FacebookSignInUseCase facebookSignInUseCase(FacebookSignInUseCaseRef ref) {
-  return FacebookSignInUseCase(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
@@ -212,32 +194,20 @@ class Auth extends _$Auth {
 
   Future<void> logout() async {
     final user = state.valueOrNull;
-    unregisterFcmDeviceTokenOnLogout(ref);
-    await ref.read(logoutUseCaseProvider).call();
-    resetProfileData(ref);
-    resetListingLocalCache(ref);
-    resetStoreHoursData(ref);
-    await clearDeliveryBackendSession();
     final analytics = ref.read(analyticsServiceProvider);
     analytics.track(
       AnalyticsEvents.logout,
       properties: {if (user != null) AnalyticsProps.role: user.role.name},
     );
+    // Before the remote logout below invalidates the session token.
+    await analytics.flushBeforeSignOut();
+    unregisterFcmDeviceTokenOnLogout(ref);
+    await ref.read(logoutUseCaseProvider).call();
+    resetProfileData(ref);
+    resetListingLocalCache(ref);
+    await clearDeliveryBackendSession();
     analytics.bindSession(null);
     ref.invalidateSelf();
-  }
-
-  Future<void> setUser(UserEntity user) async {
-    state = const AsyncLoading();
-    final result = await ref
-        .read(authRepositoryProvider)
-        .persistSessionUser(user);
-    ref.read(guestModeProvider.notifier).disable();
-    state = result.fold((_) => AsyncData(user), (_) => AsyncData(user));
-    syncFcmDeviceTokenWithBackend(ref, user: user);
-    prefetchProfileData(ref, user: user);
-    syncDeliveryBackendSession(ref, user: user);
-    _bindAnalyticsSession(user);
   }
 
   /// Session already persisted (e.g. login/register API) — update auth without
@@ -249,7 +219,10 @@ class Auth extends _$Auth {
     ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
     syncFcmDeviceTokenWithBackend(ref, user: user);
-    prefetchProfileData(ref, user: user);
+    // Every adoptSession caller (password login, register, phone OTP,
+    // Google) reaches here via a repository method that already called
+    // _resolveFullUser — user is fresh off a live get-profile.
+    prefetchProfileData(ref, user: user, alreadyFresh: true);
     syncDeliveryBackendSession(ref, user: user);
     _bindAnalyticsSession(user);
   }
@@ -373,6 +346,11 @@ class RegisterNotifier extends _$RegisterNotifier {
 
   void reset() => state = const RegisterState();
 
+  void setSocialIdToken(String? token) {
+    if (token == null) return;
+    state = state.copyWith(socialIdToken: token);
+  }
+
   void updateRole(UserRole role) {
     state = state.copyWith(
       selectedRole: role,
@@ -489,8 +467,6 @@ class RegisterNotifier extends _$RegisterNotifier {
     updateField(dateOfBirth: dateOnly);
   }
 
-  void clearStepErrors() => state = state.copyWith(stepErrors: {});
-
   Future<void> pickStoreLogo() async {
     final picker = ImagePicker();
     final file = await picker.pickImage(
@@ -605,7 +581,16 @@ class RegisterNotifier extends _$RegisterNotifier {
     }
     state = state.copyWith(stepErrors: {}, error: null);
     if (state.currentStep < state.totalSteps) {
-      state = state.copyWith(currentStep: state.currentStep + 1);
+      final reachedStep = state.currentStep + 1;
+      state = state.copyWith(currentStep: reachedStep);
+      // Vendor-only: the wizard shares this method with the consumer flow,
+      // which has no separate onboarding funnel to instrument.
+      if (state.selectedRole == UserRole.vendor) {
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.vendorOnboardingStep,
+          properties: {AnalyticsProps.step: reachedStep},
+        );
+      }
     }
     return true;
   }
@@ -642,6 +627,10 @@ class RegisterNotifier extends _$RegisterNotifier {
     state = state.copyWith(isLoading: true, error: null, stepErrors: {});
     final role = state.selectedRole ?? UserRole.consumer;
     final fullNameEn = state.fullName.trim();
+    // Google sign-up only: the Web client ID the ID token was minted for.
+    final clientId = state.socialIdToken == null
+        ? null
+        : DefaultFirebaseOptions.googleWebClientId;
     final result = role == UserRole.vendor
         ? await ref
               .read(registerVendorUseCaseProvider)
@@ -661,6 +650,8 @@ class RegisterNotifier extends _$RegisterNotifier {
                   storeGovernmentId: state.storeGovernmentId!,
                   whatsappNumber: state.whatsappNumber,
                   profileImagePath: state.storeLogoPath ?? '',
+                  idToken: state.socialIdToken,
+                  clientId: clientId,
                 ),
               )
         : await ref
@@ -676,6 +667,8 @@ class RegisterNotifier extends _$RegisterNotifier {
                   cityId: state.storeCityId!,
                   governorateId: state.storeGovernmentId!,
                   dateOfBirth: state.dateOfBirth,
+                  idToken: state.socialIdToken,
+                  clientId: clientId,
                 ),
               );
     if (_disposed) return;

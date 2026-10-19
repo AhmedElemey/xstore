@@ -16,15 +16,6 @@ enum OrderStatus {
   cancelled,
 }
 
-int orderStatusToWire(OrderStatus status) => switch (status) {
-      OrderStatus.pending => 0,
-      OrderStatus.confirmed => 1,
-      OrderStatus.processing => 2,
-      OrderStatus.shipped => 3,
-      OrderStatus.delivered => 4,
-      OrderStatus.cancelled => 5,
-    };
-
 /// C# `OrderStatus` member name. `PUT /vendor/orders/status` binds
 /// `status` as `System.String` — an int 400s with `$.status` plus a
 /// cascading `request` required error.
@@ -95,13 +86,22 @@ class OrderAddress with _$OrderAddress {
     required String wilaya,
     String? postalCode,
     @Default(false) bool isDefault,
-    /// Set when this address was pinned on the map picker (see
-    /// `showMapAddressPicker`). Null for addresses saved before the picker
-    /// existed, or typed without dropping a pin — `placeOrder` falls back
+    /// Set when this address was pinned on the (since removed) map
+    /// picker. Null for addresses saved before or after the picker, or
+    /// typed without dropping a pin — `placeOrder` falls back
     /// to [AppLocationCache] in that case, same as before this field
     /// existed.
     double? latitude,
     double? longitude,
+    /// The ids [city]/[wilaya] were resolved from at save time (via the same
+    /// live `/api/governorates` + `/api/cities` reference lists the picker
+    /// itself reads) — kept so the displayed names can be re-resolved in
+    /// whichever locale is active later, instead of the display staying
+    /// frozen in the language that was active when the address was saved.
+    /// Null for addresses saved before this field existed; display falls
+    /// back to the plain [city]/[wilaya] strings in that case.
+    int? cityId,
+    int? governorateId,
   }) = _OrderAddress;
 }
 
@@ -179,6 +179,7 @@ class OrderEntity with _$OrderEntity {
     required DateTime createdAt,
     required DateTime updatedAt,
     DateTime? confirmedAt,
+    DateTime? processingAt,
     DateTime? shippedAt,
     DateTime? deliveredAt,
     DateTime? cancelledAt,
@@ -196,6 +197,19 @@ extension OrderEntityX on OrderEntity {
     return id;
   }
 
+  /// Live order rows carry no per-step timestamps, so the step times stamped
+  /// locally on each status change must survive refetches that omit them —
+  /// otherwise the timeline flips earlier steps back to "Pending".
+  OrderEntity keepingStepTimesFrom(OrderEntity? old) {
+    if (old == null) return this;
+    return copyWith(
+      confirmedAt: confirmedAt ?? old.confirmedAt,
+      processingAt: processingAt ?? old.processingAt,
+      shippedAt: shippedAt ?? old.shippedAt,
+      deliveredAt: deliveredAt ?? old.deliveredAt,
+    );
+  }
+
   /// Mutation responses (cancel 2xx with no order body) omit line items.
   /// Keep the snapshot the UI already has and only take status fields.
   OrderEntity takingStatusFrom(OrderEntity incoming) {
@@ -206,6 +220,7 @@ extension OrderEntityX on OrderEntity {
       cancelledAt: incoming.cancelledAt ?? cancelledAt,
       updatedAt: incoming.updatedAt,
       confirmedAt: incoming.confirmedAt ?? confirmedAt,
+      processingAt: incoming.processingAt ?? processingAt,
       shippedAt: incoming.shippedAt ?? shippedAt,
       deliveredAt: incoming.deliveredAt ?? deliveredAt,
       deliveryMethod: incoming.deliveryMethod ?? deliveryMethod,

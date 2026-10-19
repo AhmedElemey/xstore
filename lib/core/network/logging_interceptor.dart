@@ -28,6 +28,8 @@ class LoggingInterceptor extends Interceptor {
     'firebaseidtoken',
     'otpcode',
     'smscode',
+    'api_key',
+    'apikey',
   };
 
   static const _encoder = JsonEncoder.withIndent('  ');

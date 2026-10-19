@@ -8,6 +8,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../providers/wishlist_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/legal_links.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
 class MoveAllToCartBar extends ConsumerWidget {
@@ -29,17 +30,18 @@ class MoveAllToCartBar extends ConsumerWidget {
     final addable = counts.addable;
     if (total == 0 || avail == 0) return const SizedBox.shrink();
 
-    return Material(
-      elevation: 8,
-      shadowColor: context.textPrimary.withValues(alpha: 0.1),
-      color: context.surfaceColor,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.backgroundColor.withValues(alpha: 0.96),
+        border: Border(top: BorderSide(color: context.borderColor)),
+      ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            AppSpacing.xl,
             AppSpacing.md,
-            AppSpacing.lg,
+            AppSpacing.xl,
             AppSpacing.md,
           ),
           child: Column(
@@ -47,7 +49,10 @@ class MoveAllToCartBar extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                context.l10n.wishlistItemsAvailableLine(total, avail),
+                context.l10n.wishlistItemsAvailableLine(
+                  context.formatInt(total),
+                  context.formatInt(avail),
+                ),
                 style: AppTypography.bodySmall.copyWith(
                   color: context.textSecondary,
                 ),
@@ -67,11 +72,12 @@ class MoveAllToCartBar extends ConsumerWidget {
                               if (!context.mounted) return;
                               AppSnackbar.show(
                                 context,
-                                message: context.l10n.wishlistAddedToCartCount(n),
+                                message: context.l10n.wishlistAddedToCartCount(
+                                  n,
+                                ),
                                 action: SnackBarAction(
                                   label: context.l10n.wishlistViewCart,
-                                  onPressed: () =>
-                                      context.push(AppRoutes.cart),
+                                  onPressed: () => context.push(AppRoutes.cart),
                                 ),
                               );
                             },
@@ -84,7 +90,7 @@ class MoveAllToCartBar extends ConsumerWidget {
                       onPressed: () {
                         Share.share(
                           context.l10n.wishlistShareText(
-                            'https://xstore.app/wishlist',
+                            xstoreDownloadUrl(isArabic: context.isArabic),
                           ),
                         );
                       },

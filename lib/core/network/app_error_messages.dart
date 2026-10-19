@@ -10,6 +10,14 @@ const rateLimitErrorCode = 'rateLimitExceeded';
 /// case for a consumer who hasn't verified their phone number yet.
 const phoneNotVerifiedErrorCode = 'phoneNotVerified';
 
+/// Checkout's pre-order stock check found at least one line the listing
+/// can no longer fill (`GET /api/listings/{id}/stock`). No order was placed.
+const outOfStockErrorCode = 'outOfStock';
+
+/// Adding to cart refused: the listing reports no stock (it stays Active on
+/// the backend at `stockQuantity: 0`).
+const soldOutErrorCode = 'soldOut';
+
 /// CONFIRMED (live probe, 2026-08-14): `POST /api/listings` 403s with this
 /// case when the vendor's store has no saved lat/lng — register only
 /// collects city/governorate dropdowns, so every vendor hits this on their
@@ -26,17 +34,30 @@ const accountNotVerifiedErrorCode = 'accountNotVerified';
 /// "Please add and verify your email address before requesting a phone OTP."
 const emailRequiredBeforePhoneErrorCode = 'emailRequiredBeforePhone';
 
+/// Social sign-in failures raised by `SocialAuthDataSource`.
+const googleSignInFailedErrorCode = 'googleSignInFailed';
+const socialAccountExistsErrorCode = 'socialAccountExists';
+const socialAccountDisabledErrorCode = 'socialAccountDisabled';
+
 /// Maps internal error codes (e.g. offline) to user-facing l10n strings.
 String resolveAppError(BuildContext context, String? error) {
   if (isOfflineError(error)) return context.l10n.noInternet;
-  if (error == rateLimitErrorCode) {
-    return 'Too many requests. Please wait a minute and try again.';
-  }
+  if (error == rateLimitErrorCode) return context.l10n.phoneTooManyRequests;
   if (error == emailRequiredBeforePhoneErrorCode) {
     return context.l10n.verifyEmailBeforePhone;
   }
+  if (error == soldOutErrorCode) return context.l10n.addToCartSoldOut;
   if (error == accountNotVerifiedErrorCode) {
     return context.l10n.listingErrorAccountNotVerified;
   }
-  return error ?? context.l10n.errorGeneric;
+  if (error == googleSignInFailedErrorCode) {
+    return context.l10n.googleSignInFailed;
+  }
+  if (error == socialAccountExistsErrorCode) {
+    return context.l10n.socialAccountExists;
+  }
+  if (error == socialAccountDisabledErrorCode) {
+    return context.l10n.socialAccountDisabled;
+  }
+  return context.localizedError(error ?? context.l10n.errorGeneric);
 }

@@ -28,6 +28,7 @@ class UpdateListingUseCase {
     required Map<String, String> attributes,
     required List<String> imagePaths,
     required ListingStatus status,
+    List<String>? keepImageUrls,
   }) {
     return _repository.updateListing(
       id: id,
@@ -48,6 +49,7 @@ class UpdateListingUseCase {
       attributes: attributes,
       imagePaths: imagePaths,
       status: status,
+      keepImageUrls: keepImageUrls,
     );
   }
 }

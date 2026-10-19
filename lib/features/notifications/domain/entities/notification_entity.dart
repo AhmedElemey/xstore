@@ -58,10 +58,13 @@ class NotificationEntity with _$NotificationEntity {
   }) = _NotificationEntity;
 }
 
+/// Date bucket for the notifications feed; the widget localizes the header.
+enum NotificationGroupKind { today, yesterday, thisWeek, earlier }
+
 @freezed
 class NotificationGroup with _$NotificationGroup {
   const factory NotificationGroup({
-    required String label,
+    required NotificationGroupKind kind,
     required List<NotificationEntity> notifications,
   }) = _NotificationGroup;
 }

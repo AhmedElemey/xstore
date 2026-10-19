@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/analytics/event_names.dart';
-import '../../../core/constants/app_strings.dart';
+import '../../../core/constants/category_queries.dart';
 import '../../../core/constants/prefs_keys.dart';
 import '../../../shared/providers/shared_providers.dart';
 import '../../home/presentation/providers/categories_provider.dart';
@@ -42,11 +42,17 @@ class Explore extends _$Explore {
     // display name and is used directly as the search query.
     final query = switch (categoryKey) {
       null => '',
-      AppStrings.categoryQueryMens => 'men ',
-      AppStrings.categoryQueryWomens => 'women ',
+      kCategoryQueryMens => 'men ',
+      kCategoryQueryWomens => 'women ',
       final key => key,
     };
     if (query.isNotEmpty) {
+      if (categoryKey != null) {
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.categoryViewed,
+          properties: {AnalyticsProps.category: categoryKey},
+        );
+      }
       onQueryChanged(query);
     }
   }
@@ -116,6 +122,8 @@ class Explore extends _$Explore {
           maxPrice: state.filters.maxPrice,
           condition: _serverCondition,
           categoryId: categoryId,
+          shippingAvailable: state.filters.shippingOnly,
+          minimumRating: state.filters.minRating,
         );
     if (_disposed) return;
     result.fold(
@@ -134,13 +142,24 @@ class Explore extends _$Explore {
         );
         final trimmed = q.trim();
         if (trimmed.isNotEmpty) {
+          // People paste phone numbers / emails into search — keep the
+          // product words, never the contact details.
+          final query = trimmed
+              .replaceAll(RegExp(r'\S+@\S+'), '[email]')
+              .replaceAll(RegExp(r'\d{7,}'), '[number]');
           ref.read(analyticsServiceProvider).track(
             AnalyticsEvents.searchPerformed,
             properties: {
-              AnalyticsProps.query: trimmed,
+              AnalyticsProps.query: query,
               AnalyticsProps.resultCount: sorted.length,
             },
           );
+          if (sorted.isEmpty) {
+            ref.read(analyticsServiceProvider).track(
+              AnalyticsEvents.searchNoResults,
+              properties: {AnalyticsProps.query: query},
+            );
+          }
         }
       },
     );
@@ -159,6 +178,8 @@ class Explore extends _$Explore {
           maxPrice: state.filters.maxPrice,
           condition: _serverCondition,
           categoryId: categoryId,
+          shippingAvailable: state.filters.shippingOnly,
+          minimumRating: state.filters.minRating,
         );
     if (_disposed) return;
     result.fold(
@@ -179,6 +200,15 @@ class Explore extends _$Explore {
 
   void applyFilters(FilterState f) {
     state = state.copyWith(filters: f);
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.filterApplied,
+      properties: {
+        AnalyticsProps.categoryCount: f.categories.length,
+        AnalyticsProps.conditionCount: f.conditions.length,
+        AnalyticsProps.hasPriceRange: f.minPrice != null || f.maxPrice != null,
+        AnalyticsProps.shippingOnly: f.shippingOnly,
+      },
+    );
     unawaited(search(state.query));
   }
 

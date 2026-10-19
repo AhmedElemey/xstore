@@ -63,6 +63,26 @@ void main() {
     expect(output, contains('a@b.com'));
   });
 
+  test('onRequest redacts Amplitude api_key in the JSON body', () {
+    final options = RequestOptions(
+      path: '/2/httpapi',
+      method: 'POST',
+      data: {
+        'api_key': 'amplitude-project-write-key',
+        'events': [
+          {'event_type': 'app_open'},
+        ],
+      },
+    );
+
+    interceptor.onRequest(options, RequestInterceptorHandler());
+
+    final output = logs.join('\n');
+    expect(output, isNot(contains('amplitude-project-write-key')));
+    expect(output, contains('***REDACTED***'));
+    expect(output, contains('app_open'));
+  });
+
   test('onResponse redacts sensitive fields in the response body', () {
     final requestOptions = RequestOptions(path: '/auth/login', method: 'POST');
     final response = Response(

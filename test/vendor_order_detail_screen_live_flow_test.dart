@@ -26,6 +26,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/shared/widgets/error_state_widget.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
@@ -314,6 +315,143 @@ void main() {
         findsNothing,
         reason: 'a delivered order no longer offers Mark as Delivered',
       );
+    },
+  );
+
+  testWidgets(
+    'vendor marks a confirmed order processing from the detail screen',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var status = 'confirmed';
+      RequestOptions? putRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (_) => {
+          'orders': [_vendorOrderJson(status: status)],
+          'totalCount': 1,
+          'pendingCount': 0,
+          'confirmedCount': 1,
+          'totalRevenue': 0,
+        },
+        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
+          putRequest = options;
+          status = 'processing';
+          return _vendorOrderJson(status: status);
+        },
+      });
+
+      await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ], '920');
+      await _settle(tester);
+
+      expect(find.text('Mark as Processing'), findsOneWidget);
+      await tester.tap(find.text('Mark as Processing'));
+      await _settle(tester);
+
+      expect(putRequest, isNotNull);
+      expect(putRequest!.data, {
+        'orderIds': [920],
+        'status': 'Processing',
+      });
+      expect(
+        find.text('Mark as Shipped'),
+        findsOneWidget,
+        reason: 'a processing order moves on to Mark as Shipped',
+      );
+    },
+  );
+
+  testWidgets(
+    'vendor ships a processing order with tracking info from the detail screen',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var status = 'processing';
+      RequestOptions? putRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (_) => {
+          'orders': [_vendorOrderJson(status: status)],
+          'totalCount': 1,
+          'pendingCount': 0,
+          'confirmedCount': 1,
+          'totalRevenue': 0,
+        },
+        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
+          putRequest = options;
+          status = 'shipped';
+          return _vendorOrderJson(status: status);
+        },
+      });
+
+      await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ], '920');
+      await _settle(tester);
+
+      expect(find.text('Mark as Shipped'), findsOneWidget);
+      await tester.tap(find.text('Mark as Shipped'));
+      await _settle(tester);
+
+      final textFields = find.byType(TextField);
+      expect(textFields, findsNWidgets(2));
+      await tester.enterText(textFields.at(0), 'XS-TRACK-920');
+      await tester.enterText(textFields.at(1), 'xStore Logistics');
+      await tester.pump();
+      await tester.tap(find.text('Confirm Shipment'));
+      await _settle(tester);
+
+      expect(putRequest, isNotNull);
+      expect(putRequest!.data, {
+        'orderIds': [920],
+        'status': 'Shipped',
+      });
+      expect(
+        find.text('Mark as Delivered'),
+        findsOneWidget,
+        reason: 'a shipped order moves on to Mark as Delivered',
+      );
+    },
+  );
+
+  testWidgets(
+    'a failed load shows the styled error state, and Retry fetches again',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var healed = false;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (options) {
+          if (!healed) {
+            return DioException(
+              requestOptions: options,
+              type: DioExceptionType.connectionError,
+            );
+          }
+          return {
+            'orders': [_vendorOrderJson()],
+            'totalCount': 1,
+            'pendingCount': 1,
+            'confirmedCount': 0,
+            'totalRevenue': 0,
+          };
+        },
+      });
+
+      await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ], '920');
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+
+      healed = true;
+      await tester.tap(find.text('Retry'));
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.textContaining('Order #'), findsOneWidget);
     },
   );
 }

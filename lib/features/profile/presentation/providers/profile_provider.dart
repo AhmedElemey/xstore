@@ -5,19 +5,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/constants/prefs_keys.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/mock/mock_config.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../domain/entities/profile_entity.dart';
+import '../../domain/entities/update_profile_request.dart';
 import 'profile_dependencies.dart';
 import 'profile_state.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../core/utils/location_service.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 part 'profile_provider.g.dart';
 
@@ -27,12 +32,27 @@ part 'profile_provider.g.dart';
 /// Pass [user] when the caller already knows the session user and
 /// `authProvider` may still read as Loading — e.g. from inside `Auth.build()`,
 /// where reading it back would return null and skip the fetch.
-void prefetchProfileData(Ref ref, {UserEntity? user}) {
+///
+/// Pass [alreadyFresh] when [user] was JUST returned by a live get-profile
+/// call (login/register/social auth — see `_resolveFullUser` in
+/// `auth_repository_impl.dart`), so its verification flags are current.
+/// This skips a second, redundant get-profile round-trip in live mode by
+/// seeding [ProfileEntity] straight from [user] instead — see
+/// `_refreshProfileDataImpl`. Never pass this from a cold-start session
+/// restore (`Auth.build()`): that `user` came from local storage, which can
+/// be stale, so it still needs the real network refresh.
+void prefetchProfileData(
+  Ref ref, {
+  UserEntity? user,
+  bool alreadyFresh = false,
+}) {
   if (kDebugMode) {
     debugPrint('[ProfileNotifier] prefetchProfileData scheduled');
   }
   unawaited(
-    ref.read(profileNotifierProvider.notifier).refreshProfileData(user: user),
+    ref
+        .read(profileNotifierProvider.notifier)
+        .refreshProfileData(user: user, alreadyFresh: alreadyFresh),
   );
 }
 
@@ -131,10 +151,13 @@ class ProfileNotifier extends _$ProfileNotifier {
   /// without copying those values into the edit form. Edit Profile's OTP
   /// screen uses this so verifying a new email/phone cannot wipe in-progress
   /// field edits via [ProfileState.applyFromProfile].
+  ///
+  /// [alreadyFresh]: see [prefetchProfileData].
   Future<void> refreshProfileData({
     UserEntity? user,
     bool force = false,
     bool preserveEdits = false,
+    bool alreadyFresh = false,
   }) async {
     final sessionUser = user ?? ref.read(authProvider).valueOrNull;
     if (sessionUser == null) {
@@ -188,6 +211,7 @@ class ProfileNotifier extends _$ProfileNotifier {
       sessionUser,
       requestId,
       preserveEdits,
+      alreadyFresh: alreadyFresh,
     );
     _inFlightRefresh = future;
     try {
@@ -202,20 +226,34 @@ class ProfileNotifier extends _$ProfileNotifier {
   Future<void> _refreshProfileDataImpl(
     UserEntity sessionUser,
     int requestId,
-    bool preserveEdits,
-  ) async {
+    bool preserveEdits, {
+    bool alreadyFresh = false,
+  }) async {
     final epoch = _sessionEpoch;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final prefs = await ref.read(sharedPreferencesProvider.future);
-      if (epoch != _sessionEpoch || requestId != _refreshRequestId) return;
-      final push = prefs.getBool(PrefsKeys.profilePushNotifications) ?? true;
-      final email = prefs.getBool(PrefsKeys.profileEmailUpdates) ?? true;
       final themeMode = ref.read(appThemeModeProvider);
 
-      final result = await ref
-          .read(getProfileUseCaseProvider)
-          .call(sessionUser);
+      // sessionUser was just returned by a live get-profile call (login/
+      // register/social auth), which already parsed the exact same wire
+      // response this use case would re-fetch — skip the redundant round
+      // trip and seed ProfileEntity from it directly. Mock mode is excluded:
+      // its wishlistCount/etc. only exist in getProfile's mock
+      // branch, not on sessionUser.
+      final result = alreadyFresh && !MockConfig.useMock
+          ? Right<Failure, ProfileEntity>(
+              ProfileEntity(
+                user: sessionUser,
+                isEmailVerificationRequired:
+                    sessionUser.isEmailVerificationRequired,
+                isPhoneVerificationRequired:
+                    sessionUser.isPhoneVerificationRequired,
+                isEmailVerified: sessionUser.isEmailVerified,
+                isPhoneVerified: sessionUser.isPhoneVerified,
+                hasPassword: sessionUser.hasPassword,
+              ),
+            )
+          : await ref.read(getProfileUseCaseProvider).call(sessionUser);
       if (epoch != _sessionEpoch || requestId != _refreshRequestId) return;
       result.fold(
         (f) {
@@ -229,7 +267,6 @@ class ProfileNotifier extends _$ProfileNotifier {
           if (kDebugMode) {
             debugPrint(
               '[ProfileNotifier] refreshProfileData OK — '
-              'orders=${profile.ordersCount} '
               'wishlist=${profile.wishlistCount} '
               'role=${profile.user.role.name}',
             );
@@ -248,18 +285,13 @@ class ProfileNotifier extends _$ProfileNotifier {
             return;
           }
           state = state
-              .applyFromProfile(
-                profile,
-                isDarkMode: _isDarkTheme(themeMode),
-                pushNotificationsEnabled: push,
-                emailUpdatesEnabled: email,
-              )
+              .applyFromProfile(profile, isDarkMode: _isDarkTheme(themeMode))
               .copyWith(isLoading: false);
         },
       );
     } catch (e) {
       if (epoch != _sessionEpoch || requestId != _refreshRequestId) return;
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: userErrorMessage(e));
     }
   }
 
@@ -503,14 +535,6 @@ class ProfileNotifier extends _$ProfileNotifier {
     return true;
   }
 
-  void clearAvatarFile() {
-    final cleared = state.copyWith(editAvatarFile: null);
-    final u = cleared.user;
-    state = cleared.copyWith(
-      hasChanges: u != null && !_profileEditEqualsUser(cleared, u),
-    );
-  }
-
   void markAvatarRemoved() {
     final cleared = state.copyWith(editAvatarFile: null, avatarRemoved: true);
     final u = cleared.user;
@@ -636,6 +660,41 @@ class ProfileNotifier extends _$ProfileNotifier {
       editStoreLogoFile: null,
     );
     await refreshProfileData(force: true);
+    if (epoch != _sessionEpoch) return;
+    await _persistClearedImagesAfterRefresh(request);
+  }
+
+  /// GET after save can echo the previous logo/avatar even when the PUT
+  /// asked to clear them. Keep the removal the user just confirmed so
+  /// re-entering edit / store does not restore the old URL from that GET.
+  Future<void> _persistClearedImagesAfterRefresh(
+    UpdateProfileRequest request,
+  ) async {
+    final epoch = _sessionEpoch;
+    final profile = state.profile;
+    if (profile == null) return;
+    var user = profile.user;
+    var changed = false;
+    final userPath = request.userImagePath?.trim();
+    final storePath = request.storeImagePath?.trim();
+    if ((request.userImageUrl == null ||
+            request.userImageUrl!.trim().isEmpty) &&
+        (userPath == null || userPath.isEmpty) &&
+        user.avatarUrl != null) {
+      user = user.copyWith(avatarUrl: null);
+      changed = true;
+    }
+    if ((request.storeImageUrl == null ||
+            request.storeImageUrl!.trim().isEmpty) &&
+        (storePath == null || storePath.isEmpty) &&
+        user.storeLogoUrl != null) {
+      user = user.copyWith(storeLogoUrl: null);
+      changed = true;
+    }
+    if (!changed) return;
+    if (epoch != _sessionEpoch) return;
+    state = state.copyWith(profile: profile.copyWith(user: user));
+    await ref.read(authRepositoryProvider).persistSessionUser(user);
   }
 
   Future<void> toggleDarkMode(bool enabled) async {
@@ -645,22 +704,6 @@ class ProfileNotifier extends _$ProfileNotifier {
         .setTheme(enabled ? ThemeMode.dark : ThemeMode.light);
     if (epoch != _sessionEpoch) return;
     state = state.copyWith(isDarkMode: enabled);
-  }
-
-  Future<void> togglePushNotifications(bool enabled) async {
-    final epoch = _sessionEpoch;
-    final prefs = await ref.read(sharedPreferencesProvider.future);
-    await prefs.setBool(PrefsKeys.profilePushNotifications, enabled);
-    if (epoch != _sessionEpoch) return;
-    state = state.copyWith(pushNotificationsEnabled: enabled);
-  }
-
-  Future<void> toggleEmailUpdates(bool enabled) async {
-    final epoch = _sessionEpoch;
-    final prefs = await ref.read(sharedPreferencesProvider.future);
-    await prefs.setBool(PrefsKeys.profileEmailUpdates, enabled);
-    if (epoch != _sessionEpoch) return;
-    state = state.copyWith(emailUpdatesEnabled: enabled);
   }
 
   // Returns `deleted: true` when the backend deleted the account. Session

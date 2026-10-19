@@ -39,6 +39,7 @@ import 'package:xstore/core/network/dio_provider.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/commission/presentation/screens/vendor_wallet_screen.dart';
+import 'package:xstore/shared/widgets/error_state_widget.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
 /// technique as vendor_orders_screen_live_flow_test.dart's
@@ -156,9 +157,9 @@ void main() {
       await _settle(tester);
 
       expect(find.text('Your platform fees are up to date.'), findsOneWidget);
-      expect(find.text('EGP 4,500'), findsOneWidget);
+      expect(find.text('4,500 LE'), findsOneWidget);
       expect(find.text('12'), findsOneWidget);
-      expect(find.text('EGP 5'), findsOneWidget);
+      expect(find.text('5 LE'), findsOneWidget);
     },
   );
 
@@ -193,6 +194,75 @@ void main() {
         find.text('Your platform fees are up to date.'),
         findsNothing,
       );
+    },
+  );
+  testWidgets(
+    'a failed load shows the error state with Retry, not zero totals',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var fail = true;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (options) => fail
+            ? DioException(
+                requestOptions: options,
+                type: DioExceptionType.connectionError,
+              )
+            : {
+                'orders': <Map<String, dynamic>>[],
+                'totalCount': 12,
+                'totalRevenue': 4500,
+                'commissionValueOnOrder': 5,
+                'exceedsWarnThreshold': false,
+                'exceedsPauseThreshold': false,
+              },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsOneWidget);
+      expect(find.text('Your platform fees are up to date.'), findsNothing);
+      expect(find.text('0 LE'), findsNothing);
+
+      fail = false;
+      await tester.tap(find.text('Retry'));
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.text('Your platform fees are up to date.'), findsOneWidget);
+      expect(find.text('4,500 LE'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'a vendor with no revenue yet still sees fees up to date',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (_) => {
+          'orders': <Map<String, dynamic>>[],
+          'totalCount': 0,
+          'totalRevenue': 0,
+          'exceedsWarnThreshold': false,
+          'exceedsPauseThreshold': false,
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.text('Your platform fees are up to date.'), findsOneWidget);
     },
   );
 }

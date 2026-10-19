@@ -3,13 +3,11 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/listing/presentation/providers/listing_dependencies.dart';
 import '../../features/profile/presentation/providers/profile_provider.dart';
-import '../../features/store/presentation/providers/store_hours_provider.dart';
 import '../constants/prefs_keys.dart';
 import '../utils/app_location_cache.dart';
 import 'api_auth_headers.dart';
@@ -25,18 +23,22 @@ part 'dio_provider.g.dart';
 /// forces the app back to a logged-out state — mirrors the manual logout
 /// cleanup in `Auth.logout()` minus the remote logout call, which is
 /// pointless for a session the backend already doesn't know about.
-Future<void> _clearInvalidSession(
-  Ref ref,
-  FlutterSecureStorage secureStorage,
-) async {
-  await secureStorage.delete(key: PrefsKeys.authToken);
-  await secureStorage.delete(key: PrefsKeys.authRefreshToken);
-  await secureStorage.delete(key: PrefsKeys.authUser);
-  resetProfileData(ref);
-  resetListingLocalCache(ref);
-  resetStoreHoursData(ref);
-  ref.invalidate(authProvider);
-}
+///
+/// A separate provider on purpose: `dioProvider` must not `ref.read` its own
+/// dependents (listing datasource, auth) — that is a `CircularDependencyError`
+/// in debug and aborted the logout. This provider has no dio ancestor, so its
+/// own `ref` may read them lazily when the callback runs.
+final clearInvalidSessionProvider = Provider<Future<void> Function()>((ref) {
+  return () async {
+    const secureStorage = FlutterSecureStorage();
+    await secureStorage.delete(key: PrefsKeys.authToken);
+    await secureStorage.delete(key: PrefsKeys.authRefreshToken);
+    await secureStorage.delete(key: PrefsKeys.authUser);
+    resetProfileData(ref);
+    resetListingLocalCache(ref);
+    ref.invalidate(authProvider);
+  };
+});
 
 @Riverpod(keepAlive: true)
 Dio dio(DioRef ref) {
@@ -74,13 +76,19 @@ Dio dio(DioRef ref) {
         // unauthenticated on failure; an endpoint that actually needs the
         // token will 401 and the normal session-restore/refresh paths take
         // over from there.
+        // Standalone requests (General Settings) never carry the token, so
+        // they skip the read — a hung KeyStore must not eat the first-launch
+        // settings timeout.
+        final standalone = options.extra[ApiAuthHeaders.standaloneKey] == true;
         String? token;
-        try {
-          token = await secureStorage
-              .read(key: PrefsKeys.authToken)
-              .timeout(const Duration(seconds: 5));
-        } catch (_) {
-          token = null;
+        if (!standalone) {
+          try {
+            token = await secureStorage
+                .read(key: PrefsKeys.authToken)
+                .timeout(const Duration(seconds: 5));
+          } catch (_) {
+            token = null;
+          }
         }
         if (token != null && token.isNotEmpty) {
           options.headers['X-Auth-Token'] = token;
@@ -103,7 +111,7 @@ Dio dio(DioRef ref) {
     TokenRefreshInterceptor(
       dio: client,
       secureStorage: secureStorage,
-      onRefreshFailed: () => _clearInvalidSession(ref, secureStorage),
+      onRefreshFailed: () => ref.read(clearInvalidSessionProvider)(),
     ),
   );
 
@@ -121,13 +129,19 @@ Dio dio(DioRef ref) {
     InterceptorsWrapper(
       onError: (error, handler) async {
         final code = error.response?.statusCode;
-        if (code != null && code >= 500) {
+        // Standalone (General Settings) and silent (language sync) requests
+        // handle their own failures.
+        final extra = error.requestOptions.extra;
+        final skipServerErrorPage =
+            extra[ApiAuthHeaders.standaloneKey] == true ||
+            extra[ApiAuthHeaders.silentErrorsKey] == true;
+        if (!skipServerErrorPage && code != null && code >= 500) {
           ref.read(serverErrorProvider.notifier).trigger();
         }
         if (code == 404 &&
             error.requestOptions.path == ApiEndpoints.getProfile &&
             error.requestOptions.headers.containsKey('X-Auth-Token')) {
-          await _clearInvalidSession(ref, secureStorage);
+          await ref.read(clearInvalidSessionProvider)();
         }
         handler.next(error);
       },

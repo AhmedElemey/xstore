@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -9,14 +8,18 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../shared/utils/whatsapp.dart';
+// import '../../../../shared/utils/whatsapp.dart'; // TODO(phase-2): WhatsApp contact
 import '../../../../shared/widgets/app_cached_network_image.dart';
-import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
+import '../../../../shared/widgets/orbit_background.dart';
+// import '../../../../shared/widgets/app_snackbar.dart'; // TODO(phase-2): WhatsApp contact
 import '../../domain/entities/order_entity.dart';
 import '../providers/vendor_order_detail_provider.dart';
 import '../widgets/delivery_method_sheet.dart';
 import '../widgets/order_item_tile.dart';
 import '../widgets/order_price_breakdown.dart';
+import '../widgets/order_status_badge.dart';
 import '../widgets/order_timeline.dart';
 import '../widgets/reject_order_sheet.dart';
 import '../widgets/shipping_info_sheet.dart';
@@ -26,14 +29,25 @@ class VendorOrderDetailScreen extends ConsumerStatefulWidget {
   const VendorOrderDetailScreen({super.key, required this.orderId});
   final String orderId;
   @override
-  ConsumerState<VendorOrderDetailScreen> createState() => _VendorOrderDetailScreenState();
+  ConsumerState<VendorOrderDetailScreen> createState() =>
+      _VendorOrderDetailScreenState();
 }
 
-class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScreen> {
+class _VendorOrderDetailScreenState
+    extends ConsumerState<VendorOrderDetailScreen> {
   @override
-  void initState() { super.initState(); WidgetsBinding.instance.addPostFrameCallback((_) => ref.read(vendorOrderDetailProvider(widget.orderId).notifier).fetchOrder()); }
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => ref
+          .read(vendorOrderDetailProvider(widget.orderId).notifier)
+          .fetchOrder(),
+    );
+  }
 
-  Future<void> _confirmWithMethodPicker(VendorOrderDetailNotifier notifier) async {
+  Future<void> _confirmWithMethodPicker(
+    VendorOrderDetailNotifier notifier,
+  ) async {
     final method = await showModalBottomSheet<DeliveryMethod>(
       context: context,
       isScrollControlled: true,
@@ -46,109 +60,216 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(vendorOrderDetailProvider(widget.orderId));
-    final notifier = ref.read(vendorOrderDetailProvider(widget.orderId).notifier);
+    final notifier = ref.read(
+      vendorOrderDetailProvider(widget.orderId).notifier,
+    );
     final o = state.order;
-    if (state.isLoading && o == null) return const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
-    if (o == null) return Scaffold(body: Center(child: Text(state.error ?? context.l10n.errorGeneric)));
-    ref.listen(vendorOrderDetailProvider(widget.orderId), (p, n) { if (n.error != null && n.error != p?.error) { context.showSnack(n.error!); notifier.clearError(); } });
+    ref.listen(vendorOrderDetailProvider(widget.orderId), (p, n) {
+      // A failed first load keeps its error: the body shows it with Retry.
+      if (n.error != null && n.order != null && n.error != p?.error) {
+        context.showSnack(n.error!);
+        notifier.clearError();
+      }
+    });
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            pinned: true, backgroundColor: context.surfaceColor, elevation: 0,
-            title: Text('${context.l10n.orderHashPrefix}${o.formattedOrderId}'),
-            actions: [
-              IconButton(
-                tooltip: context.l10n.share,
-                icon: const Icon(Icons.ios_share_rounded),
-                onPressed: () => Share.share(
-                  '${context.l10n.orderHashPrefix}${o.formattedOrderId}\n${context.formatCurrency(o.total)}',
-                ),
+      body: OrbitBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              _Header(order: o),
+              Expanded(
+                child: o == null
+                    ? state.isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          )
+                        : ErrorStateWidget(
+                            message: state.error ?? context.l10n.errorGeneric,
+                            onRetry: notifier.fetchOrder,
+                          )
+                    : CustomScrollView(
+                        slivers: [
+                          SliverPadding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                              AppSpacing.xl,
+                              AppSpacing.lg,
+                              AppSpacing.xl,
+                              AppSpacing.x4l,
+                            ),
+                            sliver: SliverToBoxAdapter(
+                              child: _Content(order: o),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
+              if (o != null)
+                VendorOrderActionSheet(
+                  order: o,
+                  onConfirm: () => _confirmWithMethodPicker(notifier),
+                  onReject: () => showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (_) =>
+                        RejectOrderSheet(onConfirm: notifier.rejectOrder),
+                  ),
+                  onProcessing: notifier.markProcessing,
+                  onShipped: () => showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (_) =>
+                        ShippingInfoSheet(onConfirm: notifier.markShipped),
+                  ),
+                  onDelivered: notifier.markDelivered,
+                ),
             ],
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _StatusHeader(order: o),
-                const SizedBox(height: AppSpacing.lg),
-                _Card(child: OrderTimeline(order: o)),
-                const SizedBox(height: AppSpacing.lg),
-                _BuyerInfoCard(order: o),
-                const SizedBox(height: AppSpacing.lg),
-                _DeliveryAddressCard(address: o.deliveryAddress),
-                const SizedBox(height: AppSpacing.lg),
-                // Package delivery ("request custom delivery") deferred to
-                // phase 2 — out of scope for phase 1 launch.
-                // if (o.deliveryMethod == DeliveryMethod.platform &&
-                //     o.status != OrderStatus.cancelled &&
-                //     o.status != OrderStatus.delivered) ...[
-                //   _Card(
-                //     child: Column(
-                //       crossAxisAlignment: CrossAxisAlignment.start,
-                //       children: [
-                //         Text(context.l10n.requestCustomDeliveryTitle, style: Theme.of(context).textTheme.titleMedium),
-                //         const SizedBox(height: AppSpacing.sm),
-                //         Text(context.l10n.requestCustomDeliverySubtitle, style: Theme.of(context).textTheme.bodySmall),
-                //         const SizedBox(height: AppSpacing.md),
-                //         OutlinedButton(
-                //           onPressed: () => context.push(
-                //             AppRoutes.sendPackage,
-                //             extra: SendPackageArgs(
-                //               orderId: o.id,
-                //               initialDropoff: o.deliveryAddress,
-                //             ),
-                //           ),
-                //           child: Text(context.l10n.requestCustomDeliveryAction),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                //   const SizedBox(height: AppSpacing.lg),
-                // ],
-                _Card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(context.l10n.ordersItemsSectionCount(o.items.length), style: Theme.of(context).textTheme.titleMedium), const SizedBox(height: AppSpacing.sm), ...o.items.map((e) => OrderItemTile(item: e, showStockHint: true))])),
-                const SizedBox(height: AppSpacing.lg),
-                _Card(child: OrderPriceBreakdown(order: o, vendorMode: true)),
-                if (o.status == OrderStatus.shipped) ...[
-                  const SizedBox(height: AppSpacing.lg),
-                  _ShippingInfoCard(order: o),
-                ],
-                if (o.status == OrderStatus.cancelled) ...[
-                  const SizedBox(height: AppSpacing.lg),
-                  Container(padding: const EdgeInsets.all(AppSpacing.md), decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppSpacing.md)), child: Text('${context.l10n.ordersCancelReasonSection}: ${o.cancelReason ?? '-'}')),
-                ],
-              ]),
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Material(
-        color: context.surfaceColor,
-        child: VendorOrderActionSheet(
-          order: o,
-          onConfirm: () => _confirmWithMethodPicker(notifier),
-          onReject: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => RejectOrderSheet(onConfirm: notifier.rejectOrder)),
-          onProcessing: notifier.markProcessing,
-          onShipped: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => ShippingInfoSheet(onConfirm: notifier.markShipped)),
-          onDelivered: notifier.markDelivered,
         ),
       ),
     );
   }
 }
 
+/// Orbit header: frosted back button, order number, and the share action.
+class _Header extends StatelessWidget {
+  const _Header({required this.order});
+
+  final OrderEntity? order;
+
+  @override
+  Widget build(BuildContext context) {
+    final o = order;
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          if (Navigator.of(context).canPop()) ...[
+            const AuthBackButton(),
+            const SizedBox(width: AppSpacing.md),
+          ],
+          if (o != null) ...[
+            Expanded(
+              child: Text(
+                context.orderRef(o.formattedOrderId),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.headlineSmall.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Material(
+              color: context.glassColor,
+              shape: CircleBorder(side: BorderSide(color: context.borderColor)),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => Share.share(
+                  '${context.l10n.orderHashPrefix}${o.formattedOrderId}\n${context.formatCurrency(o.total)}',
+                ),
+                child: SizedBox.square(
+                  dimension: 44,
+                  child: Icon(
+                    Icons.ios_share_rounded,
+                    size: 20,
+                    color: context.textPrimary,
+                    semanticLabel: context.l10n.share,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Content extends StatelessWidget {
+  const _Content({required this.order});
+
+  final OrderEntity order;
+
+  @override
+  Widget build(BuildContext context) {
+    final o = order;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _StatusHeader(order: o),
+        const SizedBox(height: AppSpacing.lg),
+        _Card(child: OrderTimeline(order: o)),
+        const SizedBox(height: AppSpacing.lg),
+        _BuyerInfoCard(order: o),
+        const SizedBox(height: AppSpacing.lg),
+        _DeliveryAddressCard(address: o.deliveryAddress),
+        const SizedBox(height: AppSpacing.lg),
+        _Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.ordersItemsSectionCount(
+                  context.formatInt(o.items.length),
+                ),
+                style: AppTypography.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              ...o.items.map(
+                (e) => OrderItemTile(item: e, showStockHint: true),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        _Card(child: OrderPriceBreakdown(order: o, vendorMode: true)),
+        if (o.status == OrderStatus.shipped) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _ShippingInfoCard(order: o),
+        ],
+        if (o.status == OrderStatus.cancelled) ...[
+          const SizedBox(height: AppSpacing.lg),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: AppColors.error.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.error.withValues(alpha: 0.4)),
+            ),
+            child: Text(
+              '${context.l10n.ordersCancelReasonSection}: ${o.cancelReason ?? '-'}',
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 class _Card extends StatelessWidget {
   const _Card({required this.child});
+
   final Widget child;
+
   @override
   Widget build(BuildContext context) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(color: context.surfaceColor, borderRadius: BorderRadius.circular(AppSpacing.lg), boxShadow: [BoxShadow(color: context.cardShadowColor, blurRadius: 10)]),
-        child: child,
-      );
+    width: double.infinity,
+    padding: const EdgeInsets.all(AppSpacing.lg),
+    decoration: BoxDecoration(
+      color: context.glassColor,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: context.borderColor),
+    ),
+    child: child,
+  );
 }
 
 class _BuyerInfoCard extends StatelessWidget {
@@ -203,9 +324,9 @@ class _BuyerInfoCard extends StatelessWidget {
                           if (await canLaunchUrl(uri)) await launchUrl(uri);
                         },
                         child: Text(
-                          phone,
+                          context.ltr(phone),
                           style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.primary,
+                            color: context.linkColor,
                           ),
                         ),
                       ),
@@ -214,21 +335,22 @@ class _BuyerInfoCard extends StatelessWidget {
               ),
             ],
           ),
-          if (phone.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: () async {
-                final opened = await launchWhatsApp(phone: phone);
-                if (!opened && context.mounted) {
-                  AppSnackbar.info(
-                    context,
-                    context.l10n.whatsappSellerUnavailable,
-                  );
-                }
-              },
-              child: Text(context.l10n.ordersWhatsapp),
-            ),
-          ],
+          // TODO(phase-2): WhatsApp contact — hidden by product request; restore with the imports above.
+          // if (phone.isNotEmpty) ...[
+          //   const SizedBox(height: AppSpacing.md),
+          //   OutlinedButton(
+          //     onPressed: () async {
+          //       final opened = await launchWhatsApp(phone: phone);
+          //       if (!opened && context.mounted) {
+          //         AppSnackbar.info(
+          //           context,
+          //           context.l10n.whatsappSellerUnavailable,
+          //         );
+          //       }
+          //     },
+          //     child: Text(context.l10n.ordersWhatsapp),
+          //   ),
+          // ],
         ],
       ),
     );
@@ -269,8 +391,7 @@ class _DeliveryAddressCard extends StatelessWidget {
             style: AppTypography.titleMedium,
           ),
           const SizedBox(height: AppSpacing.lg),
-          if (street.isNotEmpty)
-            Text(street, style: AppTypography.bodyMedium),
+          if (street.isNotEmpty) Text(street, style: AppTypography.bodyMedium),
           if (cityLine.isNotEmpty) ...[
             if (street.isNotEmpty) const SizedBox(height: AppSpacing.xs),
             Text(cityLine, style: AppTypography.bodyMedium),
@@ -312,13 +433,18 @@ class _ShippingInfoCard extends StatelessWidget {
                           color: context.textSecondary,
                         ),
                       ),
-                      Text(tracking, style: AppTypography.bodyMedium),
+                      Text(
+                        tracking,
+                        style: AppTypography.mono.copyWith(
+                          fontSize: 14,
+                          color: context.textPrimary,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 IconButton(
-                  tooltip:
-                      MaterialLocalizations.of(context).copyButtonLabel,
+                  tooltip: MaterialLocalizations.of(context).copyButtonLabel,
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: tracking));
                     context.showSnack(context.l10n.ordersTrackingCopied);
@@ -347,7 +473,7 @@ class _ShippingInfoCard extends StatelessWidget {
               ),
             ),
             Text(
-              DateFormat('EEEE, MMM d, yyyy').format(eta.toLocal()),
+              context.formatLongDate(eta.toLocal()),
               style: AppTypography.bodyMedium,
             ),
           ],
@@ -357,12 +483,15 @@ class _ShippingInfoCard extends StatelessWidget {
   }
 }
 
+/// Glass status banner: status icon and word on a status-tinted outline.
 class _StatusHeader extends StatelessWidget {
   const _StatusHeader({required this.order});
+
   final OrderEntity order;
+
   @override
   Widget build(BuildContext context) {
-    final c = switch (order.status) { OrderStatus.pending => AppColors.warning, OrderStatus.confirmed => AppColors.primary, OrderStatus.processing => AppColors.orderStatusProcessing, OrderStatus.shipped => AppColors.orderStatusShipped, OrderStatus.delivered => AppColors.success, _ => AppColors.error };
+    final c = orderStatusColor(order.status);
     final text = switch (order.status) {
       OrderStatus.pending => context.l10n.vendorStatusPending,
       OrderStatus.confirmed => context.l10n.vendorStatusConfirmed,
@@ -371,22 +500,36 @@ class _StatusHeader extends StatelessWidget {
       OrderStatus.delivered => context.l10n.vendorStatusDelivered,
       OrderStatus.cancelled => context.l10n.vendorStatusCancelled,
     };
+    final icon = switch (order.status) {
+      OrderStatus.pending => Icons.hourglass_top_rounded,
+      OrderStatus.confirmed => Icons.check_circle_outline,
+      OrderStatus.processing => Icons.inventory_2_outlined,
+      OrderStatus.shipped => Icons.local_shipping_outlined,
+      OrderStatus.delivered => Icons.verified_rounded,
+      OrderStatus.cancelled => Icons.cancel_outlined,
+    };
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: c,
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: c.withValues(alpha: 0.4)),
       ),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w600,
+      child: Row(
+        children: [
+          Icon(icon, color: c, size: 28),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTypography.titleCompact.copyWith(
+                color: context.textPrimary,
+                fontWeight: FontWeight.w800,
+              ),
             ),
+          ),
+        ],
       ),
     );
   }

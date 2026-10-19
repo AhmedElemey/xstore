@@ -1,7 +1,11 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
+import 'package:amplitude_flutter/amplitude.dart';
+import 'package:amplitude_flutter/autocapture/autocapture.dart';
+import 'package:amplitude_flutter/configuration.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,10 +14,86 @@ import 'package:xstore/core/analytics/analytics_service.dart';
 import 'package:xstore/core/analytics/event_names.dart';
 import 'package:xstore/core/constants/prefs_keys.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
+import 'package:xstore/core/router/app_routes.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
+
+/// Stands in for the real `amplitude_flutter` platform channel — records
+/// every `invokeMethod` call instead of dispatching to native code, so
+/// tests can assert on exactly what the SDK was asked to send without a
+/// real Android/iOS/web plugin registered.
+class _RecordingMethodChannel extends MethodChannel {
+  _RecordingMethodChannel() : super('amplitude_flutter');
+
+  final calls = <MethodCall>[];
+
+  @override
+  Future<T?> invokeMethod<T>(String method, [dynamic arguments]) async {
+    calls.add(MethodCall(method, arguments));
+    if (method == 'init') return true as T?;
+    return null;
+  }
+}
+
+Amplitude _fakeAmplitude(_RecordingMethodChannel channel, {String apiKey = 'test-amplitude-key'}) =>
+    Amplitude(
+      Configuration(apiKey: apiKey, autocapture: const AutocaptureDisabled()),
+      channel,
+    );
+
+/// Records what the service asked GA4 to log. [FirebaseAnalytics] has only
+/// a private constructor, so the fake implements it; anything unused here
+/// falls through to [noSuchMethod].
+class _RecordingFirebaseAnalytics implements FirebaseAnalytics {
+  _RecordingFirebaseAnalytics({this.throwOnLog = false});
+
+  final bool throwOnLog;
+  final events = <(String, Map<String, Object>?)>[];
+  final userIds = <String?>[];
+  final userProperties = <String, String?>{};
+
+  @override
+  Future<void> logEvent({
+    required String name,
+    Map<String, Object>? parameters,
+    AnalyticsCallOptions? callOptions,
+  }) async {
+    if (throwOnLog) throw StateError('GA unavailable');
+    events.add((name, parameters));
+  }
+
+  @override
+  Future<void> logScreenView({
+    String? screenClass,
+    String? screenName,
+    Map<String, Object>? parameters,
+    AnalyticsCallOptions? callOptions,
+  }) =>
+      logEvent(
+        name: 'screen_view',
+        parameters: {
+          if (screenName != null) 'screen_name': screenName,
+          ...?parameters,
+        },
+      );
+
+  @override
+  Future<void> setUserId({String? id, AnalyticsCallOptions? callOptions}) async =>
+      userIds.add(id);
+
+  @override
+  Future<void> setUserProperty({
+    required String name,
+    required String? value,
+    AnalyticsCallOptions? callOptions,
+  }) async =>
+      userProperties[name] = value;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 class _RecordingAdapter implements HttpClientAdapter {
   _RecordingAdapter({this.statusCode = 202});
@@ -76,6 +156,8 @@ void main() {
     required Auth auth,
     UserEntity? sessionUser,
     Map<String, String> secureValues = const {},
+    Amplitude? amplitudeClient,
+    FirebaseAnalytics? firebaseAnalytics,
   }) {
     FlutterSecureStorage.setMockInitialValues(secureValues);
     late AnalyticsService created;
@@ -87,6 +169,8 @@ void main() {
             ref,
             client: dio,
             readAuthToken: () async => secureValues[PrefsKeys.authToken],
+            amplitudeClient: amplitudeClient,
+            firebaseAnalytics: firebaseAnalytics,
           );
           return created;
         }),
@@ -141,10 +225,42 @@ void main() {
     final body = Map<String, dynamic>.from(adapter.posts.single.data as Map);
     expect(body.keys, ['events']);
     final events = (body['events'] as List).cast<Map>();
-    expect(events, hasLength(2));
-    expect(events.map((e) => e['name']), ['view_item', 'add_to_cart']);
-    expect(events.first['eventId'], isNotEmpty);
-    expect(events.first['properties'], {'item_id': 'p1'});
+    // app_open is also queued on init and rides in the same batch — filter
+    // it out, it's not what this test is about.
+    final tracked =
+        events.where((e) => e['name'] != AnalyticsEvents.appOpen).toList();
+    expect(tracked, hasLength(2));
+    expect(tracked.map((e) => e['name']), ['view_item', 'add_to_cart']);
+    expect(tracked.map((e) => e['eventName']), ['view_item', 'add_to_cart']);
+    expect(tracked.first['eventId'], isNotEmpty);
+    expect(tracked.first['timestamp'], isNotEmpty);
+    expect(tracked.first['userId'], 'u1');
+    expect(tracked.first['screenName'], isNotEmpty);
+    expect(tracked.first['properties'], {'item_id': 'p1'});
+  });
+
+  test('flush stamps session identity onto events queued as a guest', () async {
+    buildContainer(
+      auth: FakeAuth(null),
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    service.track('view_item', properties: {'item_id': 'p1', 'price_egp': 10});
+    await service.ready;
+    await service.flushNow();
+    expect(adapter.posts, isEmpty);
+
+    service.bindSession(_user());
+    await service.flushNow();
+
+    final body = Map<String, dynamic>.from(adapter.posts.single.data as Map);
+    final events = (body['events'] as List).cast<Map>();
+    // app_open is queued on init as a guest and flushes in the same batch
+    // once the session is bound.
+    final viewItem = events.firstWhere((e) => e['name'] == 'view_item');
+    expect(viewItem['userId'], 'u1');
+    expect(viewItem['userRole'], 'consumer');
+    expect(viewItem['eventName'], 'view_item');
+    expect(viewItem['properties'], {'item_id': 'p1', 'price_egp': '10'});
   });
 
   test('flushes the queued events once the user logs in', () async {
@@ -167,7 +283,9 @@ void main() {
   test('does not queue logout for the initial guest session', () async {
     buildContainer(auth: FakeAuth(null));
     await service.ready;
-    expect(service.queuedEventNames, isEmpty);
+    // app_open is queued on every init (see the dedicated test below) —
+    // this test is only about logout not being queued unprompted.
+    expect(service.queuedEventNames, isNot(contains(AnalyticsEvents.logout)));
   });
 
   test('queues logout when the session goes from signed-in to signed-out',
@@ -178,12 +296,74 @@ void main() {
       secureValues: {PrefsKeys.authToken: 'sess-token'},
     );
     await service.ready;
+    // Deterministically drain the app_open event queued on init (signed in
+    // from the start, so it's eligible to flush) before asserting on the
+    // queue below.
+    await service.flushNow();
     expect(service.queuedEventNames, isEmpty);
 
     // Auth.logout tracks then bindSession(null); the event must stay queued.
     service.track(AnalyticsEvents.logout);
     service.bindSession(null);
     expect(service.queuedEventNames, [AnalyticsEvents.logout]);
+  });
+
+  test('flushBeforeSignOut sends logout while the session token is valid',
+      () async {
+    buildContainer(
+      auth: FakeAuth(_user()),
+      sessionUser: _user(),
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    await service.ready;
+    await service.flushNow(); // drain app_open queued on init
+    adapter.posts.clear();
+
+    service.track(AnalyticsEvents.logout);
+    await service.flushBeforeSignOut();
+    service.bindSession(null);
+
+    expect(adapter.posts, hasLength(1));
+    final events = ((adapter.posts.single.data as Map)['events'] as List)
+        .cast<Map>();
+    expect(events.map((e) => e['name']), [AnalyticsEvents.logout]);
+    expect(service.queuedEventNames, isEmpty);
+  });
+
+  test('never sends a previous account\'s events under the next session',
+      () async {
+    buildContainer(
+      auth: FakeAuth(null),
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    await service.ready;
+
+    // u1's logout could not be sent (e.g. offline) before signing out.
+    service.bindSession(_user());
+    await service.flushNow(); // settle the flush login kicks off
+    adapter.posts.clear();
+    service.track(AnalyticsEvents.logout);
+    service.bindSession(null);
+    service.track('view_item'); // guest browsing — stitched to next login
+
+    const other = UserEntity(
+      id: 'u2',
+      name: 'Other',
+      email: 'other@test.com',
+      phoneNumber: '01022222222',
+    );
+    service.bindSession(other);
+    await service.flushNow();
+
+    final sent = [
+      for (final post in adapter.posts)
+        ...((post.data as Map)['events'] as List).cast<Map>(),
+    ];
+    // app_open (queued as a guest on init) may ride along — not the point.
+    final tracked =
+        sent.where((e) => e['name'] != AnalyticsEvents.appOpen).toList();
+    expect(tracked.map((e) => e['name']), ['view_item']);
+    expect(tracked.single['userId'], 'u2');
   });
 
   test('HTTP 200 drops the sent batch so the next flush does not resend it',
@@ -211,10 +391,84 @@ void main() {
       secureValues: {PrefsKeys.authToken: 'sess-token'},
     );
     await service.ready;
+    // Deterministically drain the app_open event queued on init (signed in
+    // from the start, so it's eligible to flush) before asserting below
+    // that signing out stops any further POSTs.
+    await service.flushNow();
+    adapter.posts.clear();
     service.bindSession(null);
     service.track('view_item');
     await service.flushNow();
     expect(adapter.posts, isEmpty);
+  });
+
+  test('tracks app_open exactly once, on init, before any user is known',
+      () async {
+    buildContainer(auth: FakeAuth(null));
+    await service.ready;
+
+    expect(service.queuedEventNames, [AnalyticsEvents.appOpen]);
+  });
+
+  group('route-driven events', () {
+    test('screen_view fires for every route change', () async {
+      buildContainer(auth: FakeAuth(null));
+      await service.ready;
+
+      service.debugRouteChanged('/home');
+
+      expect(service.queuedEventNames, contains(AnalyticsEvents.screenView));
+    });
+
+    test('screen_view carries the previous route as referrer', () async {
+      buildContainer(
+        auth: FakeAuth(_user()),
+        sessionUser: _user(),
+        secureValues: {PrefsKeys.authToken: 'sess-token'},
+      );
+      await service.ready;
+
+      service.debugRouteChanged('/product/p1', referrer: '/home');
+      await service.flushNow();
+
+      final sent = [
+        for (final post in adapter.posts)
+          ...((post.data as Map)['events'] as List).cast<Map>(),
+      ];
+      final view = sent.lastWhere((e) => e['name'] == AnalyticsEvents.screenView);
+      expect(view['properties'], {
+        AnalyticsProps.screenName: '/product/p1',
+        AnalyticsProps.referrer: '/home',
+      });
+    });
+
+    test('cart_viewed fires alongside screen_view when the route is /cart',
+        () async {
+      buildContainer(auth: FakeAuth(null));
+      await service.ready;
+
+      service.debugRouteChanged(AppRoutes.cart);
+
+      expect(
+        service.queuedEventNames,
+        containsAllInOrder(
+          [AnalyticsEvents.screenView, AnalyticsEvents.cartViewed],
+        ),
+      );
+    });
+
+    test('cart_viewed does not fire for other routes', () async {
+      buildContainer(auth: FakeAuth(null));
+      await service.ready;
+
+      service.debugRouteChanged('/home');
+      service.debugRouteChanged('/explore');
+
+      expect(
+        service.queuedEventNames,
+        isNot(contains(AnalyticsEvents.cartViewed)),
+      );
+    });
   });
 
   test(
@@ -230,4 +484,197 @@ void main() {
       expect(auth.pingAnalytics, returnsNormally);
     },
   );
+
+  group('Amplitude forwarding', () {
+    late _RecordingMethodChannel channel;
+
+    setUp(() {
+      channel = _RecordingMethodChannel();
+    });
+
+    List<Map> trackCalls() => channel.calls
+        .where((c) => c.method == 'track')
+        .map((c) => (c.arguments as Map)['event'] as Map)
+        .toList();
+
+    test('accepts short numeric user ids (Amplitude defaults to min 5)', () {
+      final config = AnalyticsService.amplitudeConfiguration('key');
+
+      expect(config.minIdLength, 1);
+      expect(config.toMap()['minIdLength'], 1);
+    });
+
+    test('does not construct an Amplitude client when no AMPLITUDE_API_KEY '
+        'is configured — the disabled path never touches a platform '
+        'channel, mocked or not', () async {
+      buildContainer(auth: FakeAuth(null));
+      service.track('view_item');
+      await service.ready;
+      await expectLater(service.flushNow(), completes);
+    });
+
+    test('forwards guest events with no signed-in user required', () async {
+      buildContainer(auth: FakeAuth(null), amplitudeClient: _fakeAmplitude(channel));
+      service.track('view_item', properties: {'item_id': 'p1'});
+      await service.ready;
+      await service.flushNow();
+
+      // app_open is forwarded too (it's not session-gated) — pick out the
+      // event this test is actually about.
+      final viewItem =
+          trackCalls().firstWhere((e) => e['event_type'] == 'view_item');
+      expect(viewItem['user_id'], isNull);
+      expect(viewItem['device_id'], isNotEmpty);
+      expect(viewItem['event_properties'], containsPair('item_id', 'p1'));
+    });
+
+    test('includes user_id and role once signed in', () async {
+      buildContainer(
+        auth: FakeAuth(_user()),
+        sessionUser: _user(),
+        secureValues: {PrefsKeys.authToken: 'sess-token'},
+        amplitudeClient: _fakeAmplitude(channel),
+      );
+      service.track('purchase');
+      await service.ready;
+      await service.flushNow();
+
+      final purchaseEvent =
+          trackCalls().firstWhere((e) => e['event_type'] == 'purchase');
+      expect(purchaseEvent['user_id'], 'u1');
+      expect(purchaseEvent['user_properties'], {'role': 'consumer'});
+    });
+
+    test('maps purchase value_egp onto Amplitude revenue fields', () async {
+      buildContainer(
+        auth: FakeAuth(_user()),
+        sessionUser: _user(),
+        secureValues: {PrefsKeys.authToken: 'sess-token'},
+        amplitudeClient: _fakeAmplitude(channel),
+      );
+      service.track(
+        AnalyticsEvents.purchase,
+        properties: {AnalyticsProps.valueEgp: 499.5, AnalyticsProps.orderId: 'o1'},
+      );
+      await service.ready;
+      await service.flushNow();
+
+      final purchaseEvent =
+          trackCalls().firstWhere((e) => e['event_type'] == 'purchase');
+      expect(purchaseEvent['revenue'], 499.5);
+      expect(purchaseEvent['revenue_type'], 'purchase');
+    });
+
+    test('an Amplitude track() call never affects the xStore collector '
+        'queue, and vice versa', () async {
+      buildContainer(
+        auth: FakeAuth(_user()),
+        sessionUser: _user(),
+        secureValues: {PrefsKeys.authToken: 'sess-token'},
+        amplitudeClient: _fakeAmplitude(channel),
+      );
+      service.track('view_item');
+      await service.ready;
+      await service.flushNow();
+
+      expect(
+        trackCalls().map((e) => e['event_type']),
+        containsAll(['view_item', AnalyticsEvents.appOpen]),
+      );
+      expect(adapter.posts, hasLength(1)); // xStore collector still sent.
+    });
+  });
+
+  group('Google Analytics forwarding', () {
+    late _RecordingFirebaseAnalytics ga;
+
+    setUp(() {
+      ga = _RecordingFirebaseAnalytics();
+    });
+
+    Map<String, Object>? paramsOf(String name) =>
+        ga.events.firstWhere((e) => e.$1 == name).$2;
+
+    test('forwards guest events under the catalog name with GA-safe params',
+        () async {
+      buildContainer(auth: FakeAuth(null), firebaseAnalytics: ga);
+      service.track(
+        AnalyticsEvents.filterApplied,
+        properties: {
+          AnalyticsProps.shippingOnly: true,
+          AnalyticsProps.categoryCount: 2,
+          AnalyticsProps.reason: null,
+          AnalyticsProps.query: 'x' * 150,
+        },
+      );
+      await service.ready;
+
+      expect(ga.events.map((e) => e.$1), contains(AnalyticsEvents.appOpen));
+      final params = paramsOf(AnalyticsEvents.filterApplied)!;
+      expect(params[AnalyticsProps.shippingOnly], 'true');
+      expect(params[AnalyticsProps.categoryCount], 2);
+      expect(params.containsKey(AnalyticsProps.reason), isFalse);
+      expect((params[AnalyticsProps.query]! as String).length, 100);
+      // The collector still holds the guest event; GA does not gate on login.
+      expect(service.queuedEventNames, contains(AnalyticsEvents.filterApplied));
+    });
+
+    test('route changes log screen_view with screen_name and referrer',
+        () async {
+      buildContainer(auth: FakeAuth(null), firebaseAnalytics: ga);
+      await service.ready;
+      service.debugRouteChanged(AppRoutes.cart, referrer: '/home');
+
+      final params = paramsOf(AnalyticsEvents.screenView)!;
+      expect(params[AnalyticsProps.screenName], AppRoutes.cart);
+      expect(params[AnalyticsProps.referrer], '/home');
+      expect(ga.events.map((e) => e.$1), contains(AnalyticsEvents.cartViewed));
+    });
+
+    test('purchase carries GA revenue fields', () async {
+      buildContainer(auth: FakeAuth(null), firebaseAnalytics: ga);
+      service.track(
+        AnalyticsEvents.purchase,
+        properties: {
+          AnalyticsProps.orderId: 'o1',
+          AnalyticsProps.valueEgp: 499.5,
+          AnalyticsProps.currency: 'EGP',
+        },
+      );
+      await service.ready;
+
+      final params = paramsOf(AnalyticsEvents.purchase)!;
+      expect(params['value'], 499.5);
+      expect(params['currency'], 'EGP');
+      expect(params['transaction_id'], 'o1');
+    });
+
+    test('bindSession sets and clears the GA user id and role', () async {
+      buildContainer(auth: FakeAuth(null), firebaseAnalytics: ga);
+      service.bindSession(_user());
+      await service.ready;
+      expect(ga.userIds.last, 'u1');
+      expect(ga.userProperties['role'], 'consumer');
+
+      service.bindSession(null);
+      await service.ready;
+      expect(ga.userIds.last, isNull);
+      expect(ga.userProperties['role'], isNull);
+    });
+
+    test('a failing GA call never breaks track() or the xStore collector',
+        () async {
+      buildContainer(
+        auth: FakeAuth(_user()),
+        sessionUser: _user(),
+        secureValues: {PrefsKeys.authToken: 'sess-token'},
+        firebaseAnalytics: _RecordingFirebaseAnalytics(throwOnLog: true),
+      );
+      service.track('view_item');
+      await service.ready;
+      await service.flushNow();
+
+      expect(adapter.posts, hasLength(1));
+    });
+  });
 }

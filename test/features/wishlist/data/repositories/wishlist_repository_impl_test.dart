@@ -176,37 +176,6 @@ void main() {
     });
   });
 
-  group('clearWishlist', () {
-    test('returns Right(unit) on success', () async {
-      final repo = WishlistRepositoryImpl(
-        StubWishlistRemoteDataSource(onClearWishlist: (_) async {}),
-        StubCartRepository(),
-      );
-
-      final result = await repo.clearWishlist('consumer_1');
-
-      expect(result.isRight(), isTrue);
-      result.fold((_) => fail('expected Right'), (u) => expect(u, unit));
-    });
-
-    test('maps a thrown exception to Failure.server', () async {
-      final repo = WishlistRepositoryImpl(
-        StubWishlistRemoteDataSource(
-          onClearWishlist: (_) async => throw const ServerException('boom'),
-        ),
-        StubCartRepository(),
-      );
-
-      final result = await repo.clearWishlist('consumer_1');
-
-      expect(result.isLeft(), isTrue);
-      result.fold(
-        (f) => expect(f, isA<ServerFailure>()),
-        (_) => fail('expected Left'),
-      );
-    });
-  });
-
   group('moveListingToCart', () {
     test(
       'delegates to CartRepository.addFromListing and discards the cart',

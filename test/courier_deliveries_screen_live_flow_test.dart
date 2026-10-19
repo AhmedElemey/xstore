@@ -205,13 +205,13 @@ void main() {
       ]);
       await _settle(tester);
 
-      expect(find.text('Active'), findsOneWidget);
-      expect(find.text('History'), findsOneWidget);
+      expect(find.text('ACTIVE'), findsOneWidget);
+      expect(find.text('HISTORY'), findsOneWidget);
       // Cash-in-hand sums only the delivered, unpaid-COD order (300) —
       // the same amount also renders on that order's own history card, so
       // this legitimately matches twice (see the cash summary header AND
       // the card's own collected-amount line).
-      expect(find.text('EGP 300'), findsWidgets);
+      expect(find.text('300 LE'), findsWidgets);
     },
   );
 
@@ -240,7 +240,7 @@ void main() {
       ]);
       await _settle(tester);
 
-      expect(find.text('Active'), findsOneWidget);
+      expect(find.text('ACTIVE'), findsOneWidget);
 
       await tester.tap(find.text('Delivered'));
       await _settle(tester);
@@ -250,7 +250,7 @@ void main() {
       await tester.tap(find.text('Delivered').last);
       await _settle(tester);
 
-      expect(find.text('History'), findsOneWidget);
+      expect(find.text('HISTORY'), findsOneWidget);
     },
   );
 }

@@ -18,5 +18,6 @@ class SearchResultEntity with _$SearchResultEntity {
     required bool isSellerVerified,
     required String location,
     required bool hasShipping,
+    @Default(false) bool isSoldOut,
   }) = _SearchResultEntity;
 }

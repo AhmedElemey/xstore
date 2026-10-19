@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'app_flavor.dart';
 
 /// Initialized once at app startup from the flavor entry point ([main_dev.dart],
@@ -13,7 +15,16 @@ abstract final class AppConfig {
     return _flavor!;
   }
 
+  /// Null in unit tests that never call [init] — callers must not assume a
+  /// flavor exists (Amplitude falls back to dart-define / off).
+  static AppFlavor? get maybeFlavor => _flavor;
+
   static void init(AppFlavor flavor) {
     _flavor = flavor;
+  }
+
+  @visibleForTesting
+  static void debugReset() {
+    _flavor = null;
   }
 }

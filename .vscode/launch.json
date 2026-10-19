@@ -5,21 +5,50 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "xstore",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "xstore (profile mode)",
+            "name": "xstore (dev)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "program": "lib/main_dev.dart",
+            "args": ["--flavor", "dev"]
         },
         {
-            "name": "xstore (release mode)",
+            "name": "xstore (dev, profile mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "profile",
+            "program": "lib/main_dev.dart",
+            "args": ["--flavor", "dev"]
+        },
+        {
+            "name": "xstore (dev, release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "program": "lib/main_dev.dart",
+            "args": ["--flavor", "dev"]
+        },
+        {
+            "name": "xstore (prod)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_prod.dart",
+            "args": ["--flavor", "prod"]
+        },
+        {
+            "name": "xstore (prod, profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "program": "lib/main_prod.dart",
+            "args": ["--flavor", "prod"]
+        },
+        {
+            "name": "xstore (prod, release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "program": "lib/main_prod.dart",
+            "args": ["--flavor", "prod"]
         }
     ]
 }

@@ -22,7 +22,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
@@ -30,7 +30,15 @@ import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 import 'package:xstore/features/listing/presentation/screens/my_listings_screen.dart';
+import 'package:xstore/features/listing/presentation/widgets/listing_filter_tabs.dart';
+import 'package:xstore/features/listing/presentation/widgets/listing_sort_bar.dart';
+import 'package:xstore/features/listing/presentation/widgets/listing_stats_banner.dart';
+import 'package:xstore/features/listing/presentation/widgets/status_badge.dart';
+import 'package:xstore/features/listing/presentation/widgets/listing_empty_state.dart';
+import 'package:xstore/shared/widgets/error_state_widget.dart';
+import 'package:xstore/shared/widgets/offline_banner.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
 /// technique as orders_screen_live_flow_test.dart's `_RoutedInterceptor`.
@@ -90,21 +98,34 @@ Map<String, dynamic> _listingJson({
   String title = 'Wireless Earbuds',
   num price = 50000,
   int status = 2,
-}) => {'id': id, 'title': title, 'description': 'A listing', 'price': price, 'status': status};
+  String? postedAt,
+}) => {
+  'id': id,
+  'title': title,
+  'description': 'A listing',
+  'price': price,
+  'status': status,
+  if (postedAt != null) 'postedAt': postedAt,
+};
 
-Widget _harness(List<Override> overrides) => ProviderScope(
+Widget _harness(List<Override> overrides, {Locale? locale}) => ProviderScope(
   overrides: overrides,
-  child: const MaterialApp(
-    localizationsDelegates: [
+  child: MaterialApp(
+    locale: locale,
+    localizationsDelegates: const [
       AppLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: AppLocalizations.supportedLocales,
-    // MyListingsScreen renders its own Scaffold, so no extra Material
-    // wrapper is needed here.
-    home: MyListingsScreen(),
+    // Same chrome as production `XstoreApp` — listing search used to
+    // dispose a TextEditingController during the dialog's exit animation,
+    // which asserted `_dependents.isEmpty` on this Stack.
+    builder: (context, child) => OfflineBannerHost(
+      child: child ?? const SizedBox.shrink(),
+    ),
+    home: const MyListingsScreen(),
   ),
 );
 
@@ -156,7 +177,9 @@ void main() {
         'GET ${ApiEndpoints.apiMyListings}': (_) => [_listingJson()],
         'PUT ${ApiEndpoints.apiListingDeactivate('9001')}': (options) {
           putRequest = options;
-          return _listingJson(status: 3);
+          // The live endpoint replies with a message, not a listing DTO —
+          // parsing it as a listing threw "Null is not a subtype of num".
+          return {'message': 'Listing deactivated successfully.'};
         },
       });
 
@@ -177,6 +200,217 @@ void main() {
       await _settle(tester);
 
       expect(putRequest, isNotNull);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(
+        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
+        ListingStatus.paused,
+      );
     },
   );
+
+  // TODO(backend): no endpoint to resume a paused listing (backend Q3) —
+  // restore the old resume wire-call test when the Resume entry returns.
+  testWidgets(
+    'a paused listing offers no Resume entry',
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (_) =>
+            [_listingJson(status: 3)],
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(
+        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
+        ListingStatus.paused,
+      );
+      await tester.tap(find.byIcon(LucideIcons.moreVertical));
+      await _settle(tester);
+
+      expect(find.text('Edit Listing'), findsOneWidget);
+      expect(find.text('Resume'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'vendor deletes a draft listing via the live cancel wire call',
+    (tester) async {
+      RequestOptions? cancelRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (_) =>
+            [_listingJson(title: 'Draft lamp', status: 0)],
+        'PUT ${ApiEndpoints.apiListingCancel('9001')}': (options) {
+          cancelRequest = options;
+          return <String, dynamic>{};
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(find.text('Draft lamp'), findsOneWidget);
+      await tester.tap(find.byIcon(LucideIcons.moreVertical));
+      await _settle(tester);
+
+      await tester.tap(find.text('Delete'));
+      await _settle(tester);
+
+      expect(find.textContaining('will be removed permanently'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await _settle(tester);
+
+      expect(cancelRequest, isNotNull);
+      expect(find.text('Draft lamp'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'searching listings does not assert during the dialog exit animation',
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (_) => [
+          _listingJson(id: '1', title: 'Red lamp'),
+          _listingJson(id: '2', title: 'Blue vase'),
+        ],
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(LucideIcons.search));
+      await _settle(tester);
+
+      await tester.enterText(find.byType(TextFormField), 'lamp');
+      await tester.tap(find.widgetWithText(FilledButton, 'Search'));
+      // The future completes at Navigator.pop; one more frame is the
+      // exit animation that used to hit a disposed TextEditingController.
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      await _settle(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Red lamp'), findsOneWidget);
+      expect(find.text('Blue vase'), findsNothing);
+    },
+  );
+
+  // TODO(backend): no endpoint to resubmit an admin-rejected listing (backend Q3) —
+  // restore the old failed-resubmit sheet test when the Resubmit entry returns.
+  testWidgets(
+    'a rejected listing offers no Resubmit entry',
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (_) => [_listingJson(status: 5)],
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(LucideIcons.moreVertical));
+      await _settle(tester);
+
+      expect(find.text('Resubmit'), findsNothing);
+      expect(find.text('Edit Listing'), findsOneWidget);
+    },
+  );
+  testWidgets(
+    'a failed first load shows the error state with Retry, not the empty state',
+    (tester) async {
+      var fail = true;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (options) => fail
+            ? DioException(
+                requestOptions: options,
+                type: DioExceptionType.connectionError,
+              )
+            : [_listingJson()],
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsOneWidget);
+      expect(find.byType(ListingEmptyState), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+      // Zero stats and tabs above the error would read as data.
+      expect(find.byType(ListingStatsBanner), findsNothing);
+      expect(find.byType(ListingFilterTabs), findsNothing);
+      expect(find.byType(ListingSortBar), findsNothing);
+
+      fail = false;
+      await tester.tap(find.text('Retry'));
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.byType(ListingStatsBanner), findsOneWidget);
+      expect(find.byType(ListingFilterTabs), findsOneWidget);
+      expect(find.text('Wireless Earbuds'), findsOneWidget);
+    },
+  );
+
+  testWidgets('a genuinely empty list keeps the empty state', (tester) async {
+    final dio = _fakeDio({'GET ${ApiEndpoints.apiMyListings}': (_) => []});
+
+    await tester.pumpWidget(
+      _harness([
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ]),
+    );
+    await _settle(tester);
+
+    expect(find.byType(ListingEmptyState), findsOneWidget);
+    expect(find.byType(ErrorStateWidget), findsNothing);
+    expect(find.byType(ListingStatsBanner), findsOneWidget);
+  });
+
+  testWidgets('Arabic: stats and posted date use Arabic-Indic digits', (
+    tester,
+  ) async {
+    final dio = _fakeDio({
+      'GET ${ApiEndpoints.apiMyListings}': (_) => [
+        _listingJson(postedAt: '2026-10-15T12:00:00Z'),
+      ],
+    });
+
+    await tester.pumpWidget(
+      _harness([
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ], locale: const Locale('ar')),
+    );
+    await _settle(tester);
+
+    expect(find.textContaining('15'), findsNothing);
+    expect(find.textContaining('2026'), findsNothing);
+    expect(find.textContaining('١٥'), findsOneWidget);
+    expect(find.textContaining('٢٠٢٦'), findsOneWidget);
+    expect(find.text('١'), findsWidgets); // total listings
+  });
 }

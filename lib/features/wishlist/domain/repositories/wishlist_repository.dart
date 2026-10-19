@@ -25,8 +25,6 @@ abstract interface class WishlistRepository {
     int quantity,
   });
 
-  Future<Either<Failure, Unit>> clearWishlist(String consumerId);
-
   /// Catalog-only preview for optimistic UI (not persisted).
   Future<WishlistItemEntity> stubFromListingId(String listingId);
 }

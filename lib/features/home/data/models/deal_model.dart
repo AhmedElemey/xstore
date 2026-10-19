@@ -13,6 +13,7 @@ class DealModel with _$DealModel {
     required double price,
     String? imageUrl,
     @Default(0.0) double discountPercent,
+    @Default(false) bool isSoldOut,
   }) = _DealModel;
 
   factory DealModel.fromJson(Map<String, dynamic> json) =>
@@ -26,5 +27,6 @@ extension DealModelX on DealModel {
         price: price,
         imageUrl: imageUrl,
         discountPercent: discountPercent,
+        isSoldOut: isSoldOut,
       );
 }

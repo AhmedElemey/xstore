@@ -23,7 +23,6 @@ mixin _$PlaceOrderParams {
   String? get deliveryNote => throw _privateConstructorUsedError;
   double get subtotal => throw _privateConstructorUsedError;
   double get shippingTotal => throw _privateConstructorUsedError;
-  double get discount => throw _privateConstructorUsedError;
   double get total => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -45,7 +44,6 @@ abstract class $PlaceOrderParamsCopyWith<$Res> {
       String? deliveryNote,
       double subtotal,
       double shippingTotal,
-      double discount,
       double total});
 
   $OrderAddressCopyWith<$Res> get deliveryAddress;
@@ -71,7 +69,6 @@ class _$PlaceOrderParamsCopyWithImpl<$Res, $Val extends PlaceOrderParams>
     Object? deliveryNote = freezed,
     Object? subtotal = null,
     Object? shippingTotal = null,
-    Object? discount = null,
     Object? total = null,
   }) {
     return _then(_value.copyWith(
@@ -102,10 +99,6 @@ class _$PlaceOrderParamsCopyWithImpl<$Res, $Val extends PlaceOrderParams>
       shippingTotal: null == shippingTotal
           ? _value.shippingTotal
           : shippingTotal // ignore: cast_nullable_to_non_nullable
-              as double,
-      discount: null == discount
-          ? _value.discount
-          : discount // ignore: cast_nullable_to_non_nullable
               as double,
       total: null == total
           ? _value.total
@@ -139,7 +132,6 @@ abstract class _$$PlaceOrderParamsImplCopyWith<$Res>
       String? deliveryNote,
       double subtotal,
       double shippingTotal,
-      double discount,
       double total});
 
   @override
@@ -164,7 +156,6 @@ class __$$PlaceOrderParamsImplCopyWithImpl<$Res>
     Object? deliveryNote = freezed,
     Object? subtotal = null,
     Object? shippingTotal = null,
-    Object? discount = null,
     Object? total = null,
   }) {
     return _then(_$PlaceOrderParamsImpl(
@@ -196,10 +187,6 @@ class __$$PlaceOrderParamsImplCopyWithImpl<$Res>
           ? _value.shippingTotal
           : shippingTotal // ignore: cast_nullable_to_non_nullable
               as double,
-      discount: null == discount
-          ? _value.discount
-          : discount // ignore: cast_nullable_to_non_nullable
-              as double,
       total: null == total
           ? _value.total
           : total // ignore: cast_nullable_to_non_nullable
@@ -219,7 +206,6 @@ class _$PlaceOrderParamsImpl implements _PlaceOrderParams {
       this.deliveryNote,
       required this.subtotal,
       required this.shippingTotal,
-      required this.discount,
       required this.total})
       : _items = items;
 
@@ -244,13 +230,11 @@ class _$PlaceOrderParamsImpl implements _PlaceOrderParams {
   @override
   final double shippingTotal;
   @override
-  final double discount;
-  @override
   final double total;
 
   @override
   String toString() {
-    return 'PlaceOrderParams(consumerId: $consumerId, items: $items, deliveryAddress: $deliveryAddress, paymentMethod: $paymentMethod, deliveryNote: $deliveryNote, subtotal: $subtotal, shippingTotal: $shippingTotal, discount: $discount, total: $total)';
+    return 'PlaceOrderParams(consumerId: $consumerId, items: $items, deliveryAddress: $deliveryAddress, paymentMethod: $paymentMethod, deliveryNote: $deliveryNote, subtotal: $subtotal, shippingTotal: $shippingTotal, total: $total)';
   }
 
   @override
@@ -271,8 +255,6 @@ class _$PlaceOrderParamsImpl implements _PlaceOrderParams {
                 other.subtotal == subtotal) &&
             (identical(other.shippingTotal, shippingTotal) ||
                 other.shippingTotal == shippingTotal) &&
-            (identical(other.discount, discount) ||
-                other.discount == discount) &&
             (identical(other.total, total) || other.total == total));
   }
 
@@ -286,7 +268,6 @@ class _$PlaceOrderParamsImpl implements _PlaceOrderParams {
       deliveryNote,
       subtotal,
       shippingTotal,
-      discount,
       total);
 
   @JsonKey(ignore: true)
@@ -306,7 +287,6 @@ abstract class _PlaceOrderParams implements PlaceOrderParams {
       final String? deliveryNote,
       required final double subtotal,
       required final double shippingTotal,
-      required final double discount,
       required final double total}) = _$PlaceOrderParamsImpl;
 
   @override
@@ -323,8 +303,6 @@ abstract class _PlaceOrderParams implements PlaceOrderParams {
   double get subtotal;
   @override
   double get shippingTotal;
-  @override
-  double get discount;
   @override
   double get total;
   @override

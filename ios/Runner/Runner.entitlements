@@ -4,14 +4,19 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
-	<!-- Universal Links. Requires apple-app-site-association (with the real
-	     Apple Team ID) hosted at
-	     https://xstore.com/.well-known/apple-app-site-association — see
+	<!-- Universal Links. `?mode=developer` is debug-build-only (Apple skips
+	     the hosted apple-app-site-association check for a build run from
+	     Xcode on a real device signed with this entitlement's Team ID) —
+	     lets QA tap real https://xstore.com/... links in Notes/Messages
+	     before the production AASA file exists. Do NOT copy this suffix
+	     into RunnerRelease.entitlements — a release/TestFlight build must
+	     go through real domain verification, and `mode=developer` there
+	     would silently disable it. See
 	     docs_business/launch_todos/07_deep_linking.md. -->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:xstore.com</string>
-		<string>applinks:www.xstore.com</string>
+		<string>applinks:xstore.com?mode=developer</string>
+		<string>applinks:www.xstore.com?mode=developer</string>
 	</array>
 </dict>
 </plist>

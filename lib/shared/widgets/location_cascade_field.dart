@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
@@ -169,6 +169,7 @@ class LocationCascadeField extends ConsumerWidget {
   }) {
     return showModalBottomSheet<Object>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: context.surfaceColor,
       shape: const RoundedRectangleBorder(

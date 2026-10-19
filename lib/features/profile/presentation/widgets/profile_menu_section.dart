@@ -21,30 +21,22 @@ class ProfileMenuSection extends StatelessWidget {
       children: [
         if (title.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(
-              left: AppSpacing.xs,
+            padding: const EdgeInsetsDirectional.only(
+              start: AppSpacing.xs,
               bottom: AppSpacing.sm,
             ),
             child: Text(
-              title,
-              style: AppTypography.labelSmall.copyWith(
-                color: context.textSecondary,
-                letterSpacing: 1.1,
-                fontWeight: FontWeight.w600,
+              title.toUpperCase(),
+              style: AppTypography.fieldLabel.copyWith(
+                color: context.labelColor,
               ),
             ),
           ),
         Container(
           decoration: BoxDecoration(
-            color: context.surfaceColor,
-            borderRadius: BorderRadius.circular(AppSpacing.lg),
-            boxShadow: [
-              BoxShadow(
-                color: context.textPrimary.withValues(alpha: 0.06),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: context.glassColor,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: context.borderColor),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -53,8 +45,11 @@ class ProfileMenuSection extends StatelessWidget {
                 children[i],
                 if (i < children.length - 1)
                   Padding(
-                    padding: EdgeInsets.only(left: 64, right: AppSpacing.lg),
-                    child: Divider(height: 1, color: context.textDisabled),
+                    padding: const EdgeInsetsDirectional.only(
+                      start: 64,
+                      end: AppSpacing.lg,
+                    ),
+                    child: Divider(height: 1, color: context.borderColor),
                   ),
               ],
             ],

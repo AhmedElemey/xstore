@@ -4,6 +4,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/vendor_report_reason.dart';
 import '../../domain/repositories/vendor_reports_repository.dart';
 import '../datasources/vendor_reports_remote_datasource.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class VendorReportsRepositoryImpl implements VendorReportsRepository {
   VendorReportsRepositoryImpl({required VendorReportsRemoteDataSource remote})
@@ -27,7 +28,7 @@ class VendorReportsRepositoryImpl implements VendorReportsRepository {
       );
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

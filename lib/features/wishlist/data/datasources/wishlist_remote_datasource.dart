@@ -5,6 +5,7 @@ import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/network/json_list_unwrap.dart';
+import '../../../cart/domain/entities/cart_shipping_rules.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 
 abstract interface class WishlistRemoteDataSource {
@@ -20,8 +21,6 @@ abstract interface class WishlistRemoteDataSource {
     required String listingId,
     String? wishlistItemId,
   });
-
-  Future<void> clearWishlist(String consumerId);
 
   Future<WishlistItemEntity> buildFromListingId(
     String listingId, {
@@ -113,18 +112,6 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
   }
 
   @override
-  Future<void> clearWishlist(String consumerId) async {
-    try {
-      await _dio.delete<void>(
-        '${ApiEndpoints.wishlist}/$consumerId',
-        options: ApiAuthHeaders.authenticated(),
-      );
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  @override
   Future<WishlistItemEntity> buildFromListingId(
     String listingId, {
     String? wishId,
@@ -187,9 +174,9 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
               root['imageUrl'].toString(),
           ];
 
-    final price = _num(root['price']);
+    final price = jsonDouble(root['price']);
     final compareRaw = root['compareAtPrice'] ?? root['compare_at_price'];
-    final compare = compareRaw == null ? null : _num(compareRaw);
+    final compare = compareRaw == null ? null : jsonDouble(compareRaw);
 
     final catRaw =
         root['categoryLabel'] ?? root['category'] ?? root['categoryNameEn'];
@@ -204,7 +191,7 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
 
     final ratingRaw = root['rating'] ?? root['averageRating'];
     // Missing/zero rating means "no reviews yet" — never fabricate a score.
-    final rating = ratingRaw == null ? null : _num(ratingRaw);
+    final rating = ratingRaw == null ? null : jsonDouble(ratingRaw);
 
     final reviewCountRaw = root['reviewCount'];
     final reviewsList = root['reviews'];
@@ -219,9 +206,11 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
         : int.tryParse(stockRaw?.toString() ?? '') ?? 1;
 
     final shipAvail =
-        json['shippingAvailable'] != false &&
-        root['shippingAvailable'] != false;
-    final shippingCost = shipAvail ? (price >= 20000 ? 0.0 : 500.0) : 0.0;
+        (root['shippingAvailable'] ?? json['shippingAvailable']) == true;
+    final shippingCost = cartLineShippingCost(
+      shippingAvailable: shipAvail,
+      listingShippingCost: jsonDouble(root['shippingCost'] ?? json['shippingCost']),
+    );
 
     return WishlistItemEntity(
       id: id,
@@ -353,9 +342,11 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     }
     final ratingRaw =
         json['rating'] ?? listing['rating'] ?? listing['averageRating'];
-    final rating = ratingRaw == null || _num(ratingRaw) <= 0
+    final rating = ratingRaw == null || jsonDouble(ratingRaw) <= 0
         ? null
-        : _num(ratingRaw);
+        : jsonDouble(ratingRaw);
+    final shipAvail =
+        (json['shippingAvailable'] ?? listing['shippingAvailable']) == true;
     return WishlistItemEntity(
       id: _mapString(json, ['id']),
       listingId: listingId,
@@ -367,14 +358,14 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       vendorStoreName: vendorStoreName,
       vendorAvatar: vendorAvatar,
       isVendorVerified: json['isVendorVerified'] != false,
-      price: _num(json['price'] ?? listing['price']),
+      price: jsonDouble(json['price'] ?? listing['price']),
       compareAtPrice:
           json['compareAtPrice'] == null && listing['compareAtPrice'] == null
           ? null
-          : _num(json['compareAtPrice'] ?? listing['compareAtPrice']),
+          : jsonDouble(json['compareAtPrice'] ?? listing['compareAtPrice']),
       previousPrice: json['previousPrice'] == null
           ? null
-          : _num(json['previousPrice']),
+          : jsonDouble(json['previousPrice']),
       priceDropPercent: (json['priceDropPercent'] as num?)?.toInt(),
       category: category,
       condition: condition,
@@ -386,10 +377,13 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
           1,
       isAvailable: json['isAvailable'] != false,
       isInCart: json['isInCart'] == true,
-      shippingAvailable:
-          json['shippingAvailable'] != false &&
-          listing['shippingAvailable'] != false,
-      shippingCost: _num(json['shippingCost']),
+      shippingAvailable: shipAvail,
+      shippingCost: cartLineShippingCost(
+        shippingAvailable: shipAvail,
+        listingShippingCost: jsonDouble(
+          json['shippingCost'] ?? listing['shippingCost'],
+        ),
+      ),
       addedAt:
           DateTime.tryParse((json['addedAt'] ?? '').toString()) ??
           DateTime.now(),
@@ -397,10 +391,5 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
           DateTime.tryParse((json['lastPriceCheckAt'] ?? '').toString()) ??
           DateTime.now(),
     );
-  }
-
-  double _num(Object? value) {
-    if (value is num) return value.toDouble();
-    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 }

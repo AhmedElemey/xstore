@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../domain/entities/review_write_params.dart';
 import 'product_dependencies.dart';
 import 'product_detail_notifier.dart';
@@ -93,6 +95,15 @@ class ProductReviewsNotifier extends _$ProductReviewsNotifier {
         state = state.copyWith(isSubmitting: false);
         ref.invalidate(productDetailProvider(listingId));
         unawaited(refresh());
+        if (editingReviewId == null) {
+          ref.read(analyticsServiceProvider).track(
+            AnalyticsEvents.reviewSubmitted,
+            properties: {
+              AnalyticsProps.itemId: listingId,
+              AnalyticsProps.rating: params.rating,
+            },
+          );
+        }
         return true;
       },
     );

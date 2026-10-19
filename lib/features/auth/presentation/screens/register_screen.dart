@@ -1,12 +1,13 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/network/app_error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -19,8 +20,10 @@ import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/birth_date_picker.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../store_categories/domain/entities/store_category_entity.dart';
 import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
+import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_states.dart';
@@ -30,11 +33,16 @@ import '../widgets/auth_text_field.dart';
 import '../widgets/password_strength_bar.dart';
 import '../widgets/role_selector_card.dart';
 import '../widgets/auth_divider.dart';
-import '../widgets/social_login_row.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../widgets/google_sign_in_button.dart';
 import '../widgets/phone_input_field.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({super.key, this.googlePrefill});
+
+  /// Google profile of a sign-in that matched no account; its email and
+  /// name prefill step 2. The user still picks a role, phone and password.
+  final SocialAuthResult? googlePrefill;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -50,12 +58,36 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _storeDesc = TextEditingController();
   final _whatsapp = TextEditingController();
 
+  /// Email came from a Google sign-in — it's the identity being registered,
+  /// so it can't be edited.
+  var _emailFromGoogle = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(registerNotifierProvider.notifier).reset();
+      final prefill = widget.googlePrefill;
+      if (prefill != null) _applyGooglePrefill(prefill);
     });
+  }
+
+  void _applyGooglePrefill(SocialAuthResult r) {
+    final name = r.displayName?.trim() ?? '';
+    final email = r.email?.trim() ?? '';
+    if (name.isNotEmpty) _fullName.text = name;
+    if (email.isNotEmpty) {
+      _email.text = email;
+      setState(() => _emailFromGoogle = true);
+    }
+    ref.read(registerNotifierProvider.notifier)
+      ..updateField(
+        fullName: name.isEmpty ? null : name,
+        email: email.isEmpty ? null : email,
+      )
+      // Sent as `idToken` + `clientId` on the register request.
+      ..setSocialIdToken(r.idToken);
   }
 
   @override
@@ -102,7 +134,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ],
       ),
     );
-    if (leave == true && mounted) context.pop();
+    if (leave != true || !mounted) return;
+    // Google "no account" reaches register via `go`, leaving nothing to pop.
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.login);
+    }
   }
 
   void _onBack(RegisterState s, RegisterNotifier n) {
@@ -169,125 +207,121 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         AppSnackbar.error(context, next.error!);
       }
     });
-    // Already on the register screen — just consume the flag (a Google
-    // sign-in with no matching account can fire this from here too, via the
-    // same SocialLoginRow), no navigation needed.
-    ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
-      if (next) {
+    // Already on the register screen (Google via the same GoogleSignInButton
+    // matched no account) — prefill in place, no navigation needed.
+    ref.listen(socialAuthProvider.select((s) => s.googleRegistration), (
+      prev,
+      next,
+    ) {
+      if (next != null && mounted) {
         ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
+        _applyGooglePrefill(next);
       }
     });
     ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {
       if (next != null && next != prev && mounted) {
-        AppSnackbar.error(context, next);
+        AppSnackbar.error(context, resolveAppError(context, next));
       }
     });
 
     final labels = s.totalSteps == 4
-        ? [context.l10n.stepRole, context.l10n.stepInfo, context.l10n.stepSecurity, context.l10n.stepStore]
-        : [context.l10n.stepRole, context.l10n.stepInfo, context.l10n.stepSecurity];
-    final progress = s.currentStep / s.totalSteps;
-
+        ? [
+            context.l10n.stepRole,
+            context.l10n.stepInfo,
+            context.l10n.stepSecurity,
+            context.l10n.stepStore,
+          ]
+        : [
+            context.l10n.stepRole,
+            context.l10n.stepInfo,
+            context.l10n.stepSecurity,
+          ];
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: context.backgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft, color: context.iconPrimary),
-          onPressed: () => _onBack(s, n),
-        ),
-      ),
-      body: Stack(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: OrbitBackground(
+        child: SafeArea(
+          child: Stack(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                child: Text(
-                  context.l10n.stepOf(s.currentStep, s.totalSteps),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: context.textSecondary,
-                  ),
-                ),
-              ),
-              const Gap(AppSpacing.sm),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 6,
-                    backgroundColor: context.textDisabled.withValues(alpha: 0.35),
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-              const Gap(AppSpacing.sm),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(
-                    labels.length,
-                    (i) => Expanded(
-                      child: Text(
-                        labels[i],
-                        textAlign: TextAlign.center,
-                        style: AppTypography.labelSmall.copyWith(
-                          fontWeight: i + 1 == s.currentStep
-                              ? FontWeight.w800
-                              : FontWeight.w500,
-                          color: i + 1 <= s.currentStep
-                              ? AppColors.primary
-                              : context.textDisabled,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                    child: Row(
+                      children: [
+                        AuthBackButton(onPressed: () => _onBack(s, n)),
+                        const Gap(AppSpacing.md),
+                        Expanded(
+                          child: Text(
+                            context.l10n
+                                .stepOf(
+                                  context.formatInt(s.currentStep),
+                                  context.formatInt(s.totalSteps),
+                                )
+                                .toUpperCase(),
+                            style: AppTypography.mono.copyWith(
+                              fontSize: AppTypography.rem(0.75),
+                              color: context.labelColor,
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
+                  const Gap(AppSpacing.spacing18),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: _StepTrail(current: s.currentStep, labels: labels),
+                  ),
+                  const Gap(AppSpacing.x2l),
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 320),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (child, anim) {
+                        return FadeTransition(
+                          opacity: anim,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0.04, 0),
+                              end: Offset.zero,
+                            ).animate(anim),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: KeyedSubtree(
+                        key: ValueKey(s.currentStep),
+                        child: _stepBody(s, n),
                       ),
                     ),
                   ),
-                ),
-              ),
-              const Gap(AppSpacing.lg),
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 320),
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  transitionBuilder: (child, anim) {
-                    return FadeTransition(
-                      opacity: anim,
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0.04, 0),
-                          end: Offset.zero,
-                        ).animate(anim),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: KeyedSubtree(
-                    key: ValueKey(s.currentStep),
-                    child: _stepBody(s, n),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      24,
+                      AppSpacing.md,
+                      24,
+                      28,
+                    ),
+                    child: XstoreButton(
+                      label:
+                          s.selectedRole == UserRole.vendor &&
+                              s.currentStep == 4
+                          ? context.l10n.createMyStore
+                          : context.l10n.continueLabel,
+                      isLoading: s.isLoading,
+                      onPressed: _primaryEnabled(s)
+                          ? () => _onPrimary(s, n)
+                          : null,
+                    ),
                   ),
-                ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: XstoreButton(
-                  label: s.selectedRole == UserRole.vendor && s.currentStep == 4
-                      ? context.l10n.createMyStore
-                      : context.l10n.continueLabel,
-                  isLoading: s.isLoading,
-                  onPressed: _primaryEnabled(s) ? () => _onPrimary(s, n) : null,
-                ),
-              ),
+              if (s.showVendorSuccessOverlay)
+                _VendorSuccessOverlay(name: s.fullName),
             ],
           ),
-          if (s.showVendorSuccessOverlay) _VendorSuccessOverlay(name: s.fullName),
-        ],
+        ),
       ),
     );
   }
@@ -302,6 +336,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           n: n,
           fullName: _fullName,
           email: _email,
+          emailReadOnly: _emailFromGoogle,
           phone: _phone,
           onPickDob: () => _pickDob(n, s),
         );
@@ -324,7 +359,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         return const SizedBox.shrink();
     }
   }
-
 }
 
 class _StepRole extends StatelessWidget {
@@ -336,38 +370,31 @@ class _StepRole extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      padding: _stepPadding,
       children: [
-        Text(
-          context.l10n.joinAs,
-          style: AppTypography.titleLarge.copyWith(
-            fontWeight: FontWeight.w800,
-            color: context.textPrimary,
-          ),
+        _StepHeading(
+          title: context.l10n.joinAs,
+          subtitle: context.l10n.chooseHowUse,
         ),
-        const Gap(AppSpacing.spacing10),
-        Text(
-          context.l10n.chooseHowUse,
-          style: AppTypography.body15.copyWith(
-            height: 1.4,
-            color: context.textSecondary,
-          ),
-        ),
-        const Gap(AppSpacing.xl),
         if (s.stepErrors.containsKey('role'))
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Text(
               s.stepErrors['role']!,
-              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colorScheme.error,
+              ),
             ),
           ),
         RoleSelectorCard(
           title: context.l10n.iAmBuyer,
           subtitle: context.l10n.buyerSubtitle,
           icon: LucideIcons.shoppingBag,
-          accentColor: AppColors.primary,
-          selectionBorderColor: AppColors.primary,
+          orbColors: const [
+            AppColors.white,
+            AppColors.primaryLight,
+            AppColors.primary,
+          ],
           isSelected: s.selectedRole == UserRole.consumer,
           onTap: () => n.updateRole(UserRole.consumer),
           features: [
@@ -381,21 +408,23 @@ class _StepRole extends StatelessWidget {
           title: context.l10n.iAmSeller,
           subtitle: context.l10n.sellerSubtitle,
           icon: LucideIcons.store,
-          accentColor: AppColors.accent,
-          selectionBorderColor: AppColors.accent,
+          orbColors: const [
+            AppColors.white,
+            AppColors.accentLight,
+            AppColors.darkSecondary,
+          ],
           isSelected: s.selectedRole == UserRole.vendor,
           onTap: () => n.updateRole(UserRole.vendor),
           features: [
             context.l10n.sellerFeature1,
             context.l10n.sellerFeature2,
             context.l10n.sellerFeature3,
-            context.l10n.sellerFeature4,
           ],
         ),
         const Gap(AppSpacing.xl),
         AuthDivider(label: context.l10n.socialLoginDivider),
         const Gap(AppSpacing.xl),
-        const SocialLoginRow(),
+        const GoogleSignInButton(),
       ],
     );
   }
@@ -407,6 +436,7 @@ class _StepPersonal extends StatelessWidget {
     required this.n,
     required this.fullName,
     required this.email,
+    required this.emailReadOnly,
     required this.phone,
     required this.onPickDob,
   });
@@ -415,6 +445,7 @@ class _StepPersonal extends StatelessWidget {
   final RegisterNotifier n;
   final TextEditingController fullName;
   final TextEditingController email;
+  final bool emailReadOnly;
   final TextEditingController phone;
   final VoidCallback onPickDob;
 
@@ -422,24 +453,15 @@ class _StepPersonal extends StatelessWidget {
   Widget build(BuildContext context) {
     final dobLabel = s.dateOfBirth == null
         ? context.l10n.dateOfBirthOptional
-        : DateFormat('d MMM yyyy').format(s.dateOfBirth!);
+        : context.formatDate(s.dateOfBirth!);
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      padding: _stepPadding,
       children: [
-        Text(
-          context.l10n.tellUsAboutYou,
-          style: AppTypography.titleLarge.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
+        _StepHeading(
+          title: context.l10n.tellUsAboutYou,
+          subtitle: context.l10n.infoOnProfile,
         ),
-        const Gap(AppSpacing.sm),
-        Text(
-          context.l10n.infoOnProfile,
-          style:
-              AppTypography.body15.copyWith(color: context.textSecondary),
-        ),
-        const Gap(AppSpacing.xl),
         AuthTextField(
           label: context.l10n.fullNameRequired,
           hint: context.l10n.fullNameHint,
@@ -448,7 +470,7 @@ class _StepPersonal extends StatelessWidget {
           errorText: s.stepErrors['fullName'],
           onChanged: (v) => n.updateField(fullName: v),
         ),
-        const Gap(AppSpacing.inputContentPaddingH),
+        const Gap(AppSpacing.lg),
         ValueListenableBuilder<TextEditingValue>(
           valueListenable: email,
           builder: (context, val, _) {
@@ -457,25 +479,27 @@ class _StepPersonal extends StatelessWidget {
               label: context.l10n.emailAddressRequired,
               hint: context.l10n.enterEmailHint,
               controller: email,
+              readOnly: emailReadOnly,
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(LucideIcons.mail),
               errorText: s.stepErrors['email'],
-              suffixIcon: ok
-                  ? const Icon(Icons.check_circle, color: AppColors.success)
+              suffixIcon: emailReadOnly
+                  ? Icon(LucideIcons.lock, color: context.textSecondary)
+                  : ok
+                  ? Icon(Icons.check_circle, color: _successColor(context))
                   : null,
               onChanged: (v) => n.updateField(email: v),
             );
           },
         ),
-        const Gap(AppSpacing.inputContentPaddingH),
+        const Gap(AppSpacing.lg),
         PhoneInputField(
           controller: phone,
           errorText: s.stepErrors['phone'],
-          onChanged: (v) => n.updateField(
-            phoneNumber: v.replaceAll(RegExp(r'\D'), ''),
-          ),
+          onChanged: (v) =>
+              n.updateField(phoneNumber: v.replaceAll(RegExp(r'\D'), '')),
         ),
-        const Gap(AppSpacing.inputContentPaddingH),
+        const Gap(AppSpacing.lg),
         AuthTextField(
           label: context.l10n.dateOfBirthOptional,
           readOnly: true,
@@ -484,7 +508,7 @@ class _StepPersonal extends StatelessWidget {
           prefixIcon: const Icon(LucideIcons.calendar),
           errorText: s.stepErrors['dob'],
         ),
-        const Gap(AppSpacing.inputContentPaddingH),
+        const Gap(AppSpacing.lg),
         LocationCascadeField(
           cityId: s.storeCityId,
           governorateId: s.storeGovernmentId,
@@ -515,24 +539,15 @@ class _StepSecurity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      padding: _stepPadding,
       children: [
-        Text(
-          context.l10n.secureYourAccount,
-          style: AppTypography.titleLarge.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
+        _StepHeading(
+          title: context.l10n.secureYourAccount,
+          subtitle: context.l10n.strongPasswordHint,
         ),
-        const Gap(AppSpacing.sm),
-        Text(
-          context.l10n.strongPasswordHint,
-          style:
-              AppTypography.body15.copyWith(color: context.textSecondary),
-        ),
-        const Gap(AppSpacing.xl),
         AuthTextField(
           label: context.l10n.passwordRequired,
-          hint: '********',
+          hint: context.l10n.passwordMask,
           controller: password,
           obscureText: !s.isPasswordVisible,
           prefixIcon: const Icon(LucideIcons.lock),
@@ -551,7 +566,7 @@ class _StepSecurity extends StatelessWidget {
         const Gap(AppSpacing.lg),
         AuthTextField(
           label: context.l10n.confirmPasswordRequired,
-          hint: '********',
+          hint: context.l10n.passwordMask,
           controller: confirm,
           obscureText: !s.isConfirmPasswordVisible,
           prefixIcon: const Icon(LucideIcons.shieldCheck),
@@ -561,14 +576,19 @@ class _StepSecurity extends StatelessWidget {
               if (s.password.isNotEmpty &&
                   s.password == s.confirmPassword &&
                   s.confirmPassword.isNotEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(right: 4),
-                  child: Icon(Icons.check_circle, color: AppColors.success),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 4),
+                  child: Icon(
+                    Icons.check_circle,
+                    color: _successColor(context),
+                  ),
                 ),
               IconButton(
                 onPressed: () => n.toggleConfirmPasswordVisibility(),
                 icon: Icon(
-                  s.isConfirmPasswordVisible ? LucideIcons.eyeOff : LucideIcons.eye,
+                  s.isConfirmPasswordVisible
+                      ? LucideIcons.eyeOff
+                      : LucideIcons.eye,
                   color: context.iconSecondary,
                 ),
               ),
@@ -583,7 +603,6 @@ class _StepSecurity extends StatelessWidget {
           children: [
             Checkbox(
               value: s.agreedToTerms,
-              activeColor: AppColors.primary,
               onChanged: (_) => n.toggleAgreedToTerms(),
             ),
             Expanded(
@@ -606,7 +625,7 @@ class _StepSecurity extends StatelessWidget {
                         context.l10n.termsOfService,
                         style: AppTypography.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.accent,
+                          color: context.linkColor,
                         ),
                       ),
                     ),
@@ -622,7 +641,7 @@ class _StepSecurity extends StatelessWidget {
                         context.l10n.privacyPolicy,
                         style: AppTypography.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.accent,
+                          color: context.linkColor,
                         ),
                       ),
                     ),
@@ -635,7 +654,9 @@ class _StepSecurity extends StatelessWidget {
         if (s.stepErrors.containsKey('terms'))
           Text(
             s.stepErrors['terms']!,
-            style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colorScheme.error,
+            ),
           ),
       ],
     );
@@ -680,13 +701,12 @@ class _StepStore extends ConsumerWidget {
         children: [
           Text(
             context.l10n.genericError,
-            style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colorScheme.error,
+            ),
           ),
           if (onRetry != null)
-            TextButton(
-              onPressed: onRetry,
-              child: Text(context.l10n.retry),
-            ),
+            TextButton(onPressed: onRetry, child: Text(context.l10n.retry)),
         ],
       ),
       data: (items) => DropdownButtonFormField<int>(
@@ -694,19 +714,11 @@ class _StepStore extends ConsumerWidget {
         value: value != null && items.any((e) => idOf(e) == value)
             ? value
             : null,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: context.surfaceColor,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-          errorText: errorText,
-        ),
+        decoration: InputDecoration(errorText: errorText),
         hint: Text(hint),
         items: items
             .map(
-              (e) => DropdownMenuItem(
-                value: idOf(e),
-                child: Text(labelOf(e)),
-              ),
+              (e) => DropdownMenuItem(value: idOf(e), child: Text(labelOf(e))),
             )
             .toList(),
         onChanged: onChanged,
@@ -720,29 +732,20 @@ class _StepStore extends ConsumerWidget {
     final initials = s.storeName.isEmpty
         ? '?'
         : s.storeName
-            .trim()
-            .split(RegExp(r'\s+'))
-            .map((e) => e.isNotEmpty ? e[0] : '')
-            .take(2)
-            .join()
-            .toUpperCase();
+              .trim()
+              .split(RegExp(r'\s+'))
+              .map((e) => e.isNotEmpty ? e[0] : '')
+              .take(2)
+              .join()
+              .toUpperCase();
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      padding: _stepPadding,
       children: [
-        Text(
-          context.l10n.setUpYourStore,
-          style: AppTypography.titleLarge.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
+        _StepHeading(
+          title: context.l10n.setUpYourStore,
+          subtitle: context.l10n.tellBuyersStore,
         ),
-        const Gap(AppSpacing.sm),
-        Text(
-          context.l10n.tellBuyersStore,
-          style:
-              AppTypography.body15.copyWith(color: context.textSecondary),
-        ),
-        const Gap(AppSpacing.xl),
         AuthTextField(
           label: context.l10n.storeNameRequired,
           hint: context.l10n.storeNameHint,
@@ -755,17 +758,14 @@ class _StepStore extends ConsumerWidget {
         Text(
           context.l10n.storeUrlPreview(s.storeSlug),
           style: AppTypography.bodySmall.copyWith(
-            color: AppColors.primary,
+            color: context.linkColor,
             fontWeight: FontWeight.w600,
           ),
         ),
         const Gap(AppSpacing.lg),
         Text(
-          context.l10n.storeCategoryRequired,
-          style: AppTypography.bodySmall.copyWith(
-            fontWeight: FontWeight.w600,
-            color: context.textPrimary,
-          ),
+          context.l10n.storeCategoryRequired.toUpperCase(),
+          style: AppTypography.fieldLabel.copyWith(color: context.labelColor),
         ),
         const Gap(AppSpacing.sm),
         _lookupDropdown<StoreCategoryEntity>(
@@ -789,22 +789,22 @@ class _StepStore extends ConsumerWidget {
           onChanged: (v) => n.updateField(storeDescription: v),
         ),
         Align(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           child: Text(
             '${s.storeDescription.length}/300',
-            style: AppTypography.body12.copyWith(
-              color: context.textSecondary,
+            style: AppTypography.mono.copyWith(
+              fontSize: AppTypography.rem(0.75),
+              color: context.labelColor,
             ),
           ),
         ),
         const Gap(AppSpacing.lg),
         Text(
-          context.l10n.storeLogoRequired,
-          style: AppTypography.bodySmall.copyWith(
-            fontWeight: FontWeight.w600,
+          context.l10n.storeLogoRequired.toUpperCase(),
+          style: AppTypography.fieldLabel.copyWith(
             color: s.stepErrors.containsKey('storeLogo')
-                ? AppColors.error
-                : context.textPrimary,
+                ? context.colorScheme.error
+                : context.labelColor,
           ),
         ),
         const Gap(AppSpacing.spacing10),
@@ -814,31 +814,48 @@ class _StepStore extends ConsumerWidget {
             child: InkWell(
               onTap: () => n.pickStoreLogo(),
               customBorder: const CircleBorder(),
-              child: ClipOval(
-                child: s.storeLogoPath != null
-                    ? Image.file(
-                        File(s.storeLogoPath!),
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [AppColors.primary, AppColors.accent],
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: context.borderColor),
+                  boxShadow: [
+                    BoxShadow(
+                      color: context.brandGradient.first.withValues(alpha: 0.3),
+                      blurRadius: 24,
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: s.storeLogoPath != null
+                      ? Image.file(
+                          File(s.storeLogoPath!),
+                          width: 100,
+                          height: 100,
+                          cacheWidth:
+                              (100 * MediaQuery.devicePixelRatioOf(context))
+                                  .round(),
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: AlignmentDirectional.topStart,
+                              end: AlignmentDirectional.bottomEnd,
+                              colors: context.brandGradient,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            initials,
+                            style: AppTypography.displayMedium.copyWith(
+                              color: context.onBrandColor,
+                            ),
                           ),
                         ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          initials,
-                          style: AppTypography.displayMedium.copyWith(
-                            color: AppColors.white,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
+                ),
               ),
             ),
           ),
@@ -848,16 +865,17 @@ class _StepStore extends ConsumerWidget {
           Center(
             child: Text(
               s.stepErrors['storeLogo']!,
-              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colorScheme.error,
+              ),
             ),
           ),
         ],
         const Gap(AppSpacing.lg),
         PhoneInputField(
           controller: whatsapp,
-          onChanged: (v) => n.updateField(
-            whatsappNumber: v.replaceAll(RegExp(r'\D'), ''),
-          ),
+          onChanged: (v) =>
+              n.updateField(whatsappNumber: v.replaceAll(RegExp(r'\D'), '')),
         ),
       ],
     );
@@ -878,8 +896,9 @@ class _VendorSuccessOverlay extends ConsumerWidget {
           margin: const EdgeInsets.all(AppSpacing.x2l),
           padding: const EdgeInsets.all(AppSpacing.spacing28),
           decoration: BoxDecoration(
-            color: context.surfaceColor,
-            borderRadius: BorderRadius.circular(24),
+            color: context.elevatedSurfaceColor,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: context.borderColor),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -889,28 +908,40 @@ class _VendorSuccessOverlay extends ConsumerWidget {
                 duration: const Duration(milliseconds: 600),
                 curve: Curves.elasticOut,
                 builder: (context, v, child) {
-                  return Transform.scale(
-                    scale: v,
-                    child: child,
-                  );
+                  return Transform.scale(scale: v, child: child);
                 },
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.spacing18),
                   decoration: BoxDecoration(
-                    color: AppColors.success,
+                    color: _successColor(context),
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: _successColor(context).withValues(alpha: 0.5),
+                        blurRadius: 28,
+                      ),
+                    ],
                   ),
-                  child: const Icon(Icons.check, color: AppColors.white, size: 48),
+                  child: Icon(
+                    Icons.check,
+                    color: context.isDark
+                        ? AppColors.darkBackground
+                        : AppColors.white,
+                    size: 48,
+                  ),
                 ),
               ),
               const Gap(AppSpacing.xl),
               Text(
                 context.l10n.vendorWelcome(
-                  name.isEmpty ? context.l10n.sellerFallbackName : name.split(' ').first,
+                  name.isEmpty
+                      ? context.l10n.sellerFallbackName
+                      : name.split(' ').first,
                 ),
                 textAlign: TextAlign.center,
-                style: AppTypography.titleMedium.copyWith(
-                  fontWeight: FontWeight.w800,
+                style: AppTypography.headlineSmall.copyWith(
+                  fontSize: AppTypography.rem(1.375),
+                  color: context.textPrimary,
                 ),
               ),
               const Gap(AppSpacing.spacing10),
@@ -925,7 +956,9 @@ class _VendorSuccessOverlay extends ConsumerWidget {
               XstoreButton(
                 label: context.l10n.goToMyStore,
                 onPressed: () async {
-                  ref.read(registerNotifierProvider.notifier).dismissVendorSuccessOverlay();
+                  ref
+                      .read(registerNotifierProvider.notifier)
+                      .dismissVendorSuccessOverlay();
                   await maybeShowLocationPermissionPrompt(context, ref);
                   if (!context.mounted) return;
                   context.go(AppRoutes.home);
@@ -937,4 +970,165 @@ class _VendorSuccessOverlay extends ConsumerWidget {
       ),
     );
   }
+}
+
+const _stepPadding = EdgeInsets.symmetric(horizontal: 24);
+
+Color _successColor(BuildContext context) =>
+    context.isDark ? AppColors.successLight : AppColors.success;
+
+/// Display title and supporting line at the top of each step.
+class _StepHeading extends StatelessWidget {
+  const _StepHeading({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTypography.headlineSmall.copyWith(
+              color: context.textPrimary,
+            ),
+          ),
+          const Gap(AppSpacing.spacing10),
+          Text(
+            subtitle,
+            style: AppTypography.body15.copyWith(
+              height: 1.4,
+              color: context.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Orbit step progress: a filled check node per finished step, a glowing
+/// ring for the current one, faint rings ahead; solid trail behind, dashed
+/// trail ahead. Step names sit underneath.
+class _StepTrail extends StatelessWidget {
+  const _StepTrail({required this.current, required this.labels});
+
+  /// 1-based current step.
+  final int current;
+  final List<String> labels;
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = context.isDark ? AppColors.primaryLight : AppColors.primary;
+    final faint = (context.isDark ? AppColors.darkTextLabel : AppColors.primary)
+        .withValues(alpha: 0.4);
+    final count = labels.length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            for (var step = 1; step <= count; step++) ...[
+              _node(context, step, brand, faint),
+              if (step < count)
+                Expanded(
+                  child: step < current
+                      ? Container(height: 2, color: brand)
+                      : CustomPaint(
+                          size: const Size.fromHeight(2),
+                          painter: _DashPainter(faint),
+                        ),
+                ),
+            ],
+          ],
+        ),
+        const Gap(AppSpacing.sm),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            for (var step = 1; step <= count; step++)
+              Text(
+                labels[step - 1],
+                style: AppTypography.labelMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: step < current
+                      ? context.linkColor
+                      : step == current
+                      ? context.textPrimary
+                      : context.labelColor,
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _node(BuildContext context, int step, Color brand, Color faint) {
+    const size = 28.0;
+    if (step < current) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: brand,
+          boxShadow: [
+            BoxShadow(color: brand.withValues(alpha: 0.6), blurRadius: 14),
+          ],
+        ),
+        child: Icon(Icons.check_rounded, size: 16, color: context.onBrandColor),
+      );
+    }
+    final isCurrent = step == current;
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: isCurrent ? brand : faint, width: 2),
+        boxShadow: isCurrent
+            ? [BoxShadow(color: brand.withValues(alpha: 0.5), blurRadius: 18)]
+            : null,
+      ),
+      child: isCurrent
+          ? Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: brand),
+            )
+          : null,
+    );
+  }
+}
+
+/// 6px-on / 6px-off horizontal line for the trail ahead.
+class _DashPainter extends CustomPainter {
+  const _DashPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = size.height;
+    final y = size.height / 2;
+    for (var x = 0.0; x < size.width; x += 12) {
+      canvas.drawLine(
+        Offset(x, y),
+        Offset(math.min(x + 6, size.width), y),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashPainter oldDelegate) => oldDelegate.color != color;
 }

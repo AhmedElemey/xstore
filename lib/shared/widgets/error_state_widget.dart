@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/constants/app_spacing.dart';
 import '../../core/utils/extensions/context_extensions.dart';
@@ -37,7 +37,7 @@ class ErrorStateWidget extends StatelessWidget {
             ),
             const Gap(AppSpacing.lg),
             Text(
-              message,
+              context.localizedError(message),
               style: theme.textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),

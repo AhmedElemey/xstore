@@ -46,6 +46,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/analytics/analytics_service.dart';
+import 'package:xstore/core/analytics/event_names.dart';
 import 'package:xstore/core/constants/prefs_keys.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
@@ -371,6 +372,10 @@ void main() {
       expect(order, isNull);
       expect(container.read(checkoutProvider).error, 'noItems');
       expect(adapter.requests, isEmpty);
+      expect(
+        container.read(analyticsServiceProvider).queuedEventNames,
+        contains(AnalyticsEvents.orderPlacementFailed),
+      );
     },
   );
 
@@ -393,6 +398,10 @@ void main() {
       expect(order, isNull);
       expect(container.read(checkoutProvider).error, 'noAddress');
       expect(adapter.requests, isEmpty);
+      expect(
+        container.read(analyticsServiceProvider).queuedEventNames,
+        contains(AnalyticsEvents.orderPlacementFailed),
+      );
     },
   );
 
@@ -450,6 +459,38 @@ void main() {
 
       expect(order, isNull);
       expect(container.read(checkoutProvider).error, phoneNotVerifiedErrorCode);
+    },
+  );
+
+  test(
+    'stock check: a line the listing can no longer fill blocks the order '
+    'before any POST /api/orders',
+    skip: MockConfig.useMock ? 'Requires MOCK=false (default) — see the happy-path test above' : false,
+    () async {
+      final adapter = _ScriptedAdapter((options) async {
+        if (options.path.contains('/stock')) {
+          return _jsonBody({'isSuccess': true, 'data': false}, 200);
+        }
+        // Listing re-read for the short line: sold out.
+        return _jsonBody({'id': 501, 'title': 'Test Listing', 'stockQuantity': 0}, 200);
+      });
+      final container = await _buildContainer(
+        _overrides(
+          dio: _fakeDio(adapter),
+          cartItems: [_seedItem()],
+          checkout: () => _SeededAddressCheckout(),
+        ),
+      );
+
+      final order = await container.read(checkoutProvider.notifier).placeOrder();
+
+      expect(order, isNull);
+      expect(container.read(checkoutProvider).error, outOfStockErrorCode);
+      expect(
+        adapter.requests.map((r) => r.path),
+        isNot(contains(endsWith('/api/orders'))),
+      );
+      expect(adapter.requests.first.path, endsWith('/api/listings/501/stock?quantity=1'));
     },
   );
 
@@ -523,10 +564,15 @@ void main() {
         container.read(checkoutProvider).error,
         'Your session has expired. Please sign in again.',
       );
-      // Exactly the original request — no refresh call was attempted, and
-      // no retry, matching TokenRefreshInterceptor's own "no refresh token"
-      // contract (see test/token_refresh_interceptor_test.dart).
-      expect(adapter.requests, hasLength(1));
+      // Only the pre-order stock check and the order POST, each once — no
+      // refresh call was attempted, and no retry, matching
+      // TokenRefreshInterceptor's own "no refresh token" contract (see
+      // test/token_refresh_interceptor_test.dart). The stock check's 401 is
+      // an unanswered check, so checkout still reaches the order POST.
+      expect(
+        adapter.requests.map((r) => r.path.split('?').first),
+        [contains('/stock'), '/api/orders'],
+      );
     },
   );
 }

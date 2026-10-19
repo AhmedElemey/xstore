@@ -53,6 +53,11 @@ mixin _$UserModel {
   int? get storeCityId => throw _privateConstructorUsedError;
   int? get storeGovernmentId => throw _privateConstructorUsedError;
   int? get storeId => throw _privateConstructorUsedError;
+  bool get isEmailVerificationRequired => throw _privateConstructorUsedError;
+  bool get isPhoneVerificationRequired => throw _privateConstructorUsedError;
+  bool get isEmailVerified => throw _privateConstructorUsedError;
+  bool get isPhoneVerified => throw _privateConstructorUsedError;
+  bool get hasPassword => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $UserModelCopyWith<UserModel> get copyWith =>
@@ -101,7 +106,12 @@ abstract class $UserModelCopyWith<$Res> {
       int? storeCategoryId,
       int? storeCityId,
       int? storeGovernmentId,
-      int? storeId});
+      int? storeId,
+      bool isEmailVerificationRequired,
+      bool isPhoneVerificationRequired,
+      bool isEmailVerified,
+      bool isPhoneVerified,
+      bool hasPassword});
 }
 
 /// @nodoc
@@ -154,6 +164,11 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? storeCityId = freezed,
     Object? storeGovernmentId = freezed,
     Object? storeId = freezed,
+    Object? isEmailVerificationRequired = null,
+    Object? isPhoneVerificationRequired = null,
+    Object? isEmailVerified = null,
+    Object? isPhoneVerified = null,
+    Object? hasPassword = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -304,6 +319,26 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.storeId
           : storeId // ignore: cast_nullable_to_non_nullable
               as int?,
+      isEmailVerificationRequired: null == isEmailVerificationRequired
+          ? _value.isEmailVerificationRequired
+          : isEmailVerificationRequired // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isPhoneVerificationRequired: null == isPhoneVerificationRequired
+          ? _value.isPhoneVerificationRequired
+          : isPhoneVerificationRequired // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isEmailVerified: null == isEmailVerified
+          ? _value.isEmailVerified
+          : isEmailVerified // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isPhoneVerified: null == isPhoneVerified
+          ? _value.isPhoneVerified
+          : isPhoneVerified // ignore: cast_nullable_to_non_nullable
+              as bool,
+      hasPassword: null == hasPassword
+          ? _value.hasPassword
+          : hasPassword // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -353,7 +388,12 @@ abstract class _$$UserModelImplCopyWith<$Res>
       int? storeCategoryId,
       int? storeCityId,
       int? storeGovernmentId,
-      int? storeId});
+      int? storeId,
+      bool isEmailVerificationRequired,
+      bool isPhoneVerificationRequired,
+      bool isEmailVerified,
+      bool isPhoneVerified,
+      bool hasPassword});
 }
 
 /// @nodoc
@@ -404,6 +444,11 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? storeCityId = freezed,
     Object? storeGovernmentId = freezed,
     Object? storeId = freezed,
+    Object? isEmailVerificationRequired = null,
+    Object? isPhoneVerificationRequired = null,
+    Object? isEmailVerified = null,
+    Object? isPhoneVerified = null,
+    Object? hasPassword = null,
   }) {
     return _then(_$UserModelImpl(
       id: null == id
@@ -554,6 +599,26 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.storeId
           : storeId // ignore: cast_nullable_to_non_nullable
               as int?,
+      isEmailVerificationRequired: null == isEmailVerificationRequired
+          ? _value.isEmailVerificationRequired
+          : isEmailVerificationRequired // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isPhoneVerificationRequired: null == isPhoneVerificationRequired
+          ? _value.isPhoneVerificationRequired
+          : isPhoneVerificationRequired // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isEmailVerified: null == isEmailVerified
+          ? _value.isEmailVerified
+          : isEmailVerified // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isPhoneVerified: null == isPhoneVerified
+          ? _value.isPhoneVerified
+          : isPhoneVerified // ignore: cast_nullable_to_non_nullable
+              as bool,
+      hasPassword: null == hasPassword
+          ? _value.hasPassword
+          : hasPassword // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -598,7 +663,12 @@ class _$UserModelImpl implements _UserModel {
       this.storeCategoryId,
       this.storeCityId,
       this.storeGovernmentId,
-      this.storeId});
+      this.storeId,
+      this.isEmailVerificationRequired = false,
+      this.isPhoneVerificationRequired = false,
+      this.isEmailVerified = false,
+      this.isPhoneVerified = false,
+      this.hasPassword = true});
 
   @override
   final String id;
@@ -679,10 +749,25 @@ class _$UserModelImpl implements _UserModel {
   final int? storeGovernmentId;
   @override
   final int? storeId;
+  @override
+  @JsonKey()
+  final bool isEmailVerificationRequired;
+  @override
+  @JsonKey()
+  final bool isPhoneVerificationRequired;
+  @override
+  @JsonKey()
+  final bool isEmailVerified;
+  @override
+  @JsonKey()
+  final bool isPhoneVerified;
+  @override
+  @JsonKey()
+  final bool hasPassword;
 
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token, refreshToken: $refreshToken, isNewUser: $isNewUser, fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, storeId: $storeId)';
+    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token, refreshToken: $refreshToken, isNewUser: $isNewUser, fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, storeId: $storeId, isEmailVerificationRequired: $isEmailVerificationRequired, isPhoneVerificationRequired: $isPhoneVerificationRequired, isEmailVerified: $isEmailVerified, isPhoneVerified: $isPhoneVerified, hasPassword: $hasPassword)';
   }
 
   @override
@@ -754,7 +839,21 @@ class _$UserModelImpl implements _UserModel {
                 other.storeCityId == storeCityId) &&
             (identical(other.storeGovernmentId, storeGovernmentId) ||
                 other.storeGovernmentId == storeGovernmentId) &&
-            (identical(other.storeId, storeId) || other.storeId == storeId));
+            (identical(other.storeId, storeId) || other.storeId == storeId) &&
+            (identical(other.isEmailVerificationRequired,
+                    isEmailVerificationRequired) ||
+                other.isEmailVerificationRequired ==
+                    isEmailVerificationRequired) &&
+            (identical(other.isPhoneVerificationRequired,
+                    isPhoneVerificationRequired) ||
+                other.isPhoneVerificationRequired ==
+                    isPhoneVerificationRequired) &&
+            (identical(other.isEmailVerified, isEmailVerified) ||
+                other.isEmailVerified == isEmailVerified) &&
+            (identical(other.isPhoneVerified, isPhoneVerified) ||
+                other.isPhoneVerified == isPhoneVerified) &&
+            (identical(other.hasPassword, hasPassword) ||
+                other.hasPassword == hasPassword));
   }
 
   @override
@@ -796,7 +895,12 @@ class _$UserModelImpl implements _UserModel {
         storeCategoryId,
         storeCityId,
         storeGovernmentId,
-        storeId
+        storeId,
+        isEmailVerificationRequired,
+        isPhoneVerificationRequired,
+        isEmailVerified,
+        isPhoneVerified,
+        hasPassword
       ]);
 
   @JsonKey(ignore: true)
@@ -844,7 +948,12 @@ abstract class _UserModel implements UserModel {
       final int? storeCategoryId,
       final int? storeCityId,
       final int? storeGovernmentId,
-      final int? storeId}) = _$UserModelImpl;
+      final int? storeId,
+      final bool isEmailVerificationRequired,
+      final bool isPhoneVerificationRequired,
+      final bool isEmailVerified,
+      final bool isPhoneVerified,
+      final bool hasPassword}) = _$UserModelImpl;
 
   @override
   String get id;
@@ -920,6 +1029,16 @@ abstract class _UserModel implements UserModel {
   int? get storeGovernmentId;
   @override
   int? get storeId;
+  @override
+  bool get isEmailVerificationRequired;
+  @override
+  bool get isPhoneVerificationRequired;
+  @override
+  bool get isEmailVerified;
+  @override
+  bool get isPhoneVerified;
+  @override
+  bool get hasPassword;
   @override
   @JsonKey(ignore: true)
   _$$UserModelImplCopyWith<_$UserModelImpl> get copyWith =>

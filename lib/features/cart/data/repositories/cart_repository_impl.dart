@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/domain/repositories/orders_repository.dart';
 import '../../domain/entities/cart_entity.dart';
@@ -8,12 +9,10 @@ import '../../domain/entities/cart_item_entity.dart';
 import '../../domain/entities/place_order_params.dart';
 import '../../domain/repositories/cart_repository.dart';
 import '../datasources/cart_remote_datasource.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class CartRepositoryImpl implements CartRepository {
-  CartRepositoryImpl(
-    this._remote,
-    this._ordersRepository,
-  );
+  CartRepositoryImpl(this._remote, this._ordersRepository);
 
   final CartRemoteDataSource _remote;
   final OrdersRepository _ordersRepository;
@@ -23,7 +22,7 @@ class CartRepositoryImpl implements CartRepository {
     try {
       return Right(await _remote.getCart(consumerId));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -35,11 +34,14 @@ class CartRepositoryImpl implements CartRepository {
   }) async {
     try {
       final line = await _remote.buildLineFromListing(listingId, quantity);
+      if (!line.isAvailable) {
+        return const Left(Failure.server(soldOutErrorCode));
+      }
       return Right(
         await _remote.addOrUpdateItem(consumerId: consumerId, item: line),
       );
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -53,7 +55,7 @@ class CartRepositoryImpl implements CartRepository {
         await _remote.addOrUpdateItem(consumerId: consumerId, item: item),
       );
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -63,9 +65,11 @@ class CartRepositoryImpl implements CartRepository {
     required String itemId,
   }) async {
     try {
-      return Right(await _remote.removeItem(consumerId: consumerId, itemId: itemId));
+      return Right(
+        await _remote.removeItem(consumerId: consumerId, itemId: itemId),
+      );
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -84,7 +88,7 @@ class CartRepositoryImpl implements CartRepository {
         ),
       );
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -93,47 +97,20 @@ class CartRepositoryImpl implements CartRepository {
     try {
       return Right(await _remote.clearCart(consumerId));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
   @override
-  Future<Either<Failure, CouponEntity>> applyCoupon({
-    required String consumerId,
-    required String code,
-    required double eligibleSubtotal,
-  }) async {
-    try {
-      return Right(
-        await _remote.applyCoupon(
-          code: code,
-          eligibleSubtotal: eligibleSubtotal,
-        ),
-      );
-    } on CouponException catch (e) {
-      return Left(Failure.validation(e.message));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, CartEntity>> removeCoupon(String consumerId) async {
-    try {
-      return Right(await _remote.removeCoupon(consumerId));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, OrderEntity>> placeOrder(PlaceOrderParams params) async {
+  Future<Either<Failure, OrderEntity>> placeOrder(
+    PlaceOrderParams params,
+  ) async {
     try {
       final order = await _remote.placeOrder(params);
       final reg = await _ordersRepository.registerCheckoutOrder(order);
       return reg.fold(Left.new, (_) => Right(order));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

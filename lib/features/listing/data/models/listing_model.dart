@@ -224,6 +224,8 @@ class ListingModel with _$ListingModel {
 // samples with those codes were available — MODERATE confidence, not
 // confirmed. Adjust if a live draft/paused/sold/rejected listing surfaces
 // a different code.
+// TODO(backend): need the C# ListingStatus declaration — unknown codes (e.g. Cancelled)
+// currently fall back to Draft.
 ListingStatus _listingStatusFromDto(String value) {
   switch (value) {
     case '0':
@@ -264,6 +266,16 @@ bool isPublicLiveListingStatus(Object? raw) {
   final s = raw.toString().trim();
   if (s.isEmpty) return true;
   return _listingStatusFromDto(s) == ListingStatus.active;
+}
+
+/// [isSoldOutListing] for a raw listing DTO.
+bool isSoldOutListingJson(Map<String, dynamic> json) {
+  final rawStock = json['stockQuantity'] ?? json['stock'] ?? json['quantity'];
+  final rawStatus = json['status']?.toString().trim() ?? '';
+  return isSoldOutListing(
+    status: rawStatus.isEmpty ? null : _listingStatusFromDto(rawStatus),
+    stock: rawStock is num ? rawStock : num.tryParse(rawStock?.toString() ?? ''),
+  );
 }
 
 extension ListingModelX on ListingModel {

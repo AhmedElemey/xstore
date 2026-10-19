@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../network/dio_error_mapper.dart';
 
 extension AsyncValueUI<T> on AsyncValue<T> {
   /// Runs [data] only for [AsyncData]; otherwise returns [orElse].
@@ -32,11 +33,12 @@ extension AsyncValueUI<T> on AsyncValue<T> {
     return when(
       data: data,
       loading: () =>
-          loading?.call() ??
-          const Center(child: CircularProgressIndicator()),
+          loading?.call() ?? const Center(child: CircularProgressIndicator()),
       error: (err, _) =>
           errorBuilder?.call(err) ??
-          Center(child: Text(err.toString(), textAlign: TextAlign.center)),
+          Center(
+            child: Text(userErrorMessage(err), textAlign: TextAlign.center),
+          ),
     );
   }
 }

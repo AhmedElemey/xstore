@@ -58,5 +58,8 @@ class RegisterState with _$RegisterState {
     String? error,
     @Default({}) Map<String, String> stepErrors,
     @Default(false) bool showVendorSuccessOverlay,
+    // Google ID token when this registration started from a Google sign-in
+    // with no matching account; sent as `idToken` + `clientId`.
+    String? socialIdToken,
   }) = _RegisterState;
 }

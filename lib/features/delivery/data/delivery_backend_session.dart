@@ -20,7 +20,7 @@ import '../../auth/presentation/providers/auth_provider.dart';
 /// its own, separate mock/demo flow — see courier-delivery-pilot).
 ///
 /// Fire-and-forget: mirrors [syncFcmDeviceTokenWithBackend] — always pass
-/// [user] when calling from within `Auth` itself (build/setUser/
+/// [user] when calling from within `Auth` itself (build/
 /// adoptSession): reading `authProvider` via `Auth`'s own `ref` trips
 /// Riverpod's self-dependency assert regardless of sync/async timing.
 void syncDeliveryBackendSession(Ref ref, {UserEntity? user}) {

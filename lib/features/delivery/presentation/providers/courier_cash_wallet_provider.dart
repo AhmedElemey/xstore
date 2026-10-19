@@ -39,7 +39,8 @@ Future<CourierCashWallet> courierCashWallet(CourierCashWalletRef ref) async {
 
   // Page through ALL orders — a single page would silently understate a
   // money figure (see review lesson on paginated financial aggregates).
-  // Fail-open on a page failure: keep whatever was summed so far.
+  // A failed page throws: a partial sum would show a wrong (even zero) money
+  // figure, and the screen's error state has a Retry.
   final delivered = <OrderEntity>[];
   for (var page = 1; page <= _walletOrderScanMaxPages; page++) {
     final result = await useCase(
@@ -47,8 +48,7 @@ Future<CourierCashWallet> courierCashWallet(CourierCashWalletRef ref) async {
       page: page,
       pageSize: _walletOrderScanPageSize,
     );
-    final orders = result.fold<List<OrderEntity>?>((_) => null, (o) => o);
-    if (orders == null) break;
+    final orders = result.fold<List<OrderEntity>>((f) => throw f, (o) => o);
 
     delivered.addAll(orders.where(holdsCollectedCash));
 

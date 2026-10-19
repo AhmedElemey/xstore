@@ -1,9 +1,8 @@
 // Covers OrdersNotifier's CONSUMER-role actions (fetchOrders, cancelOrder,
 // confirmReceipt/markDelivered, reorder) — checkout_order_flow_test.dart only
 // covers PLACING a new order; nothing previously tested acting on an
-// existing one. This notifier is role-shared with the vendor side (already
-// covered by vendor_orders_provider_test.dart via a separate, vendor-only
-// VendorOrdersNotifier) — here the session is always a consumer.
+// existing one. Vendors use the separate VendorOrdersNotifier (covered by
+// vendor_orders_provider_test.dart).
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';

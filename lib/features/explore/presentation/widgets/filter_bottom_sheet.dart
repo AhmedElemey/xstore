@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../listing/presentation/data/listing_categories_data.dart';
 import '../explore_state.dart';
 import 'price_range_slider.dart';
@@ -91,13 +93,29 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
     _minRating = widget.initial.minRating;
     _loc = TextEditingController(text: widget.initial.location ?? '');
     _ship = widget.initial.shippingOnly;
-    _minPrice = TextEditingController(
-      text: (widget.initial.minPrice ?? 0).toStringAsFixed(0),
-    );
-    _maxPrice = TextEditingController(
-      text: (widget.initial.maxPrice ?? _kMaxPriceFilter).toStringAsFixed(0),
+    // Filled in didChangeDependencies: the digits follow the app language.
+    _minPrice = TextEditingController();
+    _maxPrice = TextEditingController();
+  }
+
+  bool _priceTextSet = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_priceTextSet) return;
+    _priceTextSet = true;
+    _minPrice.text = _plainInt((widget.initial.minPrice ?? 0).round());
+    _maxPrice.text = _plainInt(
+      (widget.initial.maxPrice ?? _kMaxPriceFilter).round(),
     );
   }
+
+  /// Digits only (no thousands separator) in the app's digit system; typed
+  /// text is folded back by [Validators.parseMoneyInput].
+  String _plainInt(int value) => context.isArabic
+      ? NumberFormat('0', 'ar_EG').format(value)
+      : '$value';
 
   @override
   void dispose() {
@@ -117,8 +135,8 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
   }
 
   FilterState _buildState() {
-    final minP = double.tryParse(_minPrice.text);
-    final maxP = double.tryParse(_maxPrice.text);
+    final minP = Validators.parseMoneyInput(_minPrice.text);
+    final maxP = Validators.parseMoneyInput(_maxPrice.text);
     return FilterState(
       categories: _cats,
       conditions: _conds,
@@ -257,8 +275,8 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
                           onChanged: (v) {
                             setState(() {
                               _range = v;
-                              _minPrice.text = v.start.round().toString();
-                              _maxPrice.text = v.end.round().toString();
+                              _minPrice.text = _plainInt(v.start.round());
+                              _maxPrice.text = _plainInt(v.end.round());
                             });
                           },
                           minController: _minPrice,
@@ -340,7 +358,9 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
                         Navigator.pop(context);
                       },
                       child: Text(
-                        context.l10n.applyFiltersCount(_countActive()),
+                        context.l10n.applyFiltersCount(
+                          context.formatInt(_countActive()),
+                        ),
                       ),
                     ),
                   ],

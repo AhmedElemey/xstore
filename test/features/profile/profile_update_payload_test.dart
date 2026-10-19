@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/mock/mock_config.dart';
@@ -10,61 +8,11 @@ import 'package:xstore/features/profile/domain/entities/profile_entity.dart';
 import 'package:xstore/features/profile/domain/entities/update_profile_request.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_state.dart';
 
-class _CapturingInterceptor extends Interceptor {
-  RequestOptions? captured;
-
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    captured = options;
-    handler.resolve(
-      Response(
-        requestOptions: options,
-        statusCode: 200,
-        data: <String, dynamic>{'url': '/uploads/avatars/example.jpg'},
-      ),
-    );
-  }
-}
-
 // UserModel.fromJson wire-alias coverage (storeName precedence, whatsApp/
 // instagram aliases) lives in test/user_model_profile_wire_test.dart.
 void main() {
-  group('ProfileRemoteDataSource updateAvatar', () {
-    test(
-      'POSTs multipart to the generic uploads endpoint with field `file`',
-      skip: MockConfig.useMock
-          ? 'Requires MOCK=false — MOCK=true short-circuits to mock data '
-              'before the request reaches the interceptor'
-          : false,
-      () async {
-        final dio = Dio(BaseOptions(baseUrl: 'https://example.test'));
-        final interceptor = _CapturingInterceptor();
-        dio.interceptors.add(interceptor);
-        final datasource = ProfileRemoteDataSourceImpl(dio);
-
-        final tmp = await Directory.systemTemp.createTemp('avatar_test');
-        addTearDown(() => tmp.delete(recursive: true));
-        final photo = File('${tmp.path}/avatar.jpg')
-          ..writeAsBytesSync(const [0, 1, 2, 3]);
-
-        final url = await datasource.updateAvatar(
-          userId: '1',
-          filePath: photo.path,
-        );
-
-        final options = interceptor.captured!;
-        expect(options.method, 'POST');
-        expect(options.path, '/api/uploads/avatar');
-        final formData = options.data as FormData;
-        expect(formData.files, hasLength(1));
-        expect(formData.files.single.key, 'file');
-        expect(url, '/uploads/avatars/example.jpg');
-      },
-    );
-  });
-
   group('updateProfileWireFields', () {
-    test('sends userImageUrl null when avatar removal is requested', () {
+    test('sends empty userImageUrl when avatar removal is requested', () {
       const user = UserEntity(
         id: '1',
         name: 'Vendor',
@@ -81,13 +29,40 @@ void main() {
       final body = updateProfileWireFields(state.toUpdateProfileRequest());
 
       expect(body.containsKey('userImageUrl'), isTrue);
-      expect(body['userImageUrl'], isNull);
+      expect(body['userImageUrl'], '');
+      expect(body['avatarUrl'], '');
       expect(body['storeImageUrl'], 'https://cdn.example/store.jpg');
+      expect(body.containsKey('storeLogoUrl'), isFalse);
       expect(body.containsKey('email'), isFalse);
       expect(body.containsKey('phoneNumber'), isFalse);
     });
 
-    test('sends storeImageUrl null when store logo removal is requested', () {
+    test('sends empty storeImageUrl and storeLogoUrl when store logo is removed',
+        () {
+      const user = UserEntity(
+        id: '1',
+        name: 'Vendor',
+        email: 'v@test.com',
+        phoneNumber: '010',
+        avatarUrl: 'https://cdn.example/avatar.jpg',
+        storeLogoUrl: 'https://cdn.example/store.jpg',
+        storeId: 1,
+      );
+      final state = ProfileState(
+        profile: ProfileEntity(user: user),
+        storeLogoRemoved: true,
+      );
+
+      final body = updateProfileWireFields(state.toUpdateProfileRequest());
+
+      expect(body['storeImageUrl'], '');
+      expect(body['storeLogoUrl'], '');
+      expect(body['userImageUrl'], 'https://cdn.example/avatar.jpg');
+      expect(body.containsKey('avatarUrl'), isFalse);
+    });
+
+    test('FormData keeps empty storeImageUrl/storeLogoUrl on logo removal',
+        () async {
       const user = UserEntity(
         id: '1',
         name: 'Vendor',
@@ -101,10 +76,12 @@ void main() {
         storeLogoRemoved: true,
       );
 
-      final body = updateProfileWireFields(state.toUpdateProfileRequest());
+      final form = await updateProfileFormData(state.toUpdateProfileRequest());
+      final fields = Map<String, String>.fromEntries(form.fields);
 
-      expect(body.containsKey('storeImageUrl'), isTrue);
-      expect(body['storeImageUrl'], isNull);
+      expect(fields['storeImageUrl'], '');
+      expect(fields['storeLogoUrl'], '');
+      expect(form.files.any((e) => e.key == 'storeImage'), isFalse);
     });
 
     test('maps edit state to UpdateProfileRequest wire keys', () {
@@ -237,6 +214,44 @@ void main() {
         expect(u.longitude, 31.2357);
         expect(u.storeName, 'Tech Hub');
         expect(u.storeDescription, 'Electronics seller');
+      },
+      skip: MockConfig.useMock ? false : 'Requires --dart-define=MOCK=true',
+    );
+
+    test(
+      'removed store logo stays absent after updateProfile then getProfile',
+      () async {
+        final ds = ProfileRemoteDataSourceImpl(Dio());
+        final repo = ProfileRepositoryImpl(ds);
+
+        const session = UserEntity(
+          id: 'vendor_1',
+          name: 'Ahmed Vendor',
+          email: 'vendor@test.com',
+          phoneNumber: '01012345678',
+          role: UserRole.vendor,
+          storeLogoUrl: 'https://cdn.example/store.jpg',
+          storeId: 1,
+        );
+
+        final request = UpdateProfileRequest(
+          fullNameEn: 'Ahmed Vendor',
+          storeName: 'Tech Hub',
+          storeImageUrl: null,
+        );
+
+        final saveResult =
+            await repo.updateProfile(request, sessionUser: session);
+        expect(saveResult.isRight(), isTrue);
+        final saved = saveResult.getOrElse((_) => session);
+        expect(saved.storeLogoUrl, isNull);
+
+        final fetchResult = await repo.getProfile(saved);
+        expect(fetchResult.isRight(), isTrue);
+        final profile = fetchResult.getOrElse(
+          (_) => throw StateError('expected profile'),
+        );
+        expect(profile.user.storeLogoUrl, isNull);
       },
       skip: MockConfig.useMock ? false : 'Requires --dart-define=MOCK=true',
     );

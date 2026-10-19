@@ -6,9 +6,6 @@ abstract final class PrefsKeys {
   static const onboardingComplete = 'onboarding_complete';
   static const guestMode = 'guest_mode';
   static const rememberedPhone = 'remembered_phone';
-  static const profilePushNotifications = 'profile_push_notifications';
-  static const profileEmailUpdates = 'profile_email_updates';
-  static const profileAppLanguage = 'profile_app_language';
   static const fcmToken = 'xstore_fcm_token';
   static const deliveryAuthToken = 'xstore_delivery_auth_token';
   static const socialAuthCredentials = 'xstore_social_auth_credentials';
@@ -16,4 +13,6 @@ abstract final class PrefsKeys {
       'location_permission_rationale_shown';
   static const analyticsDeviceId = 'xstore_analytics_device_id';
   static const analyticsQueue = 'xstore_analytics_queue';
+  static const generalSettings = 'xstore_general_settings';
+  static const pendingLanguageSync = 'pending_language_sync';
 }

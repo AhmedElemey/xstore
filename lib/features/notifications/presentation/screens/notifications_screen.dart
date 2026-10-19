@@ -1,21 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
-import '../widgets/notification_filter_tabs.dart';
+import '../widgets/notification_unread_summary_banner.dart';
 import '../widgets/notifications_feed_slivers.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
-  ConsumerState<NotificationsScreen> createState() => _NotificationsScreenState();
+  ConsumerState<NotificationsScreen> createState() =>
+      _NotificationsScreenState();
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
@@ -25,10 +30,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
-    // Filter tabs hidden while backend only returns role=ALL — keep inbox on All.
+    // The backend only returns role=ALL, so the inbox always shows All.
+    // Fetch on every open: notificationsProvider is keepAlive, so a previous
+    // session's list would otherwise sit stale until the user pulled to refresh.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(notificationsProvider.notifier).applyFilter(NotificationFilter.all);
+      final notifier = ref.read(notificationsProvider.notifier);
+      notifier.applyFilter(NotificationFilter.all);
+      unawaited(notifier.fetchNotifications());
     });
   }
 
@@ -68,45 +77,74 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     );
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: context.backgroundColor,
-        surfaceTintColor: AppColors.transparent,
-        centerTitle: true,
-        title: Text(
-          context.l10n.notifications,
-          style: AppTypography.titleMedium.copyWith(
-            fontWeight: FontWeight.w700,
-            color: context.textPrimary,
+      body: OrbitBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl,
+                  AppSpacing.lg,
+                  AppSpacing.xl,
+                  AppSpacing.sm,
+                ),
+                child: Row(
+                  children: [
+                    // Like the AppBar's implied leading: no button when a
+                    // `go` left nothing to pop.
+                    if (Navigator.of(context).canPop()) ...[
+                      const AuthBackButton(),
+                      const SizedBox(width: AppSpacing.md),
+                    ],
+                    Expanded(
+                      child: Text(
+                        context.l10n.notifications,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.headlineSmall.copyWith(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (unreadCount > 0)
+                      TextButton(
+                        onPressed: n.markAllRead,
+                        child: Text(
+                          context.l10n.notificationsMarkAllRead,
+                          style: AppTypography.labelLarge.copyWith(
+                            color: context.linkColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  color: context.linkColor,
+                  onRefresh: n.refreshNotifications,
+                  child: CustomScrollView(
+                    controller: _scroll,
+                    cacheExtent: 800,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      const SliverToBoxAdapter(
+                        child: NotificationUnreadSummaryBanner(),
+                      ),
+                      ...NotificationsFeedSlivers.build(
+                        context: context,
+                        ref: ref,
+                        onDelete: _delete,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          if (unreadCount > 0)
-            TextButton(
-              onPressed: n.markAllRead,
-              child: Text(context.l10n.notificationsMarkAllRead, style: AppTypography.labelLarge.copyWith(color: AppColors.primary)),
-            ),
-          // IconButton(
-          //   icon: const Icon(LucideIcons.settings),
-          //   onPressed: () => context.push(AppRoutes.notificationSettings),
-          //   tooltip: context.l10n.notificationSettingsTitle,
-          // ),
-        ],
-      ),
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: n.refreshNotifications,
-        child: CustomScrollView(
-          controller: _scroll,
-          cacheExtent: 800,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // Commented out — backend only supports role=ALL currently (see
-            // notifications_remote_datasource.dart _roleParam). Re-enable once
-            // backend implements per-role filtering.
-            // const SliverToBoxAdapter(child: NotificationFilterTabs()),
-            const SliverToBoxAdapter(child: NotificationUnreadSummaryBanner()),
-            ...NotificationsFeedSlivers.build(context: context, ref: ref, onDelete: _delete),
-          ],
         ),
       ),
     );

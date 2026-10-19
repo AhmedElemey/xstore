@@ -1,19 +1,12 @@
 // Full order lifecycle across BOTH roles: client (consumer) and vendor.
 //
-// The app's Orders feature is role-shared: `OrdersNotifier`
-// (orders_provider.dart) drives the consumer's "My Orders" screen AND the
-// vendor's "Incoming Orders" screen — it branches on `authProvider`'s
-// current role, not on a separate notifier per role (see the
-// flutter-review skill's 2026-08-06 "two independent provider stacks"
-// lesson: this repo also has a second, vendor-only stack in
-// vendor_orders_provider.dart / vendor_order_detail_provider.dart, which
-// this test does not exercise — it targets the shared one that OrderCard
-// and OrdersScreen actually render for both roles).
-//
-// This test drives the SAME production `OrdersNotifier` from two separate
-// `ProviderContainer`s — one authenticated as the consumer who placed the
-// order, one as the vendor who fulfils it — both pointed at one shared
-// in-memory `OrdersRepository` fake that stores a single canonical order.
+// The consumer's "My Orders" list is `OrdersNotifier` (orders_provider.dart);
+// the vendor's Incoming Orders is `VendorOrdersNotifier`
+// (vendor_orders_provider.dart). This test drives both production notifiers
+// from two separate `ProviderContainer`s — one authenticated as the
+// consumer who placed the order, one as the vendor who fulfils it — both
+// pointed at one shared in-memory `OrdersRepository` fake that stores a
+// single canonical order.
 // That mirrors how a real backend behaves (one order row, two
 // role-scoped views of it) far more faithfully than the app's built-in
 // mock fixtures, whose consumer (`mock_orders.dart`) and vendor
@@ -38,6 +31,7 @@ import 'package:xstore/features/orders/domain/entities/order_item_entity.dart';
 import 'package:xstore/features/orders/domain/repositories/orders_repository.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_dependencies.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_provider.dart';
+import 'package:xstore/features/orders/presentation/providers/vendor_orders_provider.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
 
@@ -320,35 +314,35 @@ void main() {
 
       // Both roles start out seeing the same order as pending.
       await consumerContainer.read(ordersNotifierProvider.notifier).fetchOrders();
-      await vendorContainer.read(ordersNotifierProvider.notifier).fetchOrders();
+      await vendorContainer.read(vendorOrdersProvider.notifier).fetchOrders();
       expect(
         consumerContainer.read(ordersNotifierProvider).orders.single.status,
         OrderStatus.pending,
       );
       expect(
-        vendorContainer.read(ordersNotifierProvider).orders.single.status,
+        vendorContainer.read(vendorOrdersProvider).orders.single.status,
         OrderStatus.pending,
       );
 
       // Vendor accepts the order, choosing platform delivery.
       await vendorContainer
-          .read(ordersNotifierProvider.notifier)
-          .confirmOrderVendor('ORD-100', DeliveryMethod.platform);
+          .read(vendorOrdersProvider.notifier)
+          .confirmOrder('ORD-100', DeliveryMethod.platform);
       expect(
-        vendorContainer.read(ordersNotifierProvider).orders.single.status,
+        vendorContainer.read(vendorOrdersProvider).orders.single.status,
         OrderStatus.confirmed,
       );
 
       // Vendor starts processing, then ships with tracking info.
       await vendorContainer
-          .read(ordersNotifierProvider.notifier)
+          .read(vendorOrdersProvider.notifier)
           .markProcessing('ORD-100');
       expect(
-        vendorContainer.read(ordersNotifierProvider).orders.single.status,
+        vendorContainer.read(vendorOrdersProvider).orders.single.status,
         OrderStatus.processing,
       );
 
-      await vendorContainer.read(ordersNotifierProvider.notifier).markShipped(
+      await vendorContainer.read(vendorOrdersProvider.notifier).markShipped(
         'ORD-100',
         const ShippingInfo(
           trackingNumber: 'XS-TRACK-1',
@@ -356,7 +350,7 @@ void main() {
         ),
       );
       expect(
-        vendorContainer.read(ordersNotifierProvider).orders.single.status,
+        vendorContainer.read(vendorOrdersProvider).orders.single.status,
         OrderStatus.shipped,
       );
 
@@ -377,11 +371,17 @@ void main() {
       );
 
       // Vendor refetches and sees delivered, with revenue/stats updated.
-      await vendorContainer.read(ordersNotifierProvider.notifier).fetchOrders();
-      final vendorState = vendorContainer.read(ordersNotifierProvider);
-      expect(vendorState.orders.single.status, OrderStatus.delivered);
-      expect(vendorState.stats?.totalRevenue, 100);
-      expect(vendorState.stats?.pendingCount, 0);
+      await vendorContainer.read(vendorOrdersProvider.notifier).fetchOrders();
+      expect(
+        vendorContainer.read(vendorOrdersProvider).orders.single.status,
+        OrderStatus.delivered,
+      );
+      final stats = (await vendorContainer
+              .read(getVendorOrderStatsUseCaseProvider)
+              .call('vendor_1'))
+          .getOrElse((f) => throw f);
+      expect(stats.totalRevenue, 100);
+      expect(stats.pendingCount, 0);
     },
   );
 
@@ -417,12 +417,12 @@ void main() {
       await consumerContainer.read(analyticsServiceProvider).ready;
       await vendorContainer.read(analyticsServiceProvider).ready;
 
-      await vendorContainer.read(ordersNotifierProvider.notifier).fetchOrders();
+      await vendorContainer.read(vendorOrdersProvider.notifier).fetchOrders();
       await vendorContainer
-          .read(ordersNotifierProvider.notifier)
+          .read(vendorOrdersProvider.notifier)
           .rejectOrder('ORD-100', 'Out of stock');
       expect(
-        vendorContainer.read(ordersNotifierProvider).orders.single.status,
+        vendorContainer.read(vendorOrdersProvider).orders.single.status,
         OrderStatus.cancelled,
       );
 

@@ -5,8 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/core/localization/localization_provider.dart';
 import 'package:xstore/core/localization/localized_text.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
+import 'package:xstore/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:xstore/features/auth/presentation/widgets/phone_input_field.dart';
+import 'package:xstore/shared/widgets/xstore_button.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/cart/presentation/providers/cart_provider.dart';
 import 'package:xstore/features/cart/presentation/providers/cart_state.dart';
@@ -15,6 +19,17 @@ import 'package:xstore/features/cities/domain/entities/city_entity.dart';
 import 'package:xstore/features/cities/presentation/providers/city_dependencies.dart';
 import 'package:xstore/features/governments/domain/entities/government_entity.dart';
 import 'package:xstore/features/governments/presentation/providers/government_dependencies.dart';
+
+// The sheet's fields carry their label above the input (uppercase), so find
+// them through the widget that owns it.
+final streetField = find.descendant(
+  of: find.widgetWithText(AuthTextField, 'STREET'),
+  matching: find.byType(TextField),
+);
+final phoneField = find.descendant(
+  of: find.byType(PhoneInputField),
+  matching: find.byType(TextFormField),
+);
 
 const _cairoGov = GovernmentEntity(id: 16, name: LocalizedText(en: 'Cairo', ar: 'القاهرة'));
 const _maadiCity = CityEntity(
@@ -45,6 +60,7 @@ void main() {
   Future<void> pumpSection(
     WidgetTester tester, {
     String phoneNumber = '01012345678',
+    bool isArabic = false,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -69,6 +85,7 @@ void main() {
           // never opens the picker at all, so the data is unused there.
           allGovernmentsProvider.overrideWith((ref) async => const [_cairoGov]),
           allCitiesProvider.overrideWith((ref) async => const [_maadiCity]),
+          appIsArabicProvider.overrideWithValue(isArabic),
         ],
         child: const MaterialApp(
           localizationsDelegates: [
@@ -92,9 +109,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
-  FilledButton saveButton(WidgetTester tester) {
-    return tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Save Address'),
+  XstoreButton saveButton(WidgetTester tester) {
+    return tester.widget<XstoreButton>(
+      find.widgetWithText(XstoreButton, 'Save Address'),
     );
   }
 
@@ -105,7 +122,7 @@ void main() {
       await openAddSheet(tester);
 
       await tester.enterText(
-        find.widgetWithText(TextField, 'Street'),
+        streetField,
         '1 Nile St',
       );
       await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
@@ -138,15 +155,15 @@ void main() {
 
       expect(saveButton(tester).onPressed, isNull);
 
-      await tester.enterText(find.byType(TextFormField), '010');
+      await tester.enterText(phoneField, '010');
       await tester.pump();
       expect(saveButton(tester).onPressed, isNull);
 
-      await tester.enterText(find.byType(TextFormField), '01712345678');
+      await tester.enterText(phoneField, '01712345678');
       await tester.pump();
       expect(saveButton(tester).onPressed, isNull);
 
-      await tester.enterText(find.byType(TextFormField), '01112345678');
+      await tester.enterText(phoneField, '01112345678');
       await tester.pump();
       expect(saveButton(tester).onPressed, isNotNull);
     },
@@ -159,7 +176,7 @@ void main() {
       await openAddSheet(tester);
 
       await tester.enterText(
-        find.widgetWithText(TextField, 'Street'),
+        streetField,
         '1 Nile St',
       );
       await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
@@ -181,19 +198,57 @@ void main() {
       expect(saveButton(tester).onPressed, isNull);
 
       await tester.enterText(
-        find.widgetWithText(TextField, 'Street'),
+        streetField,
         '2 Nile St',
       );
       await tester.pump();
       expect(saveButton(tester).onPressed, isNotNull);
 
-      await tester.enterText(find.byType(TextFormField), '010');
+      await tester.enterText(phoneField, '010');
       await tester.pump();
       expect(saveButton(tester).onPressed, isNull);
 
-      await tester.enterText(find.byType(TextFormField), '01212345678');
+      await tester.enterText(phoneField, '01212345678');
       await tester.pump();
       expect(saveButton(tester).onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'reopening the edit sheet after a language switch shows the location '
+    'hint in the new language, not the one it was saved in',
+    (tester) async {
+      await pumpSection(tester);
+      await openAddSheet(tester);
+
+      await tester.enterText(
+        streetField,
+        '1 Nile St',
+      );
+      await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cairo'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Maadi'));
+      await tester.pumpAndSettle();
+      final save = find.text('Save Address');
+      await tester.ensureVisible(save);
+      await tester.tap(save);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // Simulate switching the app language: a fresh widget tree (so the
+      // location provider overrides are read again) but the same
+      // SharedPreferences-backed address book, exactly like reopening the
+      // app after toggling language in settings.
+      await pumpSection(tester, isArabic: true);
+
+      await tester.tap(find.text('Edit'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('القاهرة - المعادي'), findsOneWidget);
+      expect(find.text('Cairo - Maadi'), findsNothing);
     },
   );
 }

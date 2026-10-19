@@ -4,11 +4,6 @@ import '../../domain/entities/wishlist_item_entity.dart';
 
 part 'wishlist_state.freezed.dart';
 
-enum WishlistViewMode {
-  list,
-  grid,
-}
-
 enum WishlistFilter {
   all,
   available,
@@ -17,11 +12,8 @@ enum WishlistFilter {
 }
 
 enum WishlistSortOption {
-  recentlyAdded,
   priceLowToHigh,
   priceHighToLow,
-  priceDrop,
-  biggestDiscount,
   nameAZ,
 }
 
@@ -32,10 +24,7 @@ class WishlistState with _$WishlistState {
     @Default([]) List<WishlistItemEntity> filteredItems,
     @Default(<String>{}) Set<String> wishlistedListingIds,
     @Default(WishlistFilter.all) WishlistFilter selectedFilter,
-    @Default(WishlistSortOption.recentlyAdded) WishlistSortOption sortOption,
-    @Default(WishlistViewMode.list) WishlistViewMode viewMode,
-    @Default(<String>{}) Set<String> selectedItemIds,
-    @Default(false) bool isSelectionMode,
+    @Default(WishlistSortOption.priceLowToHigh) WishlistSortOption sortOption,
     @Default(true) bool isPriceDropBannerVisible,
     @Default(false) bool isLoading,
     @Default(false) bool isUpdating,

@@ -45,7 +45,10 @@ Future<OrderStatsEntity?> vendorCommissionSnapshot(
   if (user == null || user.role != UserRole.vendor) return null;
 
   final result = await ref.watch(getVendorOrderStatsUseCaseProvider)(user.id);
-  return result.fold((_) => null, (stats) => stats);
+  // A failure throws (not null): the wallet screen would otherwise show zero
+  // totals and "fees up to date". Fee/alert consumers read `valueOrNull`, so
+  // they still fall back to the starter values.
+  return result.fold((f) => throw f, (stats) => stats);
 }
 
 @riverpod

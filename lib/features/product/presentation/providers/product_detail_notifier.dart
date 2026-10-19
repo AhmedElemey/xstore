@@ -20,6 +20,11 @@ class ProductDetail extends _$ProductDetail {
   // throws an unhandled StateError.
   var _disposed = false;
 
+  // Riverpod reuses this instance when the provider is invalidated (e.g.
+  // after posting a review), so this keeps `view_item` to one per screen
+  // open instead of one per rebuild.
+  var _viewTracked = false;
+
   ProductDetailState _fromEntity(ProductDetailEntity e) {
     return ProductDetailState(
       listing: e.listing,
@@ -40,12 +45,15 @@ class ProductDetail extends _$ProductDetail {
   ) {
     final base = _fromEntity(e);
     if (previous == null) return base;
+    final stock = base.stockQuantity;
     final len = base.listing?.imageUrls.length ?? 0;
     final maxIdx = len > 0 ? len - 1 : 0;
     return base.copyWith(
-      quantity: base.stockQuantity < 1
-          ? 1
-          : previous.quantity.clamp(1, base.stockQuantity),
+      quantity: stock == null
+          ? previous.quantity
+          : stock < 1
+              ? 1
+              : previous.quantity.clamp(1, stock),
       selectedImageIndex: previous.selectedImageIndex.clamp(0, maxIdx),
       isDescriptionExpanded: previous.isDescriptionExpanded,
       isAddingToCart: false,
@@ -114,16 +122,19 @@ class ProductDetail extends _$ProductDetail {
     ref.onDispose(() => _disposed = true);
     final entity = await _fetchEntity(listingId);
     final merged = await _enriched(listingId, entity);
-    ref.read(analyticsServiceProvider).track(
-      AnalyticsEvents.viewItem,
-      properties: {
-        AnalyticsProps.itemId: merged.listing.id,
-        AnalyticsProps.category: merged.listing.categoryLabel,
-        AnalyticsProps.sellerId: merged.listing.vendorId,
-        AnalyticsProps.priceEgp: merged.listing.price,
-        AnalyticsProps.guest: ref.read(authProvider).valueOrNull == null,
-      },
-    );
+    if (!_viewTracked) {
+      _viewTracked = true;
+      ref.read(analyticsServiceProvider).track(
+        AnalyticsEvents.viewItem,
+        properties: {
+          AnalyticsProps.itemId: merged.listing.id,
+          AnalyticsProps.category: merged.listing.categoryLabel,
+          AnalyticsProps.sellerId: merged.listing.vendorId,
+          AnalyticsProps.priceEgp: merged.listing.price,
+          AnalyticsProps.guest: ref.read(authProvider).valueOrNull == null,
+        },
+      );
+    }
     return _fromEntity(merged);
   }
 
@@ -170,7 +181,8 @@ class ProductDetail extends _$ProductDetail {
     final v = state.valueOrNull;
     if (v?.listing == null) return;
     final maxQ = v!.stockQuantity;
-    if (v.quantity >= maxQ) return;
+    // Unknown stock: the cart add is the gate.
+    if (maxQ != null && v.quantity >= maxQ) return;
     state = AsyncData(v.copyWith(quantity: v.quantity + 1));
   }
 

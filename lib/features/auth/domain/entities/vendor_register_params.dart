@@ -21,5 +21,9 @@ class VendorRegisterParams with _$VendorRegisterParams {
     // Local file path of the store/profile image. The live vendor-register
     // endpoint is multipart and rejects the request without it.
     required String profileImagePath,
+    // Google sign-up: ID token + OAuth Web client ID; both null for a plain
+    // registration.
+    String? idToken,
+    String? clientId,
   }) = _VendorRegisterParams;
 }

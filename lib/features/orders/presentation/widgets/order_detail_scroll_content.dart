@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../shared/utils/whatsapp.dart';
+// import '../../../../shared/utils/whatsapp.dart'; // TODO(phase-2): WhatsApp contact
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -40,18 +41,24 @@ class OrderDetailScrollContent extends ConsumerWidget {
       delegate: SliverChildListDelegate([
         _StatusBanner(order: order),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: _WhiteCard(child: OrderTimeline(order: order)),
         ),
         const SizedBox(height: AppSpacing.lg),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: _WhiteCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  context.l10n.ordersItemsSectionCount(order.items.length),
+                  context.l10n.ordersItemsSectionCount(
+                    context.formatInt(order.items.length),
+                  ),
                   style: AppTypography.titleMedium,
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -62,7 +69,9 @@ class OrderDetailScrollContent extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: _AddressCard(address: order.deliveryAddress),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -74,7 +83,9 @@ class OrderDetailScrollContent extends ConsumerWidget {
             (order.trackingNumber != null || order.courierName != null)) ...[
           const SizedBox(height: AppSpacing.lg),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.xl,
+            ),
             child: Text(
               context.l10n.ordersTrackingSectionTitle,
               style: AppTypography.titleMedium,
@@ -82,13 +93,17 @@ class OrderDetailScrollContent extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.xl,
+            ),
             child: _TrackingCard(order: order),
           ),
         ],
         const SizedBox(height: AppSpacing.lg),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: Text(
             context.l10n.ordersPaymentSectionTitle,
             style: AppTypography.titleMedium,
@@ -96,13 +111,17 @@ class OrderDetailScrollContent extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: _WhiteCard(child: OrderPriceBreakdown(order: order)),
         ),
         if (order.notes != null && order.notes!.trim().isNotEmpty) ...[
           const SizedBox(height: AppSpacing.lg),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.xl,
+            ),
             child: Text(
               context.l10n.ordersNotesSectionTitle,
               style: AppTypography.titleMedium,
@@ -110,13 +129,16 @@ class OrderDetailScrollContent extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.xl,
+            ),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: context.textDisabled.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppSpacing.md),
+                color: context.glassColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: context.borderColor),
               ),
               child: Text(
                 order.notes!,
@@ -144,32 +166,29 @@ class _StatusBanner extends StatelessWidget {
     final sub = _subtitle(context, order.status);
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.all(AppSpacing.lg),
-      padding: const EdgeInsets.all(AppSpacing.x2l),
+      margin: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.lg,
+      ),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: c,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        boxShadow: [
-          BoxShadow(
-            color: c.withValues(alpha: 0.35),
-            blurRadius: AppSpacing.lg,
-            offset: const Offset(0, AppSpacing.sm),
-          ),
-        ],
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: c.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(_iconFor(order.status), color: AppColors.white, size: 28),
+              Icon(_iconFor(order.status), color: c, size: 28),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   orderStatusLabel(context, order.status),
                   style: AppTypography.titleCompact.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w700,
+                    color: context.textPrimary,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -179,7 +198,7 @@ class _StatusBanner extends StatelessWidget {
           Text(
             sub,
             style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.white.withValues(alpha: 0.95),
+              color: context.textSecondary,
             ),
           ),
           if (order.estimatedDelivery != null &&
@@ -187,10 +206,10 @@ class _StatusBanner extends StatelessWidget {
                   order.status == OrderStatus.confirmed)) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
-              '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d').format(order.estimatedDelivery!.toLocal())}',
+              '${context.l10n.ordersExpectedPrefix} ${context.formatWeekdayDate(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.white,
-                fontWeight: FontWeight.w600,
+                color: context.linkColor,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -229,15 +248,9 @@ class _WhiteCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        boxShadow: [
-          BoxShadow(
-            color: context.textPrimary.withValues(alpha: 0.05),
-            blurRadius: AppSpacing.md,
-            offset: const Offset(0, AppSpacing.xs),
-          ),
-        ],
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.borderColor),
       ),
       child: child,
     );
@@ -277,12 +290,12 @@ class _AddressCard extends StatelessWidget {
               ),
             ),
           if (street.isNotEmpty)
-            Text(street, style: AppTypography.bodyMedium),
+            Text(context.isolate(street), style: AppTypography.bodyMedium),
           if (cityLine.isNotEmpty)
             Text(cityLine, style: AppTypography.bodyMedium),
           if (phone.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            Text(phone, style: AppTypography.bodyMedium),
+            Text(context.ltr(phone), style: AppTypography.bodyMedium),
           ],
         ],
       ),
@@ -323,6 +336,15 @@ class _SellerSection extends ConsumerWidget {
       ),
     );
     if (!context.mounted || result != true) return;
+    ref
+        .read(analyticsServiceProvider)
+        .track(
+          AnalyticsEvents.vendorReportSubmitted,
+          properties: {
+            AnalyticsProps.sellerId: order.vendorId,
+            AnalyticsProps.orderId: order.id,
+          },
+        );
     AppSnackbar.success(context, context.l10n.reportVendorSuccess);
   }
 
@@ -332,7 +354,7 @@ class _SellerSection extends ConsumerWidget {
         ? order.vendorStoreName
         : order.vendorName;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xl),
       child: _WhiteCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,7 +377,7 @@ class _SellerSection extends ConsumerWidget {
                       ),
                       Text(
                         order.vendorRating != null
-                            ? '⭐ ${order.vendorRating!.toStringAsFixed(1)}'
+                            ? '⭐ ${context.formatDecimal(order.vendorRating!)}'
                             : context.l10n.newSeller,
                         style: AppTypography.bodySmall,
                       ),
@@ -443,7 +465,7 @@ class _BuyerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xl),
       child: _WhiteCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -493,9 +515,9 @@ class _BuyerSection extends StatelessWidget {
                           }
                         },
                         child: Text(
-                          '📞 ${order.consumerPhone}',
+                          '📞 ${context.ltr(order.consumerPhone)}',
                           style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.primary,
+                            color: context.linkColor,
                           ),
                         ),
                       ),
@@ -508,23 +530,24 @@ class _BuyerSection extends StatelessWidget {
                 ),
               ],
             ),
-            if (order.consumerPhone.trim().isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.md),
-              OutlinedButton(
-                onPressed: () async {
-                  final opened = await launchWhatsApp(
-                    phone: order.consumerPhone,
-                  );
-                  if (!opened && context.mounted) {
-                    AppSnackbar.info(
-                      context,
-                      context.l10n.whatsappSellerUnavailable,
-                    );
-                  }
-                },
-                child: Text(context.l10n.ordersWhatsapp),
-              ),
-            ],
+            // TODO(phase-2): WhatsApp contact — hidden by product request; restore with the import above.
+            // if (order.consumerPhone.trim().isNotEmpty) ...[
+            //   const SizedBox(height: AppSpacing.md),
+            //   OutlinedButton(
+            //     onPressed: () async {
+            //       final opened = await launchWhatsApp(
+            //         phone: order.consumerPhone,
+            //       );
+            //       if (!opened && context.mounted) {
+            //         AppSnackbar.info(
+            //           context,
+            //           context.l10n.whatsappSellerUnavailable,
+            //         );
+            //       }
+            //     },
+            //     child: Text(context.l10n.ordersWhatsapp),
+            //   ),
+            // ],
           ],
         ),
       ),
@@ -571,23 +594,11 @@ class _TrackingCard extends StatelessWidget {
           ),
           if (order.courierName != null)
             Text(order.courierName!, style: AppTypography.bodyMedium),
-          Text(
-            context.l10n.ordersCurrentLocationMock,
-            style: AppTypography.bodySmall,
-          ),
           if (order.estimatedDelivery != null)
             Text(
-              '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d').format(order.estimatedDelivery!.toLocal())}',
+              '${context.l10n.ordersExpectedPrefix} ${context.formatWeekdayDate(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodySmall,
             ),
-          const SizedBox(height: AppSpacing.md),
-          OutlinedButton(
-            onPressed: () => AppSnackbar.info(
-              context,
-              context.l10n.ordersCourierWebsiteSoon,
-            ),
-            child: Text(context.l10n.ordersTrackOnCourier),
-          ),
         ],
       ),
     );

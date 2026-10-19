@@ -22,24 +22,14 @@ class PriceDropBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.success,
         borderRadius: BorderRadius.circular(AppSpacing.xl),
-        boxShadow: [
-          BoxShadow(
-            color: context.textPrimary.withValues(alpha: 0.08),
-            blurRadius: AppSpacing.xs,
-            offset: const Offset(0, 1),
-          ),
-        ],
       ),
       child: Text(
-        context.l10n.wishlistPriceDropPercent(percent),
+        context.l10n.wishlistPriceDropPercent(context.formatPercent(percent)),
         style: AppTypography.labelSmall.copyWith(
           color: AppColors.white,
           fontWeight: FontWeight.w600,
         ),
       ),
-    )
-        .animate()
-        .fadeIn()
-        .slideX(begin: 0.2, end: 0);
+    ).animate().fadeIn().slideX(begin: 0.2, end: 0);
   }
 }

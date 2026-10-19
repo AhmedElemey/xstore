@@ -24,13 +24,23 @@ mixin _$OrderAddress {
   String? get postalCode => throw _privateConstructorUsedError;
   bool get isDefault => throw _privateConstructorUsedError;
 
-  /// Set when this address was pinned on the map picker (see
-  /// `showMapAddressPicker`). Null for addresses saved before the picker
-  /// existed, or typed without dropping a pin — `placeOrder` falls back
+  /// Set when this address was pinned on the (since removed) map
+  /// picker. Null for addresses saved before or after the picker, or
+  /// typed without dropping a pin — `placeOrder` falls back
   /// to [AppLocationCache] in that case, same as before this field
   /// existed.
   double? get latitude => throw _privateConstructorUsedError;
   double? get longitude => throw _privateConstructorUsedError;
+
+  /// The ids [city]/[wilaya] were resolved from at save time (via the same
+  /// live `/api/governorates` + `/api/cities` reference lists the picker
+  /// itself reads) — kept so the displayed names can be re-resolved in
+  /// whichever locale is active later, instead of the display staying
+  /// frozen in the language that was active when the address was saved.
+  /// Null for addresses saved before this field existed; display falls
+  /// back to the plain [city]/[wilaya] strings in that case.
+  int? get cityId => throw _privateConstructorUsedError;
+  int? get governorateId => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $OrderAddressCopyWith<OrderAddress> get copyWith =>
@@ -52,7 +62,9 @@ abstract class $OrderAddressCopyWith<$Res> {
       String? postalCode,
       bool isDefault,
       double? latitude,
-      double? longitude});
+      double? longitude,
+      int? cityId,
+      int? governorateId});
 }
 
 /// @nodoc
@@ -77,6 +89,8 @@ class _$OrderAddressCopyWithImpl<$Res, $Val extends OrderAddress>
     Object? isDefault = null,
     Object? latitude = freezed,
     Object? longitude = freezed,
+    Object? cityId = freezed,
+    Object? governorateId = freezed,
   }) {
     return _then(_value.copyWith(
       fullName: null == fullName
@@ -115,6 +129,14 @@ class _$OrderAddressCopyWithImpl<$Res, $Val extends OrderAddress>
           ? _value.longitude
           : longitude // ignore: cast_nullable_to_non_nullable
               as double?,
+      cityId: freezed == cityId
+          ? _value.cityId
+          : cityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      governorateId: freezed == governorateId
+          ? _value.governorateId
+          : governorateId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -136,7 +158,9 @@ abstract class _$$OrderAddressImplCopyWith<$Res>
       String? postalCode,
       bool isDefault,
       double? latitude,
-      double? longitude});
+      double? longitude,
+      int? cityId,
+      int? governorateId});
 }
 
 /// @nodoc
@@ -159,6 +183,8 @@ class __$$OrderAddressImplCopyWithImpl<$Res>
     Object? isDefault = null,
     Object? latitude = freezed,
     Object? longitude = freezed,
+    Object? cityId = freezed,
+    Object? governorateId = freezed,
   }) {
     return _then(_$OrderAddressImpl(
       fullName: null == fullName
@@ -197,6 +223,14 @@ class __$$OrderAddressImplCopyWithImpl<$Res>
           ? _value.longitude
           : longitude // ignore: cast_nullable_to_non_nullable
               as double?,
+      cityId: freezed == cityId
+          ? _value.cityId
+          : cityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      governorateId: freezed == governorateId
+          ? _value.governorateId
+          : governorateId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -213,7 +247,9 @@ class _$OrderAddressImpl implements _OrderAddress {
       this.postalCode,
       this.isDefault = false,
       this.latitude,
-      this.longitude});
+      this.longitude,
+      this.cityId,
+      this.governorateId});
 
   @override
   final String fullName;
@@ -231,9 +267,9 @@ class _$OrderAddressImpl implements _OrderAddress {
   @JsonKey()
   final bool isDefault;
 
-  /// Set when this address was pinned on the map picker (see
-  /// `showMapAddressPicker`). Null for addresses saved before the picker
-  /// existed, or typed without dropping a pin — `placeOrder` falls back
+  /// Set when this address was pinned on the (since removed) map
+  /// picker. Null for addresses saved before or after the picker, or
+  /// typed without dropping a pin — `placeOrder` falls back
   /// to [AppLocationCache] in that case, same as before this field
   /// existed.
   @override
@@ -241,9 +277,21 @@ class _$OrderAddressImpl implements _OrderAddress {
   @override
   final double? longitude;
 
+  /// The ids [city]/[wilaya] were resolved from at save time (via the same
+  /// live `/api/governorates` + `/api/cities` reference lists the picker
+  /// itself reads) — kept so the displayed names can be re-resolved in
+  /// whichever locale is active later, instead of the display staying
+  /// frozen in the language that was active when the address was saved.
+  /// Null for addresses saved before this field existed; display falls
+  /// back to the plain [city]/[wilaya] strings in that case.
+  @override
+  final int? cityId;
+  @override
+  final int? governorateId;
+
   @override
   String toString() {
-    return 'OrderAddress(fullName: $fullName, phone: $phone, street: $street, city: $city, wilaya: $wilaya, postalCode: $postalCode, isDefault: $isDefault, latitude: $latitude, longitude: $longitude)';
+    return 'OrderAddress(fullName: $fullName, phone: $phone, street: $street, city: $city, wilaya: $wilaya, postalCode: $postalCode, isDefault: $isDefault, latitude: $latitude, longitude: $longitude, cityId: $cityId, governorateId: $governorateId)';
   }
 
   @override
@@ -264,12 +312,26 @@ class _$OrderAddressImpl implements _OrderAddress {
             (identical(other.latitude, latitude) ||
                 other.latitude == latitude) &&
             (identical(other.longitude, longitude) ||
-                other.longitude == longitude));
+                other.longitude == longitude) &&
+            (identical(other.cityId, cityId) || other.cityId == cityId) &&
+            (identical(other.governorateId, governorateId) ||
+                other.governorateId == governorateId));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, fullName, phone, street, city,
-      wilaya, postalCode, isDefault, latitude, longitude);
+  int get hashCode => Object.hash(
+      runtimeType,
+      fullName,
+      phone,
+      street,
+      city,
+      wilaya,
+      postalCode,
+      isDefault,
+      latitude,
+      longitude,
+      cityId,
+      governorateId);
 
   @JsonKey(ignore: true)
   @override
@@ -288,7 +350,9 @@ abstract class _OrderAddress implements OrderAddress {
       final String? postalCode,
       final bool isDefault,
       final double? latitude,
-      final double? longitude}) = _$OrderAddressImpl;
+      final double? longitude,
+      final int? cityId,
+      final int? governorateId}) = _$OrderAddressImpl;
 
   @override
   String get fullName;
@@ -306,14 +370,26 @@ abstract class _OrderAddress implements OrderAddress {
   bool get isDefault;
   @override
 
-  /// Set when this address was pinned on the map picker (see
-  /// `showMapAddressPicker`). Null for addresses saved before the picker
-  /// existed, or typed without dropping a pin — `placeOrder` falls back
+  /// Set when this address was pinned on the (since removed) map
+  /// picker. Null for addresses saved before or after the picker, or
+  /// typed without dropping a pin — `placeOrder` falls back
   /// to [AppLocationCache] in that case, same as before this field
   /// existed.
   double? get latitude;
   @override
   double? get longitude;
+  @override
+
+  /// The ids [city]/[wilaya] were resolved from at save time (via the same
+  /// live `/api/governorates` + `/api/cities` reference lists the picker
+  /// itself reads) — kept so the displayed names can be re-resolved in
+  /// whichever locale is active later, instead of the display staying
+  /// frozen in the language that was active when the address was saved.
+  /// Null for addresses saved before this field existed; display falls
+  /// back to the plain [city]/[wilaya] strings in that case.
+  int? get cityId;
+  @override
+  int? get governorateId;
   @override
   @JsonKey(ignore: true)
   _$$OrderAddressImplCopyWith<_$OrderAddressImpl> get copyWith =>
@@ -867,6 +943,7 @@ mixin _$OrderEntity {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
   DateTime? get confirmedAt => throw _privateConstructorUsedError;
+  DateTime? get processingAt => throw _privateConstructorUsedError;
   DateTime? get shippedAt => throw _privateConstructorUsedError;
   DateTime? get deliveredAt => throw _privateConstructorUsedError;
   DateTime? get cancelledAt => throw _privateConstructorUsedError;
@@ -913,6 +990,7 @@ abstract class $OrderEntityCopyWith<$Res> {
       DateTime createdAt,
       DateTime updatedAt,
       DateTime? confirmedAt,
+      DateTime? processingAt,
       DateTime? shippedAt,
       DateTime? deliveredAt,
       DateTime? cancelledAt});
@@ -963,6 +1041,7 @@ class _$OrderEntityCopyWithImpl<$Res, $Val extends OrderEntity>
     Object? createdAt = null,
     Object? updatedAt = null,
     Object? confirmedAt = freezed,
+    Object? processingAt = freezed,
     Object? shippedAt = freezed,
     Object? deliveredAt = freezed,
     Object? cancelledAt = freezed,
@@ -1088,6 +1167,10 @@ class _$OrderEntityCopyWithImpl<$Res, $Val extends OrderEntity>
           ? _value.confirmedAt
           : confirmedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      processingAt: freezed == processingAt
+          ? _value.processingAt
+          : processingAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       shippedAt: freezed == shippedAt
           ? _value.shippedAt
           : shippedAt // ignore: cast_nullable_to_non_nullable
@@ -1151,6 +1234,7 @@ abstract class _$$OrderEntityImplCopyWith<$Res>
       DateTime createdAt,
       DateTime updatedAt,
       DateTime? confirmedAt,
+      DateTime? processingAt,
       DateTime? shippedAt,
       DateTime? deliveredAt,
       DateTime? cancelledAt});
@@ -1200,6 +1284,7 @@ class __$$OrderEntityImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
     Object? confirmedAt = freezed,
+    Object? processingAt = freezed,
     Object? shippedAt = freezed,
     Object? deliveredAt = freezed,
     Object? cancelledAt = freezed,
@@ -1325,6 +1410,10 @@ class __$$OrderEntityImplCopyWithImpl<$Res>
           ? _value.confirmedAt
           : confirmedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      processingAt: freezed == processingAt
+          ? _value.processingAt
+          : processingAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       shippedAt: freezed == shippedAt
           ? _value.shippedAt
           : shippedAt // ignore: cast_nullable_to_non_nullable
@@ -1375,6 +1464,7 @@ class _$OrderEntityImpl implements _OrderEntity {
       required this.createdAt,
       required this.updatedAt,
       this.confirmedAt,
+      this.processingAt,
       this.shippedAt,
       this.deliveredAt,
       this.cancelledAt})
@@ -1455,6 +1545,8 @@ class _$OrderEntityImpl implements _OrderEntity {
   @override
   final DateTime? confirmedAt;
   @override
+  final DateTime? processingAt;
+  @override
   final DateTime? shippedAt;
   @override
   final DateTime? deliveredAt;
@@ -1463,7 +1555,7 @@ class _$OrderEntityImpl implements _OrderEntity {
 
   @override
   String toString() {
-    return 'OrderEntity(id: $id, consumerId: $consumerId, consumerName: $consumerName, consumerPhone: $consumerPhone, consumerAvatar: $consumerAvatar, vendorId: $vendorId, vendorName: $vendorName, vendorStoreName: $vendorStoreName, vendorAvatar: $vendorAvatar, vendorRating: $vendorRating, items: $items, status: $status, paymentMethod: $paymentMethod, isPaid: $isPaid, deliveryAddress: $deliveryAddress, subtotal: $subtotal, shippingCost: $shippingCost, discount: $discount, total: $total, trackingNumber: $trackingNumber, deliveryMethod: $deliveryMethod, courierId: $courierId, courierName: $courierName, trackingLocation: $trackingLocation, estimatedDelivery: $estimatedDelivery, cancelReason: $cancelReason, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, confirmedAt: $confirmedAt, shippedAt: $shippedAt, deliveredAt: $deliveredAt, cancelledAt: $cancelledAt)';
+    return 'OrderEntity(id: $id, consumerId: $consumerId, consumerName: $consumerName, consumerPhone: $consumerPhone, consumerAvatar: $consumerAvatar, vendorId: $vendorId, vendorName: $vendorName, vendorStoreName: $vendorStoreName, vendorAvatar: $vendorAvatar, vendorRating: $vendorRating, items: $items, status: $status, paymentMethod: $paymentMethod, isPaid: $isPaid, deliveryAddress: $deliveryAddress, subtotal: $subtotal, shippingCost: $shippingCost, discount: $discount, total: $total, trackingNumber: $trackingNumber, deliveryMethod: $deliveryMethod, courierId: $courierId, courierName: $courierName, trackingLocation: $trackingLocation, estimatedDelivery: $estimatedDelivery, cancelReason: $cancelReason, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, confirmedAt: $confirmedAt, processingAt: $processingAt, shippedAt: $shippedAt, deliveredAt: $deliveredAt, cancelledAt: $cancelledAt)';
   }
 
   @override
@@ -1525,6 +1617,8 @@ class _$OrderEntityImpl implements _OrderEntity {
                 other.updatedAt == updatedAt) &&
             (identical(other.confirmedAt, confirmedAt) ||
                 other.confirmedAt == confirmedAt) &&
+            (identical(other.processingAt, processingAt) ||
+                other.processingAt == processingAt) &&
             (identical(other.shippedAt, shippedAt) ||
                 other.shippedAt == shippedAt) &&
             (identical(other.deliveredAt, deliveredAt) ||
@@ -1566,6 +1660,7 @@ class _$OrderEntityImpl implements _OrderEntity {
         createdAt,
         updatedAt,
         confirmedAt,
+        processingAt,
         shippedAt,
         deliveredAt,
         cancelledAt
@@ -1610,6 +1705,7 @@ abstract class _OrderEntity implements OrderEntity {
       required final DateTime createdAt,
       required final DateTime updatedAt,
       final DateTime? confirmedAt,
+      final DateTime? processingAt,
       final DateTime? shippedAt,
       final DateTime? deliveredAt,
       final DateTime? cancelledAt}) = _$OrderEntityImpl;
@@ -1679,6 +1775,8 @@ abstract class _OrderEntity implements OrderEntity {
   DateTime get updatedAt;
   @override
   DateTime? get confirmedAt;
+  @override
+  DateTime? get processingAt;
   @override
   DateTime? get shippedAt;
   @override

@@ -1,11 +1,18 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/app_error_messages.dart';
+import '../../../../core/network/json_list_unwrap.dart';
+import '../../../../core/network/legacy_route_options.dart';
 import '../../../../core/utils/app_location_cache.dart';
 import '../../../orders/data/datasources/orders_remote_datasource.dart';
 import '../../../orders/data/models/order_item_model.dart';
@@ -38,13 +45,6 @@ abstract interface class CartRemoteDataSource {
 
   Future<CartEntity> clearCart(String consumerId);
 
-  Future<CouponEntity> applyCoupon({
-    required String code,
-    required double eligibleSubtotal,
-  });
-
-  Future<CartEntity> removeCoupon(String consumerId);
-
   Future<OrderEntity> placeOrder(PlaceOrderParams params);
 
   Future<CartItemEntity> buildLineFromListing(String listingId, int quantity);
@@ -57,16 +57,121 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   final OrdersRemoteDataSource _orders;
 
   static final List<CartItemEntity> _items = [];
-  static CouponEntity? _coupon;
-  static String? _couponCodeInput;
+
+  /// Consumer whose saved cart has been restored into [_items] this session.
+  static String? _restoredFor;
+  static const _savedCartKeyPrefix = 'cart_items_v1_';
 
   /// Drops the in-memory cart. Called on logout/user switch so cart
   /// contents never survive into the next account. Live mode has no cart
   /// API (`GET`/`POST` `/cart` 404); mock and live share this session store.
+  /// The signed-out user's saved copy stays on the device, keyed by their
+  /// id, and is restored only when that same user signs back in.
   static void clearSessionCache() {
     _items.clear();
-    _coupon = null;
-    _couponCodeInput = null;
+    _restoredFor = null;
+  }
+
+  /// Live mode keeps the cart only on the device (no cart API), so without
+  /// this it was lost every time the app was closed. Restores once per
+  /// session per consumer. A mutation that lands while the read is pending
+  /// can save a snapshot without the restored lines, so after merging, the
+  /// restore saves again — that save runs last and holds both.
+  Future<void> _restoreSavedCart(String consumerId) async {
+    if (MockConfig.useMock || consumerId.isEmpty) return;
+    if (_restoredFor == consumerId) return;
+    _restoredFor = consumerId;
+    var merged = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('$_savedCartKeyPrefix$consumerId');
+      // Signed out (or switched user) while reading: don't resurrect it.
+      if (raw == null || _restoredFor != consumerId) return;
+      for (final json in (jsonDecode(raw) as List).whereType<Map>()) {
+        final item = _savedItemFromJson(Map<String, dynamic>.from(json));
+        if (item != null &&
+            !_items.any((e) => e.listingId == item.listingId)) {
+          _items.add(item);
+          merged = true;
+        }
+      }
+    } catch (_) {
+      // Fail open: an unreadable saved cart is just an empty cart.
+    }
+    if (merged) await _saveCart(consumerId);
+  }
+
+  Future<void> _saveCart(String consumerId) async {
+    if (MockConfig.useMock || consumerId.isEmpty) return;
+    // Only the consumer whose cart is loaded may overwrite their saved copy.
+    if (_restoredFor != consumerId) return;
+    // Snapshot BEFORE the await: a sign-out while prefs load clears _items,
+    // and writing that would wipe this user's saved cart.
+    final snapshot = jsonEncode(_items.map(_savedItemToJson).toList());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('$_savedCartKeyPrefix$consumerId', snapshot);
+    } catch (_) {
+      // Best effort: the in-memory cart is still correct for this session.
+    }
+  }
+
+  static Map<String, Object?> _savedItemToJson(CartItemEntity e) => {
+        'id': e.id,
+        'listingId': e.listingId,
+        'listingName': e.listingName,
+        'listingImage': e.listingImage,
+        'listingSlug': e.listingSlug,
+        'vendorId': e.vendorId,
+        'vendorName': e.vendorName,
+        'vendorStoreName': e.vendorStoreName,
+        'vendorAvatar': e.vendorAvatar,
+        'vendorRating': e.vendorRating,
+        'vendorVerified': e.vendorVerified,
+        'price': e.price,
+        'compareAtPrice': e.compareAtPrice,
+        'quantity': e.quantity,
+        'maxQuantity': e.maxQuantity,
+        'category': e.category,
+        'condition': e.condition,
+        'shippingAvailable': e.shippingAvailable,
+        'shippingCost': e.shippingCost,
+        'isAvailable': e.isAvailable,
+        'addedAt': e.addedAt.toIso8601String(),
+      };
+
+  static CartItemEntity? _savedItemFromJson(Map<String, dynamic> j) {
+    final id = j['id'];
+    final listingId = j['listingId'];
+    final price = j['price'];
+    final quantity = j['quantity'];
+    if (id is! String || listingId is! String) return null;
+    if (price is! num || quantity is! int || quantity < 1) return null;
+    String str(String key) => j[key] is String ? j[key] as String : '';
+    double? optNum(String key) => (j[key] as num?)?.toDouble();
+    return CartItemEntity(
+      id: id,
+      listingId: listingId,
+      listingName: str('listingName'),
+      listingImage: str('listingImage'),
+      listingSlug: str('listingSlug'),
+      vendorId: str('vendorId'),
+      vendorName: str('vendorName'),
+      vendorStoreName: str('vendorStoreName'),
+      vendorAvatar: str('vendorAvatar'),
+      vendorRating: optNum('vendorRating'),
+      vendorVerified: j['vendorVerified'] == true,
+      price: price.toDouble(),
+      compareAtPrice: optNum('compareAtPrice'),
+      quantity: quantity,
+      maxQuantity: j['maxQuantity'] is int ? j['maxQuantity'] as int : quantity,
+      category: str('category'),
+      condition: str('condition'),
+      shippingAvailable: j['shippingAvailable'] == true,
+      shippingCost: optNum('shippingCost') ?? 0,
+      isAvailable: j['isAvailable'] != false,
+      addedAt: DateTime.tryParse(str('addedAt')) ?? DateTime.now(),
+    );
   }
 
   String _vendorIdForListing(String listingId) {
@@ -180,11 +285,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       consumerId: consumerId,
       items: List<CartItemEntity>.from(_items),
       selectedItemIds: {},
-      couponCode: _couponCodeInput,
-      coupon: _coupon,
       subtotal: sub,
       shippingTotal: ship,
-      discount: 0,
       total: sub + ship,
       itemCount: _items.length,
     );
@@ -216,9 +318,10 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       category: m.categoryLabel,
       condition: m.conditionLabel,
       shippingAvailable: true,
-      shippingCost: m.price >= kFreeShippingPriceThresholdEgp
-          ? 0.0
-          : kFlatShippingFeeEgp,
+      shippingCost: cartLineShippingCost(
+        shippingAvailable: true,
+        listingShippingCost: m.shippingCost,
+      ),
       isAvailable: true,
       addedAt: DateTime.now(),
     );
@@ -239,7 +342,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     final id = cartItemId ?? 'cart_item_${DateTime.now().microsecondsSinceEpoch}';
     final listingId = (root['id'] ?? '').toString();
 
-    final price = _num(root['price']);
+    final price = jsonDouble(root['price']);
 
     final sellerRaw = root['seller'] ?? root['vendor'] ?? json['seller'] ?? json['vendor'];
     final seller = sellerRaw is Map ? Map<String, dynamic>.from(sellerRaw) : <String, dynamic>{};
@@ -258,7 +361,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     final sellerRatingRaw = seller['rating'] ?? seller['averageRating'];
     // Missing/zero rating means "no reviews yet" — never fabricate a score.
     final sellerRating =
-        sellerRatingRaw == null ? null : _num(sellerRatingRaw);
+        sellerRatingRaw == null ? null : jsonDouble(sellerRatingRaw);
     final verified = seller['verified'] == true || seller['isVerified'] == true;
 
     final imgs = root['imageUrls'];
@@ -267,7 +370,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         : (root['imageUrl'] ?? '').toString();
 
     final compareRaw = root['compareAtPrice'] ?? root['compare_at_price'];
-    final compare = compareRaw == null ? null : _num(compareRaw);
+    final compare = compareRaw == null ? null : jsonDouble(compareRaw);
 
     final catRaw = root['categoryLabel'] ?? root['category'];
     final cat = catRaw is String
@@ -280,13 +383,18 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     final condition =
         condRaw is String ? condRaw : condRaw?.toString() ?? '';
 
-    final stock = _intFromJson(root['stockQuantity'] ?? root['stock'] ?? root['quantity'], 10).clamp(1, 999);
+    // Missing stock is 0 (unavailable) — never an invented number.
+    final stock = _intFromJson(
+      root['stockQuantity'] ?? root['stock'] ?? root['quantity'],
+      0,
+    );
 
     final shipAvail =
-        json['shippingAvailable'] != false && root['shippingAvailable'] != false;
-    final shippingCost = shipAvail
-        ? (price >= kFreeShippingPriceThresholdEgp ? 0.0 : kFlatShippingFeeEgp)
-        : 0.0;
+        (root['shippingAvailable'] ?? json['shippingAvailable']) == true;
+    final shippingCost = cartLineShippingCost(
+      shippingAvailable: shipAvail,
+      listingShippingCost: jsonDouble(root['shippingCost'] ?? json['shippingCost']),
+    );
 
     return CartItemEntity(
       id: id,
@@ -303,12 +411,12 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       price: price,
       compareAtPrice: compare,
       quantity: quantity,
-      maxQuantity: stock,
+      maxQuantity: stock.clamp(1, 999),
       category: cat,
       condition: condition,
       shippingAvailable: shipAvail,
       shippingCost: shippingCost,
-      isAvailable: root['isAvailable'] != false,
+      isAvailable: root['isAvailable'] != false && stock > 0,
       addedAt: DateTime.now(),
     );
   }
@@ -326,7 +434,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }
 
   @override
-  Future<CartEntity> getCart(String consumerId) {
+  Future<CartEntity> getCart(String consumerId) async {
+    await _restoreSavedCart(consumerId);
     return _localCart(consumerId);
   }
 
@@ -334,7 +443,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   Future<CartEntity> addOrUpdateItem({
     required String consumerId,
     required CartItemEntity item,
-  }) {
+  }) async {
+    await _restoreSavedCart(consumerId);
     if (MockConfig.useMock) _ensureMockSeed();
     final idx = _items.indexWhere((e) => e.listingId == item.listingId);
     if (idx >= 0) {
@@ -344,6 +454,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     } else {
       _items.add(item);
     }
+    await _saveCart(consumerId);
     return _localCart(consumerId);
   }
 
@@ -351,8 +462,10 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   Future<CartEntity> removeItem({
     required String consumerId,
     required String itemId,
-  }) {
+  }) async {
+    await _restoreSavedCart(consumerId);
     _items.removeWhere((e) => e.id == itemId);
+    await _saveCart(consumerId);
     return _localCart(consumerId);
   }
 
@@ -361,7 +474,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     required String consumerId,
     required String itemId,
     required int quantity,
-  }) {
+  }) async {
+    await _restoreSavedCart(consumerId);
     final idx = _items.indexWhere((e) => e.id == itemId);
     if (idx >= 0) {
       if (quantity <= 0) {
@@ -373,78 +487,21 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         );
       }
     }
+    await _saveCart(consumerId);
     return _localCart(consumerId);
   }
 
   @override
-  Future<CartEntity> clearCart(String consumerId) {
+  Future<CartEntity> clearCart(String consumerId) async {
+    await _restoreSavedCart(consumerId);
     _items.clear();
-    _coupon = null;
-    _couponCodeInput = null;
+    await _saveCart(consumerId);
     return _localCart(consumerId);
   }
 
-  @override
-  Future<CouponEntity> applyCoupon({
-    required String code,
-    required double eligibleSubtotal,
-  }) async {
-    if (!MockConfig.useMock) {
-      throw CouponException('unavailable');
-    }
-    await MockConfig.simulate(null);
-    final upper = code.trim().toUpperCase();
-    if (upper == 'SAVE10') {
-      if (eligibleSubtotal < 5000) {
-        throw CouponException('minOrder');
-      }
-      final c = CouponEntity(
-        code: upper,
-        discountType: DiscountType.percentage,
-        discountValue: 10,
-        maxDiscount: 5000,
-        isValid: true,
-        message: '',
-      );
-      _coupon = c;
-      _couponCodeInput = upper;
-      return c;
-    }
-    if (upper == 'FREE500') {
-      final c = CouponEntity(
-        code: upper,
-        discountType: DiscountType.fixed,
-        discountValue: 500,
-        isValid: true,
-        message: 'FREE500',
-      );
-      _coupon = c;
-      _couponCodeInput = upper;
-      return c;
-    }
-    if (upper == 'WELCOME') {
-      final c = CouponEntity(
-        code: upper,
-        discountType: DiscountType.percentage,
-        discountValue: 15,
-        maxDiscount: 3000,
-        isValid: true,
-        message: 'WELCOME',
-      );
-      _coupon = c;
-      _couponCodeInput = upper;
-      return c;
-    }
-    throw CouponException('invalid');
-  }
-
-  @override
-  Future<CartEntity> removeCoupon(String consumerId) {
-    _coupon = null;
-    _couponCodeInput = null;
-    return _localCart(consumerId);
-  }
-
+  // TODO(phase-2): coupons — UI removed in abc664e; restore the coupon row in the cart.
+  // TODO(backend): no coupon endpoints in the contract — applyCoupon throws
+  // 'unavailable' live; needs apply/remove routes before the UI returns.
   @override
   Future<OrderEntity> placeOrder(PlaceOrderParams params) async {
     if (MockConfig.useMock) {
@@ -490,15 +547,13 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         deliveryAddress: params.deliveryAddress,
         subtotal: params.subtotal,
         shippingCost: params.shippingTotal,
-        discount: params.discount,
+        discount: 0,
         total: params.total,
         notes: params.deliveryNote,
         createdAt: now,
         updatedAt: now,
       );
       _items.clear();
-      _coupon = null;
-      _couponCodeInput = null;
       return order;
     }
     // CONFIRMED (Postman + live probe, 2026-08-14): the backend has no
@@ -513,8 +568,21 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     if (params.items.isEmpty) {
       throw const ServerException('Cart is empty');
     }
+    // Check every line BEFORE placing any order: with one order per line,
+    // a line found short mid-loop would leave the cart half-ordered.
+    final inStock = await Future.wait(params.items.map(_hasStock));
+    final short = [
+      for (var i = 0; i < params.items.length; i++)
+        if (inStock[i] == false) params.items[i],
+    ];
+    if (short.isNotEmpty) {
+      await Future.wait(short.map(_refreshShortLine));
+      await _saveCart(params.consumerId);
+      throw const ServerException(outOfStockErrorCode);
+    }
     final fallbackAddress = OrderAddressModelX.fromEntity(params.deliveryAddress);
-    // A map-pinned delivery address (see showMapAddressPicker) carries its
+    // A map-pinned delivery address (the picker is gone, but older saved
+    // addresses keep their pin) carries its
     // own coordinates — prefer those over the device's last-known GPS fix,
     // since the two can legitimately differ (ordering for a different
     // address than the one the phone is currently at). Addresses saved
@@ -570,6 +638,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       if (lastError != null) throw lastError;
       throw const ServerException('Cart is empty');
     }
+    // Ordered lines left the cart; persist so they don't come back on the
+    // next app start.
+    await _saveCart(params.consumerId);
     // Combine the per-listing orders into one view for the confirmation
     // screen: real id/status/createdAt from the first created order, full
     // item list from all of them, totals from the already-known cart
@@ -578,16 +649,56 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     // successes — the caller compares this against what was submitted to
     // tell the customer which line(s) didn't go through.
     final first = createdOrders.first.toEntity();
-    _coupon = null;
-    _couponCodeInput = null;
     return first.copyWith(
       items: createdOrders.expand((o) => o.items).map((m) => m.toEntity()).toList(),
       subtotal: params.subtotal,
       shippingCost: params.shippingTotal,
-      discount: params.discount,
+      // The cart has no discounts; keep the breakdown adding up to total.
+      discount: 0,
       total: params.total,
       notes: params.deliveryNote,
     );
+  }
+
+  /// `true`/`false` from `GET /api/listings/{id}/stock`; a 404 (listing
+  /// gone or inactive) is `false`. `null` when the check can't answer
+  /// (network, 5xx, unexpected body) — checkout then proceeds and the
+  /// order POST stays the backend's final gate, so a stock-endpoint outage
+  /// can't block every sale.
+  Future<bool?> _hasStock(CartItemEntity line) async {
+    try {
+      final res = await _dio.get<dynamic>(
+        ApiEndpoints.apiListingStock(line.listingId, line.quantity),
+        options: LegacyRouteOptions.allowNotFound(),
+      );
+      if (LegacyRouteOptions.isNotFound(res)) return false;
+      final body = res.data;
+      final data = body is Map ? body['data'] : body;
+      return data is bool ? data : null;
+    } on DioException {
+      return null;
+    }
+  }
+
+  /// Re-reads a short line's listing so the cart shows what's really left:
+  /// quantity drops to the remaining stock, or the line is marked
+  /// unavailable when nothing is left, the listing can't be read, or the
+  /// listing still claims enough (the stock check is the authority, and
+  /// this stops the same refused quantity from being resubmitted).
+  Future<void> _refreshShortLine(CartItemEntity line) async {
+    CartItemEntity? fresh;
+    try {
+      fresh = await buildLineFromListing(line.listingId, line.quantity);
+    } on ServerException {
+      fresh = null;
+    }
+    final idx = _items.indexWhere((e) => e.id == line.id);
+    if (idx < 0) return;
+    final cur = _items[idx];
+    final left = fresh != null && fresh.isAvailable ? fresh.maxQuantity : 0;
+    _items[idx] = left > 0 && left < cur.quantity
+        ? cur.copyWith(quantity: left, maxQuantity: left)
+        : cur.copyWith(isAvailable: false);
   }
 
   /// Used when adding from product — builds line from catalog.
@@ -604,9 +715,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       if (raw == null) throw const ServerException('Empty listing response');
       return _fromListingPayload(raw, quantity);
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to load listing');
+      throw mapDioException(e);
     }
   }
-
-  double _num(Object? value) => (value as num?)?.toDouble() ?? 0;
 }

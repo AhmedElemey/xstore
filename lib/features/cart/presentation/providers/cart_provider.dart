@@ -2,7 +2,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
-import '../../../../core/error/failures.dart';
 import '../../../../core/network/connectivity_provider.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -24,11 +23,8 @@ extension CartStateX on CartState {
 
   int get selectedCount => selectedItemIds.length;
 
-  bool get hasUnavailable => items.any((e) => !e.isAvailable);
-
-  Iterable<CartItemEntity> get selectedAvailableItems => items.where(
-        (e) => selectedItemIds.contains(e.id) && e.isAvailable,
-      );
+  Iterable<CartItemEntity> get selectedAvailableItems =>
+      items.where((e) => selectedItemIds.contains(e.id) && e.isAvailable);
 
   List<CartVendorGroup> get vendorGroups {
     final order = <String>[];
@@ -43,10 +39,7 @@ extension CartStateX on CartState {
     return order.map((vid) {
       final list = byVendor[vid]!;
       final f = list.first;
-      final sub = list.fold<double>(
-        0,
-        (a, b) => a + b.price * b.quantity,
-      );
+      final sub = list.fold<double>(0, (a, b) => a + b.price * b.quantity);
       return CartVendorGroup(
         vendorId: f.vendorId,
         vendorName: f.vendorName,
@@ -59,19 +52,6 @@ extension CartStateX on CartState {
       );
     }).toList();
   }
-}
-
-double cartDiscountOnSubtotal(double sub, CouponEntity c) {
-  if (!c.isValid) return 0;
-  if (c.minOrderAmount != null && sub < c.minOrderAmount!) return 0;
-  double d;
-  if (c.discountType == DiscountType.percentage) {
-    d = sub * (c.discountValue / 100);
-    if (c.maxDiscount != null && d > c.maxDiscount!) d = c.maxDiscount!;
-  } else {
-    d = c.discountValue;
-  }
-  return d > sub ? sub : d;
 }
 
 @Riverpod(keepAlive: true)
@@ -101,30 +81,23 @@ class Cart extends _$Cart {
       } else if (!user.isVendor) {
         Future.microtask(() => fetchCart());
       }
-    });
+      // fireImmediately: this provider is first built lazily (the dock mounts
+      // after the splash), by which point auth has usually already resolved,
+      // so a plain listener would never see a change and never fetch.
+    }, fireImmediately: true);
     return const CartState();
   }
 
   String? get _consumerId => ref.read(authProvider).valueOrNull?.id;
 
   void _setFromEntity(CartEntity e, {bool resetSelection = false}) {
-    final preferred = {'cart_item_001', 'cart_item_002'};
-    final ids = e.items.map((x) => x.id).toSet();
     var sel = state.selectedItemIds;
     if (resetSelection || sel.isEmpty) {
-      final pick = preferred.intersection(ids);
-      sel = pick.isEmpty
-          ? e.items.where((x) => x.isAvailable).map((x) => x.id).toSet()
-          : pick;
+      sel = e.items.where((x) => x.isAvailable).map((x) => x.id).toSet();
     } else {
-      sel = sel.intersection(ids);
+      sel = sel.intersection(e.items.map((x) => x.id).toSet());
     }
-    state = state.copyWith(
-      items: e.items,
-      coupon: e.coupon,
-      couponErrorKey: null,
-      selectedItemIds: sel,
-    );
+    state = state.copyWith(items: e.items, selectedItemIds: sel);
     _recomputeTotals();
   }
 
@@ -135,13 +108,10 @@ class Cart extends _$Cart {
       sub += it.price * it.quantity;
       ship += it.shippingCost;
     }
-    final c = state.coupon;
-    final disc = c != null ? cartDiscountOnSubtotal(sub, c) : 0.0;
     state = state.copyWith(
       subtotal: sub,
       shippingTotal: ship,
-      discount: disc,
-      total: sub + ship - disc,
+      total: sub + ship,
     );
   }
 
@@ -175,31 +145,30 @@ class Cart extends _$Cart {
     final prevIds = state.items.map((x) => x.id).toSet();
     final epoch = _epoch;
     state = state.copyWith(isUpdating: true, error: null);
-    final result = await ref.read(addToCartUseCaseProvider).call(
-          consumerId: id,
-          listingId: listingId,
-          quantity: quantity,
-        );
+    final result = await ref
+        .read(addToCartUseCaseProvider)
+        .call(consumerId: id, listingId: listingId, quantity: quantity);
     if (_epoch != epoch) return;
     result.fold(
       (f) => state = state.copyWith(isUpdating: false, error: f.toString()),
       (e) {
         state = state.copyWith(isUpdating: false);
         _setFromEntity(e);
-        final newOnes =
-            e.items.map((x) => x.id).toSet().difference(prevIds);
+        final newOnes = e.items.map((x) => x.id).toSet().difference(prevIds);
         state = state.copyWith(
           selectedItemIds: {...state.selectedItemIds, ...newOnes},
         );
         _recomputeTotals();
-        ref.read(analyticsServiceProvider).track(
-          AnalyticsEvents.addToCart,
-          properties: {
-            AnalyticsProps.itemId: listingId,
-            AnalyticsProps.quantity: quantity,
-            AnalyticsProps.cartValueEgp: state.total,
-          },
-        );
+        ref
+            .read(analyticsServiceProvider)
+            .track(
+              AnalyticsEvents.addToCart,
+              properties: {
+                AnalyticsProps.itemId: listingId,
+                AnalyticsProps.quantity: quantity,
+                AnalyticsProps.cartValueEgp: state.total,
+              },
+            );
       },
     );
   }
@@ -234,10 +203,9 @@ class Cart extends _$Cart {
     );
     _recomputeTotals();
     final epoch = _epoch;
-    final result = await ref.read(removeFromCartUseCaseProvider).call(
-          consumerId: id,
-          itemId: itemId,
-        );
+    final result = await ref
+        .read(removeFromCartUseCaseProvider)
+        .call(consumerId: id, itemId: itemId);
     if (_epoch != epoch) return;
     result.fold(
       (f) {
@@ -258,6 +226,16 @@ class Cart extends _$Cart {
           lastRemovedIndex: skipUndo ? null : idx,
         );
         _setFromEntity(e);
+        ref
+            .read(analyticsServiceProvider)
+            .track(
+              AnalyticsEvents.removeFromCart,
+              properties: {
+                AnalyticsProps.itemId: prev.listingId,
+                AnalyticsProps.quantity: prev.quantity,
+                AnalyticsProps.cartValueEgp: state.total,
+              },
+            );
       },
     );
   }
@@ -268,10 +246,9 @@ class Cart extends _$Cart {
     if (line == null || id == null) return;
     final epoch = _epoch;
     state = state.copyWith(isUpdating: true);
-    final result = await ref.read(addOrUpdateCartItemUseCaseProvider).call(
-          consumerId: id,
-          item: line,
-        );
+    final result = await ref
+        .read(addOrUpdateCartItemUseCaseProvider)
+        .call(consumerId: id, item: line);
     if (_epoch != epoch) return;
     result.fold(
       (f) => state = state.copyWith(isUpdating: false, error: f.toString()),
@@ -301,11 +278,9 @@ class Cart extends _$Cart {
     state = state.copyWith(items: optimistic);
     _recomputeTotals();
     final epoch = _epoch;
-    final result = await ref.read(updateQuantityUseCaseProvider).call(
-          consumerId: id,
-          itemId: itemId,
-          quantity: quantity,
-        );
+    final result = await ref
+        .read(updateQuantityUseCaseProvider)
+        .call(consumerId: id, itemId: itemId, quantity: quantity);
     if (_epoch != epoch) return;
     result.fold(
       (f) {
@@ -333,12 +308,7 @@ class Cart extends _$Cart {
     result.fold(
       (f) => state = state.copyWith(isUpdating: false, error: f.toString()),
       (e) {
-        state = state.copyWith(
-          isUpdating: false,
-          coupon: null,
-          couponInput: '',
-          selectedItemIds: {},
-        );
+        state = state.copyWith(isUpdating: false, selectedItemIds: {});
         _setFromEntity(e, resetSelection: true);
       },
     );
@@ -355,89 +325,67 @@ class Cart extends _$Cart {
     _recomputeTotals();
   }
 
-  void selectAll() {
-    final next = state.items.map((e) => e.id).toSet();
-    state = state.copyWith(selectedItemIds: next);
-    _recomputeTotals();
-  }
-
-  void deselectAll() {
-    state = state.copyWith(selectedItemIds: {});
-    _recomputeTotals();
-  }
-
-  bool get allSelected =>
-      state.items.isNotEmpty &&
-      state.selectedItemIds.length == state.items.length;
-
-  void toggleSelectAll() {
-    if (allSelected) {
-      deselectAll();
-    } else {
-      selectAll();
-    }
-  }
-
-  void setCouponInput(String v) {
-    state = state.copyWith(couponInput: v, couponErrorKey: null);
-  }
-
-  Future<void> applyCoupon() async {
-    final id = _consumerId;
-    if (id == null) return;
-    final code = state.couponInput.trim();
-    if (code.isEmpty) return;
-    var sub = 0.0;
-    for (final it in state.selectedAvailableItems) {
-      sub += it.price * it.quantity;
-    }
-    final epoch = _epoch;
-    state = state.copyWith(isCouponLoading: true, couponErrorKey: null);
-    final result = await ref.read(applyCouponUseCaseProvider).call(
-          consumerId: id,
-          code: code,
-          eligibleSubtotal: sub,
-        );
-    if (_epoch != epoch) return;
-    var applied = false;
-    result.fold(
-      (f) {
-        final key = switch (f) {
-          ValidationFailure(:final message) when message == 'minOrder' =>
-            'minOrder',
-          ValidationFailure(:final message) when message == 'unavailable' =>
-            'unavailable',
-          ValidationFailure() => 'invalid',
-          _ => 'invalid',
-        };
-        state = state.copyWith(isCouponLoading: false, couponErrorKey: key);
-      },
-      (_) => applied = true,
-    );
-    if (applied) {
-      await fetchCart();
-      if (_epoch != epoch) return;
-      state = state.copyWith(isCouponLoading: false);
-    }
-  }
-
-  Future<void> removeCoupon() async {
-    final id = _consumerId;
-    if (id == null) return;
-    final epoch = _epoch;
-    state = state.copyWith(isCouponLoading: true);
-    final result = await ref.read(removeCouponUseCaseProvider).call(id);
-    if (_epoch != epoch) return;
-    var ok = false;
-    result.fold(
-      (f) => state = state.copyWith(isCouponLoading: false, error: f.toString()),
-      (_) => ok = true,
-    );
-    if (ok) {
-      state = state.copyWith(isCouponLoading: false, couponInput: '');
-      await fetchCart();
-    }
-  }
+  // TODO(phase-2): coupons — parked. The coupon stack (state fields, use cases,
+  // repository methods, CouponEntity) was removed in 4239e8e; restore it from
+  // there together with the cart's coupon row. Kept for reference only:
+  // void setCouponInput(String v) {
+  //   state = state.copyWith(couponInput: v, couponErrorKey: null);
+  // }
+  // Future<void> applyCoupon() async {
+  //   final id = _consumerId;
+  //   if (id == null) return;
+  //   final code = state.couponInput.trim();
+  //   if (code.isEmpty) return;
+  //   var sub = 0.0;
+  //   for (final it in state.selectedAvailableItems) {
+  //     sub += it.price * it.quantity;
+  //   }
+  //   final epoch = _epoch;
+  //   state = state.copyWith(isCouponLoading: true, couponErrorKey: null);
+  //   final result = await ref.read(applyCouponUseCaseProvider).call(
+  //         consumerId: id,
+  //         code: code,
+  //         eligibleSubtotal: sub,
+  //       );
+  //   if (_epoch != epoch) return;
+  //   var applied = false;
+  //   result.fold(
+  //     (f) {
+  //       final key = switch (f) {
+  //         ValidationFailure(:final message) when message == 'minOrder' =>
+  //           'minOrder',
+  //         ValidationFailure(:final message) when message == 'unavailable' =>
+  //           'unavailable',
+  //         ValidationFailure() => 'invalid',
+  //         _ => 'invalid',
+  //       };
+  //       state = state.copyWith(isCouponLoading: false, couponErrorKey: key);
+  //     },
+  //     (_) => applied = true,
+  //   );
+  //   if (applied) {
+  //     await fetchCart();
+  //     if (_epoch != epoch) return;
+  //     state = state.copyWith(isCouponLoading: false);
+  //   }
+  // }
+  // Future<void> removeCoupon() async {
+  //   final id = _consumerId;
+  //   if (id == null) return;
+  //   final epoch = _epoch;
+  //   state = state.copyWith(isCouponLoading: true);
+  //   final result = await ref.read(removeCouponUseCaseProvider).call(id);
+  //   if (_epoch != epoch) return;
+  //   var ok = false;
+  //   result.fold(
+  //     (f) => state = state.copyWith(isCouponLoading: false, error: f.toString()),
+  //     (_) => ok = true,
+  //   );
+  //   if (ok) {
+  //     state = state.copyWith(isCouponLoading: false, couponInput: '');
+  //     await fetchCart();
+  //   }
+  // }
 
   Future<void> saveForLater(String itemId) async {
     final idx = state.items.indexWhere((e) => e.id == itemId);
@@ -465,21 +413,26 @@ class Cart extends _$Cart {
         state = state.copyWith(
           isUpdating: false,
           selectedItemIds: {},
-          couponInput: '',
           lastRemovedItem: null,
           lastRemovedIndex: null,
         );
         Future.microtask(fetchCart);
-        ref.read(analyticsServiceProvider).track(
-          AnalyticsEvents.purchase,
-          properties: {
-            AnalyticsProps.orderId: order.id,
-            AnalyticsProps.valueEgp: params.total,
-            AnalyticsProps.currency: 'EGP',
-            AnalyticsProps.paymentType: params.paymentMethod.name,
-            AnalyticsProps.itemCount: params.items.length,
-          },
-        );
+        ref
+            .read(analyticsServiceProvider)
+            .track(
+              AnalyticsEvents.purchase,
+              properties: {
+                AnalyticsProps.orderId: order.id,
+                AnalyticsProps.valueEgp: params.total,
+                AnalyticsProps.currency: 'EGP',
+                // Spec value is `cod`, not the enum name `cashOnDelivery`.
+                AnalyticsProps.paymentType:
+                    params.paymentMethod == PaymentMethod.cashOnDelivery
+                    ? 'cod'
+                    : params.paymentMethod.name,
+                AnalyticsProps.itemCount: params.items.length,
+              },
+            );
         return order;
       },
     );

@@ -22,6 +22,7 @@ _$SearchResultModelImpl _$$SearchResultModelImplFromJson(
       isSellerVerified: json['isSellerVerified'] as bool,
       location: json['location'] as String,
       hasShipping: json['hasShipping'] as bool,
+      isSoldOut: json['isSoldOut'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$SearchResultModelImplToJson(
@@ -40,4 +41,5 @@ Map<String, dynamic> _$$SearchResultModelImplToJson(
       'isSellerVerified': instance.isSellerVerified,
       'location': instance.location,
       'hasShipping': instance.hasShipping,
+      'isSoldOut': instance.isSoldOut,
     };

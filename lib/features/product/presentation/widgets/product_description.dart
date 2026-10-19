@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/expandable_text.dart';
 
 class ProductDescription extends StatelessWidget {
   const ProductDescription({
@@ -18,44 +20,41 @@ class ProductDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             context.l10n.description,
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: AppTypography.labelLarge.copyWith(
+              fontSize: 13,
               fontWeight: FontWeight.w700,
-            ),
-          ),
-          const Gap(AppSpacing.md),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.topLeft,
-            child: Text(
-              text,
-              maxLines: expanded ? null : 4,
-              overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                height: 1.45,
-                fontWeight: FontWeight.w400,
-              ),
+              color: context.labelColor,
             ),
           ),
           const Gap(AppSpacing.sm),
-          GestureDetector(
-            onTap: onToggle,
-            child: Text(
-              expanded
-                  ? '${context.l10n.readLess} ${context.arrowBack}'
-                  : '${context.l10n.readMore} ${context.arrowForward}',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
+          ExpandableText(
+            text: text,
+            maxLines: 4,
+            expanded: expanded,
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.textSecondary,
+              height: 1.55,
+            ),
+            toggle: Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: GestureDetector(
+                onTap: onToggle,
+                child: Text(
+                  expanded
+                      ? '${context.l10n.readLess} ${context.arrowBack}'
+                      : '${context.l10n.readMore} ${context.arrowForward}',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: context.linkColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
           ),

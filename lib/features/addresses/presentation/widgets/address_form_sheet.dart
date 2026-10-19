@@ -7,12 +7,14 @@ import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/widgets/auth_text_field.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../../../cities/presentation/providers/city_dependencies.dart';
 import '../../../governments/presentation/providers/government_dependencies.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/address_location_display.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
-import '../../../../shared/widgets/map_address_picker.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 /// Opens the add/edit address sheet, shared by checkout's address step and
 /// the Profile "My Addresses" screen — the two only places a saved address
@@ -39,12 +41,6 @@ Future<void> showAddressFormSheet(
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: context.surfaceColor,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(AppSpacing.lg),
-      ),
-    ),
     builder: (ctx) => _AddressFormSheet(
       existing: existing,
       editIndex: editIndex,
@@ -91,9 +87,9 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
   // rest of the app instead of a second, disagreeing location system.
   int? _cityId;
   int? _governorateId;
-  // Set by the map picker (showMapAddressPicker) — carried on the saved
-  // OrderAddress so checkout can use the exact pinned spot instead of the
-  // device's last-known GPS fix when placing the order.
+  // An address pinned on the map before the picker was hidden keeps its
+  // spot on save, so checkout still sends those coordinates instead of the
+  // device's last-known GPS fix.
   double? _pickedLat;
   double? _pickedLng;
   late bool _isDefault;
@@ -136,24 +132,6 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
     _streetCtrl.dispose();
     _postalCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickOnMap() async {
-    final result = await showMapAddressPicker(
-      context,
-      initialLatitude: _pickedLat,
-      initialLongitude: _pickedLng,
-    );
-    if (result == null || !mounted) return;
-    setState(() {
-      _pickedLat = result.latitude;
-      _pickedLng = result.longitude;
-      // A dropped pin's reverse-geocoded label is a reasonable street-line
-      // starting point, but never overwrites text the user already typed.
-      if (_streetCtrl.text.trim().isEmpty && result.addressLine != null) {
-        _streetCtrl.text = result.addressLine!;
-      }
-    });
   }
 
   void _save() {
@@ -211,6 +189,10 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
       isDefault: _isDefault,
       latitude: _pickedLat,
       longitude: _pickedLng,
+      // Guaranteed non-null here: the errors check above blocks save until
+      // both are picked.
+      cityId: _cityId,
+      governorateId: _governorateId,
     );
     widget.onSave(address);
     Navigator.pop(context);
@@ -244,6 +226,16 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    // Resolved in the CURRENT locale (not the frozen wilaya/city strings)
+    // so the hint doesn't show stale English inside an otherwise-Arabic
+    // sheet (or vice versa) when editing an address saved in another
+    // language.
+    final existingLocationHint = widget.existing == null
+        ? null
+        : () {
+            final location = resolveAddressLocation(ref, widget.existing!);
+            return '${location.wilaya} - ${location.city}';
+          }();
     return Padding(
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
@@ -264,48 +256,28 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            TextField(
+            AuthTextField(
+              label: l10n.checkoutFullName,
               controller: _nameCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.checkoutFullName,
-                border: const OutlineInputBorder(),
-                errorText: _fieldErrors['fullName'],
-              ),
+              errorText: _fieldErrors['fullName'],
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             PhoneInputField(
               controller: _phoneCtrl,
               onChanged: (_) {},
               errorText: _fieldErrors['phone'],
             ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
+            const SizedBox(height: AppSpacing.md),
+            AuthTextField(
+              label: l10n.checkoutStreet,
               controller: _streetCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.checkoutStreet,
-                border: const OutlineInputBorder(),
-                errorText: _fieldErrors['street'],
-              ),
+              errorText: _fieldErrors['street'],
             ),
-            const SizedBox(height: AppSpacing.sm),
-            OutlinedButton.icon(
-              onPressed: _pickOnMap,
-              icon: Icon(
-                _pickedLat == null ? Icons.location_on_outlined : Icons.check,
-              ),
-              label: Text(
-                _pickedLat == null
-                    ? l10n.checkoutPickOnMap
-                    : l10n.checkoutLocationPinned,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             LocationCascadeField(
               cityId: _cityId,
               governorateId: _governorateId,
-              hint: widget.existing == null
-                  ? null
-                  : '${widget.existing!.wilaya} - ${widget.existing!.city}',
+              hint: existingLocationHint,
               errorText: _fieldErrors['location'],
               onChanged: (cityId, governorateId) {
                 setState(() {
@@ -314,17 +286,20 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
                 });
               },
             ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
+            const SizedBox(height: AppSpacing.md),
+            AuthTextField(
+              label: l10n.checkoutPostalCode,
               controller: _postalCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.checkoutPostalCode,
-                border: const OutlineInputBorder(),
-              ),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(l10n.checkoutSetDefault),
+              title: Text(
+                l10n.checkoutSetDefault,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               value: _isDefault,
               onChanged: (v) => setState(() => _isDefault = v),
             ),
@@ -337,9 +312,9 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
             const SizedBox(height: AppSpacing.sm),
             ListenableBuilder(
               listenable: _fields,
-              builder: (context, _) => FilledButton(
+              builder: (context, _) => XstoreButton(
+                label: l10n.checkoutSaveAddress,
                 onPressed: _canSave ? _save : null,
-                child: Text(l10n.checkoutSaveAddress),
               ),
             ),
           ],

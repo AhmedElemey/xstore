@@ -302,6 +302,23 @@ void main() {
       expect(model.storeId, isNotNull);
     });
 
+    test('blank storeLogoUrl and storeImageUrl parse as no logo', () {
+      final model = userModelFromProfileResponse({
+        'user': {
+          'email': 'vendor@test.com',
+          'fullName': 'Vendor',
+          'avatarUrl': '  ',
+        },
+        'store': {
+          'id': 1,
+          'storeLogoUrl': '',
+          'storeImageUrl': '   ',
+        },
+      });
+      expect(model.storeLogoUrl, isNull);
+      expect(model.avatarUrl, isNull);
+    });
+
     test('reads nested storeCategory object when scalar id/name are absent', () {
       final model = userModelFromProfileResponse({
         'user': {

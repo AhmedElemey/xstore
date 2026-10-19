@@ -7,8 +7,9 @@ import '../../../../core/mock/mock_deals.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
+import '../../../../core/network/json_list_unwrap.dart';
 import '../../../listing/data/models/listing_model.dart'
-    show isPublicLiveListingStatus;
+    show isPublicLiveListingStatus, isSoldOutListingJson;
 import '../models/banner_model.dart';
 import '../models/category_model.dart';
 import '../models/deal_model.dart';
@@ -27,13 +28,15 @@ typedef HomeAggregate = ({
 abstract interface class HomeRemoteDataSource {
   Future<List<BannerModel>> fetchBanners();
 
+  /// Hot deals derived from `GET /api/listings` — the fallback when the
+  /// aggregate's `hotDeals` is empty.
   Future<List<DealModel>> fetchHotDeals();
 
   Future<List<CategoryModel>> fetchCategories();
 
-  /// Fetches all four home sections in one call. Returns null on error or
-  /// when every section comes back empty, so callers can fall back to the
-  /// per-section derivation that already exists.
+  /// Fetches all four home sections in one call (hot deals capped at the
+  /// carousel size). Returns null on error or when every section comes back
+  /// empty, so callers fall back per section.
   Future<HomeAggregate?> fetchHomeAggregate();
 }
 
@@ -55,18 +58,18 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     // that served static placeholder tiles unconditionally. The read
     // response has no example in the collection (only the multipart
     // create body — nameEn/nameAr/image — is documented), so this is
-    // parsed tolerantly; fall back to the static set on any error or an
-    // empty/malformed response so the home screen never shows nothing.
+    // parsed tolerantly. No admin banners (or offline) means no carousel —
+    // never placeholder banners (HeroBannerCarousel hides on empty).
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.banners,
         options: ApiAuthHeaders.public(),
       );
       final banners =
-          _unwrapObjectList(response.data).map(_bannerFromApi).whereType<BannerModel>().toList();
-      return banners.isNotEmpty ? banners : _staticBanners();
+          unwrapJsonObjectList(response.data).map(_bannerFromApi).whereType<BannerModel>().toList();
+      return banners;
     } on DioException catch (e) {
-      if (_isOffline(e)) return _staticBanners();
+      if (_isOffline(e)) return const [];
       throw mapDioException(e);
     }
   }
@@ -105,29 +108,45 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     if (MockConfig.useMock) {
       return MockConfig.simulate(List<DealModel>.from(mockHotDealModels));
     }
-    final aggregate = await fetchHomeAggregate();
-    if (aggregate != null && aggregate.hotDeals.isNotEmpty) {
-      return aggregate.hotDeals.take(_hotDealsCount).toList();
-    }
-    // Fallback: no dedicated hot-deals data from /api/home — derive from
-    // GET /api/listings instead (any listing with compareAtPrice > price
-    // is discounted; biggest discounts first).
+    // Ask the server for flagged hot deals first, then derive from
+    // GET /api/listings (any listing with compareAtPrice > price is
+    // discounted; biggest discounts first).
+    // TODO(backend): confirm `isHotDeal` semantics — if nothing flags
+    // listings it returns empty and the derivation below still applies.
     try {
-      final response = await _dio.get<dynamic>(
-        ApiEndpoints.apiListings,
-        queryParameters: {'page': 1, 'pageSize': 40},
-        options: ApiAuthHeaders.public(),
-      );
-      final deals = _unwrapObjectList(response.data)
-          .map(_dealFromListing)
-          .whereType<DealModel>()
-          .toList()
-        ..sort((a, b) => b.discountPercent.compareTo(a.discountPercent));
+      var deals = const <DealModel>[];
+      try {
+        deals = await _dealsFromListings({
+          'page': 1,
+          'pageSize': 40,
+          'isHotDeal': true,
+        });
+      } on DioException {
+        // Param unsupported or failed — derive from the plain listing below.
+      }
+      if (deals.isEmpty) {
+        deals = await _dealsFromListings({'page': 1, 'pageSize': 40});
+      }
       return deals.take(_hotDealsCount).toList();
     } on DioException catch (e) {
       if (_isOffline(e)) return _fallbackDeals();
       throw mapDioException(e);
     }
+  }
+
+  Future<List<DealModel>> _dealsFromListings(
+    Map<String, dynamic> query,
+  ) async {
+    final response = await _dio.get<dynamic>(
+      ApiEndpoints.apiListings,
+      queryParameters: query,
+      options: ApiAuthHeaders.public(),
+    );
+    return unwrapJsonObjectList(response.data)
+        .map(_dealFromListing)
+        .whereType<DealModel>()
+        .toList()
+      ..sort((a, b) => b.discountPercent.compareTo(a.discountPercent));
   }
 
   @override
@@ -141,19 +160,20 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       final data = response.data;
       if (data is! Map) return null;
       final map = Map<String, dynamic>.from(data);
-      final banners = _unwrapObjectList(map['banners'])
+      final banners = unwrapJsonObjectList(map['banners'])
           .map(_bannerFromApi)
           .whereType<BannerModel>()
           .toList();
-      final hotDeals = _unwrapObjectList(map['hotDeals'])
+      final hotDeals = unwrapJsonObjectList(map['hotDeals'])
+          .map(_dealFromListing)
+          .whereType<DealModel>()
+          .take(_hotDealsCount)
+          .toList();
+      final newArrivals = unwrapJsonObjectList(map['newArrivals'])
           .map(_dealFromListing)
           .whereType<DealModel>()
           .toList();
-      final newArrivals = _unwrapObjectList(map['newArrivals'])
-          .map(_dealFromListing)
-          .whereType<DealModel>()
-          .toList();
-      final recommended = _unwrapObjectList(map['recommendedForYou'])
+      final recommended = unwrapJsonObjectList(map['recommendedForYou'])
           .map(_dealFromListing)
           .whereType<DealModel>()
           .toList();
@@ -187,7 +207,12 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         ApiEndpoints.catalogCategories,
         options: ApiAuthHeaders.public(),
       );
-      return _unwrapObjectList(response.data)
+      // TODO(backend): confirm whether listings in hidden (`isActive: false`) categories are excluded server-side;
+      // the client only filters the category rows themselves.
+      // The public endpoint also returns categories an admin hid
+      // (`isActive: false`, confirmed live) — buyers must not see them.
+      return unwrapJsonObjectList(response.data)
+          .where((json) => json['isActive'] != false)
           .map(_categoryFromApi)
           .toList();
     } on DioException catch (e) {
@@ -204,8 +229,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     final title =
         (json['title'] ?? json['titleEn'] ?? json['name'] ?? '').toString();
     if (id.isEmpty || title.isEmpty) return null;
-    final price = _num(json['price']);
-    final compare = _num(json['compareAtPrice'] ?? json['compare_at_price']);
+    final price = jsonDouble(json['price']);
+    final compare = jsonDouble(json['compareAtPrice'] ?? json['compare_at_price']);
     final discount = compare > price && compare > 0
         ? ((compare - price) / compare) * 100
         : 0.0;
@@ -219,6 +244,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       price: price,
       imageUrl: imageUrl,
       discountPercent: discount,
+      isSoldOut: isSoldOutListingJson(json),
     );
   }
 
@@ -226,50 +252,21 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     return CategoryModel(
       id: (json['id'] ?? '').toString(),
       name: (json['nameEn'] ?? json['name'] ?? json['nameAr'] ?? '').toString(),
-      iconUrl: json['iconUrl']?.toString(),
+      // Live `/api/categories` sends the admin-uploaded picture as `imageUrl`
+      // (confirmed by live probe); `iconUrl` is kept as a fallback.
+      iconUrl: _nonBlank(json['imageUrl']) ?? _nonBlank(json['iconUrl']),
     );
   }
 
-  List<Map<String, dynamic>> _unwrapObjectList(dynamic data) {
-    if (data is List) {
-      return data
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
-    }
-    if (data is Map) {
-      final m = Map<String, dynamic>.from(data);
-      final items = m['items'] ?? m['data'] ?? m['results'] ?? m['listings'];
-      if (items is List) {
-        return items
-            .whereType<Map>()
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList();
-      }
-    }
-    return const [];
+  String? _nonBlank(Object? value) {
+    final s = value?.toString().trim();
+    return s == null || s.isEmpty ? null : s;
   }
 
   bool _isOffline(DioException e) {
     return e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout;
   }
-
-  double _num(Object? v) =>
-      v is num ? v.toDouble() : double.tryParse(v?.toString() ?? '') ?? 0;
-
-  List<BannerModel> _staticBanners() => [
-        const BannerModel(
-          id: 'b1',
-          title: 'New season',
-          imageUrl: 'https://picsum.photos/seed/xstore1/800/360',
-        ),
-        const BannerModel(
-          id: 'b2',
-          title: 'Hot deals',
-          imageUrl: 'https://picsum.photos/seed/xstore2/800/360',
-        ),
-      ];
 
   List<DealModel> _fallbackDeals() => [
         const DealModel(

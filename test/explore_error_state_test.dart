@@ -13,6 +13,7 @@ import 'package:xstore/features/explore/domain/entities/search_result_entity.dar
 import 'package:xstore/features/explore/domain/repositories/explore_repository.dart';
 import 'package:xstore/features/explore/presentation/explore_dependencies.dart';
 import 'package:xstore/features/explore/presentation/explore_provider.dart';
+import 'package:xstore/features/explore/presentation/explore_state.dart';
 
 SearchResultEntity _result(String id) => SearchResultEntity(
       id: id,
@@ -30,6 +31,8 @@ SearchResultEntity _result(String id) => SearchResultEntity(
 
 class _StubExploreRepository implements ExploreRepository {
   Either<Failure, List<SearchResultEntity>> Function(int page)? searchResult;
+  bool? lastShippingAvailable;
+  double? lastMinimumRating;
 
   @override
   Future<Either<Failure, List<SearchResultEntity>>> searchListings({
@@ -39,8 +42,13 @@ class _StubExploreRepository implements ExploreRepository {
     double? maxPrice,
     String? condition,
     int? categoryId,
-  }) async =>
-      searchResult?.call(page) ?? const Right(<SearchResultEntity>[]);
+    bool? shippingAvailable,
+    double? minimumRating,
+  }) async {
+    lastShippingAvailable = shippingAvailable;
+    lastMinimumRating = minimumRating;
+    return searchResult?.call(page) ?? const Right(<SearchResultEntity>[]);
+  }
 
   @override
   Future<Either<Failure, List<String>>> getSuggestions(String query) async =>
@@ -105,5 +113,16 @@ void main() {
     expect(state.results, hasLength(20), reason: 'existing results must not be wiped');
     expect(state.isLoadingMore, isFalse);
     expect(state.error, isNotNull);
+  });
+
+  test('shipping and minimum rating filters are sent to the server', () async {
+    repo.searchResult = (_) => Right([_result('1')]);
+    container
+        .read(exploreProvider.notifier)
+        .applyFilters(const FilterState(shippingOnly: true, minRating: 4));
+    await Future<void>.delayed(Duration.zero);
+
+    expect(repo.lastShippingAvailable, isTrue);
+    expect(repo.lastMinimumRating, 4);
   });
 }

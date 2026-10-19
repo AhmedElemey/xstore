@@ -7,6 +7,7 @@ import '../../domain/entities/city_entity.dart';
 import '../../domain/repositories/city_repository.dart';
 import '../datasources/city_remote_datasource.dart';
 import '../models/city_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class CityRepositoryImpl implements CityRepository {
   const CityRepositoryImpl(this._remote);
@@ -33,7 +34,7 @@ class CityRepositoryImpl implements CityRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

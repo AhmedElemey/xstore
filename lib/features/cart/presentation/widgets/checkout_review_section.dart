@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../shared/utils/address_location_display.dart';
 import '../../../../shared/utils/legal_links.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
-import '../../../orders/domain/entities/order_entity.dart';
+import '../../../orders/presentation/widgets/order_price_breakdown.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
 import 'cart_summary_card.dart';
-import 'checkout_payment_section.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutReviewSection extends ConsumerWidget {
   const CheckoutReviewSection({super.key});
-
-  static String _payLabel(BuildContext context, PaymentMethod m) =>
-      checkoutPaymentLabel(context, m);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,23 +22,25 @@ class CheckoutReviewSection extends ConsumerWidget {
     final st = ref.watch(checkoutProvider);
     final items = cart.selectedAvailableItems.toList();
     final idx = st.selectedAddressIndex;
-    final addr = idx != null &&
-            idx >= 0 &&
-            idx < st.savedAddresses.length
+    final addr = idx != null && idx >= 0 && idx < st.savedAddresses.length
         ? st.savedAddresses[idx]
         : null;
     final pay = st.selectedPayment;
     final note = st.deliveryNote.trim();
     final vendors = items.map((e) => e.vendorId).toSet().length;
+    final addrLocation = addr == null
+        ? null
+        : resolveAddressLocation(ref, addr);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Material(
-          color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(AppSpacing.lg),
-          elevation: 1,
-          shadowColor: context.textPrimary.withValues(alpha: 0.06),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: context.glassColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: context.borderColor),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
@@ -49,13 +48,17 @@ class CheckoutReviewSection extends ConsumerWidget {
               children: [
                 Text(
                   context.l10n.checkoutReviewTitle,
-                  style: AppTypography.titleMedium.copyWith(
-                    fontWeight: FontWeight.w700,
+                  style: AppTypography.headlineSmall.copyWith(
+                    fontSize: 18,
+                    color: context.textPrimary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  context.l10n.checkoutItemsFromSellers(items.length, vendors),
+                  context.l10n.checkoutItemsFromSellers(
+                    context.formatInt(items.length),
+                    context.formatInt(vendors),
+                  ),
                   style: AppTypography.bodySmall.copyWith(
                     color: context.textSecondary,
                     fontWeight: FontWeight.w600,
@@ -68,10 +71,10 @@ class CheckoutReviewSection extends ConsumerWidget {
                     child: Row(
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(AppSpacing.xs),
+                          borderRadius: BorderRadius.circular(12),
                           child: SizedBox(
-                            width: AppSpacing.x3l + AppSpacing.sm,
-                            height: AppSpacing.x3l + AppSpacing.sm,
+                            width: 44,
+                            height: 44,
                             child: AppCachedNetworkImage(
                               imageUrl: it.listingImage,
                               fit: BoxFit.cover,
@@ -80,30 +83,64 @@ class CheckoutReviewSection extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.sm),
+                        const SizedBox(width: AppSpacing.md),
                         Expanded(
-                          child: Text(
-                            '${it.listingName} · ${context.l10n.quantity} ${it.quantity} · ${context.formatCurrency(it.price * it.quantity)}',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.bodySmall,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                it.listingName,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              Text.rich(
+                                TextSpan(
+                                  text:
+                                      '${context.l10n.quantity} ${context.formatInt(it.quantity)} · ',
+                                  children: [
+                                    TextSpan(
+                                      text: context.formatCurrency(
+                                        it.price * it.quantity,
+                                      ),
+                                      style: AppTypography.mono.copyWith(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: context.amberColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: context.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                Divider(height: AppSpacing.x2l),
-                if (addr != null) ...[
-                  Text(
-                    '📍 ${addr.street}, ${addr.city}, ${addr.wilaya}',
-                    style: AppTypography.bodySmall.copyWith(height: 1.4),
+                Divider(height: AppSpacing.x2l, color: context.borderColor),
+                if (addr != null && addrLocation != null) ...[
+                  _iconLine(
+                    context,
+                    LucideIcons.mapPin,
+                    context.addressLine([
+                      addr.street,
+                      addrLocation.city,
+                      addrLocation.wilaya,
+                    ]),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                 ],
                 if (pay != null)
-                  Text(
-                    '💳 ${_payLabel(context, pay)}',
-                    style: AppTypography.bodySmall,
+                  _iconLine(
+                    context,
+                    LucideIcons.banknote,
+                    paymentMethodLabel(context, pay),
                   ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
@@ -151,35 +188,29 @@ class CheckoutReviewSection extends ConsumerWidget {
               child: Text(
                 context.l10n.menuTerms,
                 style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.accent,
+                  color: context.linkColor,
                   fontWeight: FontWeight.w700,
                   height: 1.45,
                 ),
               ),
             ),
-            // TODO(phase-2): No standalone return-policy content exists
-            // (the Terms document doesn't cover returns either) — re-enable
-            // once real return-policy content ships instead of linking
-            // "Return Policy" to the unrelated Terms screen.
-            // Text(
-            //   context.l10n.checkoutTermsAnd,
-            //   style: AppTypography.bodySmall.copyWith(
-            //     color: context.textSecondary,
-            //     height: 1.45,
-            //   ),
-            // ),
-            // InkWell(
-            //   onTap: () => context.push(AppRoutes.terms),
-            //   child: Text(
-            //     context.l10n.checkoutReturnPolicy,
-            //     style: AppTypography.bodySmall.copyWith(
-            //       color: AppColors.accent,
-            //       fontWeight: FontWeight.w700,
-            //       height: 1.45,
-            //     ),
-            //   ),
-            // ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _iconLine(BuildContext context, IconData icon, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: context.linkColor),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            text,
+            style: AppTypography.bodySmall.copyWith(height: 1.4),
+          ),
         ),
       ],
     );

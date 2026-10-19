@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../listing/data/models/listing_model.dart'
-    show listingConditionLabelFromRaw;
+    show isSoldOutListingJson, listingConditionLabelFromRaw;
 import '../../domain/entities/search_result_entity.dart';
 
 part 'search_result_model.freezed.dart';
@@ -23,6 +23,7 @@ class SearchResultModel with _$SearchResultModel {
     required bool isSellerVerified,
     required String location,
     required bool hasShipping,
+    @Default(false) bool isSoldOut,
   }) = _SearchResultModel;
 
   factory SearchResultModel.fromJson(Map<String, dynamic> json) =>
@@ -96,6 +97,7 @@ class SearchResultModel with _$SearchResultModel {
       ]),
       hasShipping: json['shippingAvailable'] == true ||
           json['hasShipping'] == true,
+      isSoldOut: isSoldOutListingJson(json),
     );
   }
 }
@@ -147,5 +149,6 @@ extension SearchResultModelX on SearchResultModel {
         isSellerVerified: isSellerVerified,
         location: location,
         hasShipping: hasShipping,
+        isSoldOut: isSoldOut,
       );
 }

@@ -2,4 +2,6 @@
 <resources>
     <!-- Brand primary (#4F46E5); adaptive launcher background -->
     <color name="ic_launcher_background">#FF4F46E5</color>
+    <!-- Orbit launch background (light "daylight"); dark in values-night -->
+    <color name="launch_background">#FFF6F5FF</color>
 </resources>

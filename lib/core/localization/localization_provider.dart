@@ -3,16 +3,31 @@ import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/providers/shared_providers.dart';
+import '../network/dio_error_mapper.dart';
 
 enum AppLanguage { english, arabic }
 
 class AppLocaleNotifier extends StateNotifier<AppLanguage> {
   AppLocaleNotifier(this.ref) : super(AppLanguage.english) {
-    _loadSavedLanguage();
+    errorMessagesInArabic = false;
+    loaded = _loadSavedLanguage();
   }
 
   static const _key = 'app_language';
   final Ref ref;
+
+  /// Completes once the saved language has been applied. Anything reacting
+  /// to language changes awaits this so the startup load isn't mistaken for
+  /// a user-initiated change.
+  late final Future<void> loaded;
+
+  // Every language change goes through here so server error text (mapped
+  // in datasources, with no context) follows the app language.
+  @override
+  set state(AppLanguage value) {
+    errorMessagesInArabic = value == AppLanguage.arabic;
+    super.state = value;
+  }
 
   Future<void> _loadSavedLanguage() async {
     final prefs = await ref.read(sharedPreferencesProvider.future);

@@ -190,7 +190,7 @@ void main() {
       await _settle(tester);
 
       expect(find.text('Price ready'), findsOneWidget);
-      expect(find.text('EGP 75'), findsOneWidget);
+      expect(find.text('75 LE'), findsOneWidget);
     },
   );
 

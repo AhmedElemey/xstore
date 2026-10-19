@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -15,10 +16,21 @@ import 'package:xstore/features/orders/domain/entities/order_entity.dart';
 import 'package:xstore/features/orders/domain/entities/order_item_entity.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_dependencies.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_provider.dart';
+import 'package:xstore/features/orders/presentation/providers/vendor_orders_provider.dart';
+import 'package:xstore/features/general_settings/domain/entities/app_settings.dart';
+import 'package:xstore/features/general_settings/presentation/providers/general_settings_provider.dart';
 import 'helpers/fake_async_auth_notifier.dart';
 import 'helpers/stub_auth_repository.dart';
 import 'helpers/stub_cart_repository.dart';
 import 'helpers/stub_orders_repository.dart';
+
+class _PendingSettings extends GeneralSettings {
+  _PendingSettings(this._pending);
+  final Completer<AppSettings> _pending;
+
+  @override
+  Future<AppSettings> build() => _pending.future;
+}
 
 UserEntity _consumer() => UserEntity(
   id: 'c1',
@@ -94,7 +106,6 @@ PlaceOrderParams _dummyCheckout(String consumerId) => PlaceOrderParams(
   paymentMethod: PaymentMethod.cashOnDelivery,
   subtotal: 0,
   shippingTotal: 0,
-  discount: 0,
   total: 0,
 );
 
@@ -107,11 +118,14 @@ void main() {
 
   group('computeXStoreAuthRedirect', () {
     test('unauthenticated splash and onboarding stay put (cold start)', () {
-      for (final loc in [AppRoutes.splash, AppRoutes.onboarding, AppRoutes.login]) {
+      for (final loc in [
+        AppRoutes.splash,
+        AppRoutes.onboarding,
+        AppRoutes.login,
+      ]) {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           isNull,
@@ -129,7 +143,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           isNull,
@@ -147,7 +160,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           AppRoutes.login,
@@ -160,7 +172,6 @@ void main() {
       expect(
         computeXStoreAuthRedirect(
           auth: const AsyncValue.data(null),
-          needsRoleSelection: false,
           matchedLocation: AppRoutes.home,
         ),
         AppRoutes.login,
@@ -171,7 +182,6 @@ void main() {
       expect(
         computeXStoreAuthRedirect(
           auth: AsyncValue.data(_consumer()),
-          needsRoleSelection: false,
           matchedLocation: AppRoutes.login,
         ),
         AppRoutes.home,
@@ -182,7 +192,6 @@ void main() {
       expect(
         computeXStoreAuthRedirect(
           auth: const AsyncValue.loading(),
-          needsRoleSelection: false,
           matchedLocation: AppRoutes.home,
         ),
         isNull,
@@ -193,7 +202,6 @@ void main() {
       expect(
         computeXStoreAuthRedirect(
           auth: AsyncValue.error('401', StackTrace.empty),
-          needsRoleSelection: false,
           matchedLocation: AppRoutes.wishlist,
         ),
         AppRoutes.login,
@@ -214,7 +222,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: AsyncValue.data(_consumer()),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           AppRoutes.home,
@@ -233,7 +240,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: AsyncValue.data(_vendor()),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           // Vendors have no /home tab — their shell lands on Incoming Orders.
@@ -250,7 +256,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: AsyncValue.data(_vendor()),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           AppRoutes.vendorOrders,
@@ -271,7 +276,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
-            needsRoleSelection: false,
             matchedLocation: loc,
             isGuest: true,
           ),
@@ -295,7 +299,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
-            needsRoleSelection: false,
             matchedLocation: loc,
             isGuest: true,
           ),
@@ -309,7 +312,6 @@ void main() {
       expect(
         computeXStoreAuthRedirect(
           auth: const AsyncValue.data(null),
-          needsRoleSelection: false,
           matchedLocation: AppRoutes.home,
           isGuest: false,
         ),
@@ -333,7 +335,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: AsyncValue.data(user),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           isNull,
@@ -349,7 +350,6 @@ void main() {
           expect(
             computeXStoreAuthRedirect(
               auth: AsyncValue.data(user),
-              needsRoleSelection: false,
               matchedLocation: loc,
             ),
             isNull,
@@ -359,13 +359,51 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: AsyncValue.data(_courier()),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           AppRoutes.deliveries,
           reason: 'courier should be redirected from $loc to their run',
         );
       }
+    });
+  });
+
+  group('settings gate', () {
+    test('splash is held while settings are not ready, then released', () {
+      expect(
+        computeXStoreAuthRedirect(
+          auth: AsyncValue.data(_consumer()),
+          matchedLocation: AppRoutes.splash,
+          settingsReady: false,
+        ),
+        isNull,
+      );
+      expect(
+        computeXStoreAuthRedirect(
+          auth: AsyncValue.data(_consumer()),
+          matchedLocation: AppRoutes.splash,
+        ),
+        AppRoutes.home,
+      );
+    });
+
+    test('RouterNotifier reads readiness from the settings provider', () async {
+      final pending = Completer<AppSettings>();
+      final container = ProviderContainer(
+        overrides: [
+          authProvider.overrideWith(() => FakeAuth(_consumer())),
+          generalSettingsProvider.overrideWith(() => _PendingSettings(pending)),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+      final refresh = container.read(routerNotifierProvider);
+
+      expect(refresh.redirectFor(AppRoutes.splash), isNull);
+
+      pending.complete(AppSettings.empty);
+      await container.read(generalSettingsProvider.future);
+      expect(refresh.redirectFor(AppRoutes.splash), AppRoutes.home);
     });
   });
 
@@ -572,18 +610,16 @@ void main() {
 
       await container.read(authProvider.future);
 
-      // confirmOrderVendor's optimistic-update guard needs the order
-      // already in state.orders (it snapshots the original for rollback on
-      // failure) — a bare id with no matching order is a silent no-op, not
-      // a call to the repository.
-      await container.read(ordersNotifierProvider.notifier).fetchOrders();
+      // Vendors use the vendor-only stack; load the order first so the
+      // confirm has something to roll back on failure.
+      await container.read(vendorOrdersProvider.notifier).fetchOrders();
 
       await container
-          .read(ordersNotifierProvider.notifier)
-          .confirmOrderVendor('order_x', DeliveryMethod.platform);
+          .read(vendorOrdersProvider.notifier)
+          .confirmOrder('order_x', DeliveryMethod.platform);
 
       expect(
-        container.read(ordersNotifierProvider).error,
+        container.read(vendorOrdersProvider).error,
         Failure.server('confirm failed').toString(),
       );
     });

@@ -4,7 +4,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/network/paginated_result.dart';
 import '../../domain/entities/notification_entity.dart';
 import 'notifications_dependencies.dart';
@@ -33,6 +32,9 @@ class Notifications extends _$Notifications {
       }
       _deleteTimers.clear();
     });
+    // fireImmediately: this keepAlive notifier is often first read *after*
+    // auth already has a user (home bell). A plain listen only sees later
+    // transitions, so the inbox stayed empty until pull-to-refresh.
     ref.listen(authProvider, (prev, next) {
       if (next.isLoading) return;
       if (next.valueOrNull != null) {
@@ -43,7 +45,7 @@ class Notifications extends _$Notifications {
           state = const NotificationsState();
         });
       }
-    });
+    }, fireImmediately: true);
     return const NotificationsState();
   }
 
@@ -127,7 +129,7 @@ class Notifications extends _$Notifications {
     if (todayL.isNotEmpty) {
       out.add(
         NotificationGroup(
-          label: AppStrings.notificationsGroupToday,
+          kind: NotificationGroupKind.today,
           notifications: todayL,
         ),
       );
@@ -135,7 +137,7 @@ class Notifications extends _$Notifications {
     if (yestL.isNotEmpty) {
       out.add(
         NotificationGroup(
-          label: AppStrings.notificationsGroupYesterday,
+          kind: NotificationGroupKind.yesterday,
           notifications: yestL,
         ),
       );
@@ -143,7 +145,7 @@ class Notifications extends _$Notifications {
     if (weekL.isNotEmpty) {
       out.add(
         NotificationGroup(
-          label: AppStrings.notificationsGroupThisWeek,
+          kind: NotificationGroupKind.thisWeek,
           notifications: weekL,
         ),
       );
@@ -151,7 +153,7 @@ class Notifications extends _$Notifications {
     if (earlierL.isNotEmpty) {
       out.add(
         NotificationGroup(
-          label: AppStrings.notificationsGroupEarlier,
+          kind: NotificationGroupKind.earlier,
           notifications: earlierL,
         ),
       );
@@ -170,14 +172,14 @@ class Notifications extends _$Notifications {
   }
 
   Future<void> fetchNotifications() async {
+    if (ref.read(authProvider).valueOrNull == null) return;
     final role = _role;
     final epoch = _epoch;
+    // Keep the current list while re-fetching so opening the screen (or a
+    // foreground push) doesn't flash the skeleton over rows we already have.
     state = state.copyWith(
-      isLoading: true,
+      isLoading: state.notifications.isEmpty,
       error: null,
-      page: 0,
-      notifications: [],
-      hasMore: true,
     );
     // Independent requests — fetch in parallel instead of serially.
     final (listR, countR) = await (
@@ -190,7 +192,10 @@ class Notifications extends _$Notifications {
     ).wait;
     if (epoch != _epoch) return;
     listR.fold(
-      (f) => state = state.copyWith(isLoading: false, error: f.toString()),
+      (f) => state = state.copyWith(
+        isLoading: false,
+        error: state.notifications.isEmpty ? f.toString() : null,
+      ),
       (page) {
         countR.fold(
           (fc) =>
@@ -328,11 +333,5 @@ class Notifications extends _$Notifications {
   Future<void> refreshNotifications() async {
     await Future<void>.delayed(const Duration(milliseconds: 550));
     await fetchNotifications();
-  }
-
-  int unreadInFilter(NotificationFilter filter) {
-    return state.notifications
-        .where((e) => _matchesFilter(e, filter) && !e.isRead)
-        .length;
   }
 }

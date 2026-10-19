@@ -11,6 +11,7 @@ import 'package:xstore/core/router/app_routes.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/orders/presentation/screens/order_detail_screen.dart';
+import 'package:xstore/shared/widgets/auth_back_button.dart';
 
 /// Auth that never resolves, so [OrderDetailScreen]'s fetch bails out and
 /// the back control is still on the empty/error app bar — enough to cover
@@ -59,8 +60,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(BackButton), findsOneWidget);
-      await tester.tap(find.byType(BackButton));
+      expect(find.byType(AuthBackButton), findsOneWidget);
+      await tester.tap(find.byType(AuthBackButton));
       await tester.pump();
       await tester.pump();
 

@@ -29,6 +29,7 @@ mixin _$SearchResultEntity {
   bool get isSellerVerified => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
   bool get hasShipping => throw _privateConstructorUsedError;
+  bool get isSoldOut => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $SearchResultEntityCopyWith<SearchResultEntity> get copyWith =>
@@ -54,7 +55,8 @@ abstract class $SearchResultEntityCopyWith<$Res> {
       String sellerName,
       bool isSellerVerified,
       String location,
-      bool hasShipping});
+      bool hasShipping,
+      bool isSoldOut});
 }
 
 /// @nodoc
@@ -83,6 +85,7 @@ class _$SearchResultEntityCopyWithImpl<$Res, $Val extends SearchResultEntity>
     Object? isSellerVerified = null,
     Object? location = null,
     Object? hasShipping = null,
+    Object? isSoldOut = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -137,6 +140,10 @@ class _$SearchResultEntityCopyWithImpl<$Res, $Val extends SearchResultEntity>
           ? _value.hasShipping
           : hasShipping // ignore: cast_nullable_to_non_nullable
               as bool,
+      isSoldOut: null == isSoldOut
+          ? _value.isSoldOut
+          : isSoldOut // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -162,7 +169,8 @@ abstract class _$$SearchResultEntityImplCopyWith<$Res>
       String sellerName,
       bool isSellerVerified,
       String location,
-      bool hasShipping});
+      bool hasShipping,
+      bool isSoldOut});
 }
 
 /// @nodoc
@@ -189,6 +197,7 @@ class __$$SearchResultEntityImplCopyWithImpl<$Res>
     Object? isSellerVerified = null,
     Object? location = null,
     Object? hasShipping = null,
+    Object? isSoldOut = null,
   }) {
     return _then(_$SearchResultEntityImpl(
       id: null == id
@@ -243,6 +252,10 @@ class __$$SearchResultEntityImplCopyWithImpl<$Res>
           ? _value.hasShipping
           : hasShipping // ignore: cast_nullable_to_non_nullable
               as bool,
+      isSoldOut: null == isSoldOut
+          ? _value.isSoldOut
+          : isSoldOut // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -263,7 +276,8 @@ class _$SearchResultEntityImpl implements _SearchResultEntity {
       required this.sellerName,
       required this.isSellerVerified,
       required this.location,
-      required this.hasShipping});
+      required this.hasShipping,
+      this.isSoldOut = false});
 
   @override
   final String id;
@@ -291,10 +305,13 @@ class _$SearchResultEntityImpl implements _SearchResultEntity {
   final String location;
   @override
   final bool hasShipping;
+  @override
+  @JsonKey()
+  final bool isSoldOut;
 
   @override
   String toString() {
-    return 'SearchResultEntity(id: $id, name: $name, price: $price, compareAtPrice: $compareAtPrice, imageUrl: $imageUrl, condition: $condition, category: $category, rating: $rating, reviewCount: $reviewCount, sellerName: $sellerName, isSellerVerified: $isSellerVerified, location: $location, hasShipping: $hasShipping)';
+    return 'SearchResultEntity(id: $id, name: $name, price: $price, compareAtPrice: $compareAtPrice, imageUrl: $imageUrl, condition: $condition, category: $category, rating: $rating, reviewCount: $reviewCount, sellerName: $sellerName, isSellerVerified: $isSellerVerified, location: $location, hasShipping: $hasShipping, isSoldOut: $isSoldOut)';
   }
 
   @override
@@ -323,7 +340,9 @@ class _$SearchResultEntityImpl implements _SearchResultEntity {
             (identical(other.location, location) ||
                 other.location == location) &&
             (identical(other.hasShipping, hasShipping) ||
-                other.hasShipping == hasShipping));
+                other.hasShipping == hasShipping) &&
+            (identical(other.isSoldOut, isSoldOut) ||
+                other.isSoldOut == isSoldOut));
   }
 
   @override
@@ -341,7 +360,8 @@ class _$SearchResultEntityImpl implements _SearchResultEntity {
       sellerName,
       isSellerVerified,
       location,
-      hasShipping);
+      hasShipping,
+      isSoldOut);
 
   @JsonKey(ignore: true)
   @override
@@ -365,7 +385,8 @@ abstract class _SearchResultEntity implements SearchResultEntity {
       required final String sellerName,
       required final bool isSellerVerified,
       required final String location,
-      required final bool hasShipping}) = _$SearchResultEntityImpl;
+      required final bool hasShipping,
+      final bool isSoldOut}) = _$SearchResultEntityImpl;
 
   @override
   String get id;
@@ -393,6 +414,8 @@ abstract class _SearchResultEntity implements SearchResultEntity {
   String get location;
   @override
   bool get hasShipping;
+  @override
+  bool get isSoldOut;
   @override
   @JsonKey(ignore: true)
   _$$SearchResultEntityImplCopyWith<_$SearchResultEntityImpl> get copyWith =>

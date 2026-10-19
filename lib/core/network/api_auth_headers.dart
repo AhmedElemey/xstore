@@ -24,4 +24,22 @@ abstract final class ApiAuthHeaders {
 
   /// Endpoints that require a signed-in user. No-op — see class doc.
   static Options authenticated() => Options();
+
+  /// `extra` key that marks a request as standalone (see [standalone]).
+  static const String standaloneKey = 'standalone_request';
+
+  /// A public request that must never touch the user's session or the app
+  /// shell: `dio_provider.dart` attaches no `X-Auth-Token` (so the token
+  /// refresh / invalid-session logic never acts on it) and a 5xx does not
+  /// raise the global server-error page. Use for background config reads
+  /// that handle their own failures (e.g. General Settings).
+  static Options standalone() => Options(extra: {standaloneKey: true});
+
+  /// `extra` key that marks a request as silent (see [silentErrors]).
+  static const String silentErrorsKey = 'silent_errors_request';
+
+  /// An authenticated request whose 5xx must not raise the global
+  /// server-error page. Unlike [standalone] it keeps `X-Auth-Token`. Use for
+  /// background calls the user never waits on (e.g. language sync).
+  static Options silentErrors() => Options(extra: {silentErrorsKey: true});
 }

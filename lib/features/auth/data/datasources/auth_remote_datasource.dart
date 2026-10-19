@@ -7,7 +7,6 @@ import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
-import '../../../../core/network/legacy_route_options.dart';
 import '../../domain/entities/consumer_register_params.dart';
 import '../../domain/entities/login_params.dart';
 import '../../domain/entities/user_entity.dart';
@@ -41,8 +40,6 @@ abstract interface class AuthRemoteDataSource {
     required String newPassword,
     required String confirmNewPassword,
   });
-  Future<({String token, String refreshToken})> refreshToken(String token);
-
   /// See [forgotPassword] doc — same debug-OTP-echo behavior.
   Future<String?> sendEmailOtp(String email);
   Future<void> verifyEmailOtp({required String email, required String otpToken});
@@ -54,6 +51,13 @@ abstract interface class AuthRemoteDataSource {
 
   Future<void> logout();
 
+  /// `PUT /api/auth/language`. [language] is `ar` or `en`. Throws on any
+  /// failure, including a 2xx `{isSuccess: false}` envelope.
+  Future<void> updatePreferredLanguage(
+    String language, {
+    CancelToken? cancelToken,
+  });
+
   /// Passwordless login for an existing account. [sendLoginOtp] returns the
   /// debug OTP echoed by the backend (null once a real SMS gateway exists);
   /// [loginWithOtp] returns a token-only model (resolve via [fetchProfile]).
@@ -64,26 +68,15 @@ abstract interface class AuthRemoteDataSource {
     required bool rememberMe,
   });
 
-  /// Google sign-in via the role-specific backend route. [idToken] is the
-  /// Google identity token; [asVendor] picks the vendor vs consumer endpoint.
-  /// Auto-creates the account if none exists. Returns a token-only model.
-  Future<UserModel> loginWithGoogle({
-    required String idToken,
-    required bool asVendor,
-  });
+  /// Google login for an existing account via `POST /api/auth/google/login`
+  /// (one endpoint for every role). [idToken] is the Google identity token.
+  /// Returns a token-only model.
+  Future<UserModel> loginWithGoogle({required String idToken});
 
   /// Read-only lookup — does NOT create an account. Lets the caller skip the
-  /// buyer/seller picker and go straight to [loginWithGoogle] with the
-  /// returned role when the identity already has one.
+  /// register flow and go straight to [loginWithGoogle] when the identity
+  /// already has an account.
   Future<({bool exists, UserRole? role})> checkGoogleUser({
-    required String idToken,
-  });
-
-  /// Exchanges a Firebase ID token (verified server-side) for a backend session.
-  /// Returns null while the backend route is not deployed yet (404) — callers
-  /// fall back to a local-only session.
-  Future<UserModel?> loginWithSocialToken({
-    required String provider,
     required String idToken,
   });
 }
@@ -156,6 +149,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           // not a full ISO timestamp. Omit the key entirely when not provided.
           if (params.dateOfBirth != null)
             'dateOfBirth': _dateOnlyIso(params.dateOfBirth!),
+          // Google sign-up; JSON null on a plain registration.
+          'idToken': params.idToken,
+          'clientId': params.clientId,
         },
         options: ApiAuthHeaders.public(),
       );
@@ -205,6 +201,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'cityId': params.storeCityId,
         'governorateId': params.storeGovernmentId,
         'whatsappNumber': params.whatsappNumber,
+        // Google sign-up; multipart has no null, so a plain registration
+        // sends empty fields (ASP.NET binds them as null).
+        'idToken': params.idToken,
+        'clientId': params.clientId,
         'profileImage': await MultipartFile.fromFile(
           params.profileImagePath,
           // image_picker returns POSIX-style paths on iOS/Android.
@@ -338,27 +338,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<({String token, String refreshToken})> refreshToken(
-    String token,
-  ) async {
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.refreshToken,
-        data: {'token': token},
-        options: ApiAuthHeaders.public(),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty response');
-      return (
-        token: data['token'] as String,
-        refreshToken: data['refreshToken'] as String? ?? '',
-      );
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  @override
   Future<String?> sendEmailOtp(String email) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
@@ -435,6 +414,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<void> updatePreferredLanguage(
+    String language, {
+    CancelToken? cancelToken,
+  }) async {
+    if (MockConfig.useMock) return;
+    try {
+      final response = await _dio.put<dynamic>(
+        ApiEndpoints.updateLanguage,
+        data: {'preferredLanguage': language},
+        cancelToken: cancelToken,
+        options: ApiAuthHeaders.silentErrors(),
+      );
+      final failure = envelopeFailure(response.data);
+      if (failure != null) throw failure;
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
   Future<String?> sendLoginOtp(String phoneNumber) async {
     if (MockConfig.useMock) return MockConfig.simulate('123456');
     try {
@@ -482,20 +481,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> loginWithGoogle({
-    required String idToken,
-    required bool asVendor,
-  }) async {
+  Future<UserModel> loginWithGoogle({required String idToken}) async {
     if (MockConfig.useMock) {
-      return MockConfig.simulate(
-        asVendor ? mockVendorUserModel() : mockConsumerUserModel(),
-      );
+      return MockConfig.simulate(mockConsumerUserModel());
     }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        asVendor
-            ? ApiEndpoints.googleVendorLogin
-            : ApiEndpoints.googleConsumerLogin,
+        ApiEndpoints.googleLogin,
         data: {
           'idToken': idToken,
           'clientId': DefaultFirebaseOptions.googleWebClientId,
@@ -558,6 +550,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return false;
   }
 
+  // TODO(backend): need the C# role enum — ADMIN roles currently parse as consumer.
   UserRole? _parseRole(dynamic value) {
     if (value is num) {
       // 1-based C# UserRole until the declaration is confirmed: 0 unset.
@@ -590,38 +583,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final nested = m['data'] ?? m['Data'];
     if (nested is Map) return Map<String, dynamic>.from(nested);
     return m;
-  }
-
-  @override
-  Future<UserModel?> loginWithSocialToken({
-    required String provider,
-    required String idToken,
-  }) async {
-    if (MockConfig.useMock) {
-      final model = mockConsumerUserModel(email: 'social-$provider@xstore.com');
-      return MockConfig.simulate(model);
-    }
-
-    try {
-      // TODO(backend): confirm payload keys (`provider`, `idToken`) and response shape.
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.socialLogin,
-        data: {
-          'provider': provider,
-          'idToken': idToken,
-        },
-        options: LegacyRouteOptions.allowNotFound(),
-      );
-      // Route not deployed yet — signal the caller to use a local session.
-      if (LegacyRouteOptions.isNotFound(response)) return null;
-      final data = response.data;
-      if (data == null) {
-        throw const ServerException('Empty response');
-      }
-      return UserModel.fromJson(data);
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
   }
 
   /// Live send-email-otp / send-phone-otp / forgot-password no longer

@@ -11,8 +11,6 @@
 // `flutter test --dart-define=MOCK=true`, with no `skip:` needed.
 //
 // Run with: flutter test test/notifications_screen_live_flow_test.dart
-import 'dart:async';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -22,11 +20,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/shared/widgets/error_state_widget.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
-import 'package:xstore/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:xstore/features/notifications/presentation/screens/notifications_screen.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
@@ -98,10 +96,11 @@ Map<String, dynamic> _notificationJson({
   'createdAt': '2026-09-02T00:00:00.000Z',
 };
 
-Widget _harness(List<Override> overrides) => ProviderScope(
+Widget _harness(List<Override> overrides, {Locale? locale}) => ProviderScope(
   overrides: overrides,
-  child: const MaterialApp(
-    localizationsDelegates: [
+  child: MaterialApp(
+    locale: locale,
+    localizationsDelegates: const [
       AppLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
@@ -110,32 +109,25 @@ Widget _harness(List<Override> overrides) => ProviderScope(
     supportedLocales: AppLocalizations.supportedLocales,
     // NotificationsScreen renders its own Scaffold, so no extra Material
     // wrapper is needed here.
-    home: NotificationsScreen(),
+    home: const NotificationsScreen(),
   ),
 );
 
-/// Pumps the screen, then explicitly (re-)fetches once `authProvider` has
-/// actually resolved. `NotificationsNotifier` only fetches reactively via
-/// `ref.listen(authProvider, ...)` registered in `build()` — that listener
-/// fires on the NEXT transition, not the value already present at
-/// registration time, so a fresh `_FakeAuth` override needs an explicit
-/// re-trigger, matching orders_screen_live_flow_test.dart's `_pumpReady`.
+/// Pumps the screen and waits for auth + the inbox fetch that
+/// [NotificationsScreen] now kicks off on first frame (keepAlive listen
+/// with `fireImmediately` plus the post-frame fetch).
 Future<ProviderContainer> _pumpReady(
   WidgetTester tester,
-  List<Override> overrides,
-) async {
-  await tester.pumpWidget(_harness(overrides));
+  List<Override> overrides, {
+  Locale? locale,
+}) async {
+  await tester.pumpWidget(_harness(overrides, locale: locale));
   await tester.pump();
   final container = ProviderScope.containerOf(
     tester.element(find.byType(NotificationsScreen)),
     listen: false,
   );
   await container.read(authProvider.future);
-  // Deliberately not awaited — see the FakeAsync-zone note in
-  // orders_screen_live_flow_test.dart's `_pumpReady`.
-  unawaited(
-    container.read(notificationsProvider.notifier).fetchNotifications(),
-  );
   return container;
 }
 
@@ -251,6 +243,55 @@ void main() {
       await _settle(tester);
 
       expect(deleteRequest, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'a failed load shows the styled error state in Arabic, and Retry refetches',
+    (tester) async {
+      var healed = false;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.notifications}': (options) {
+          if (!healed) {
+            return DioException(
+              requestOptions: options,
+              type: DioExceptionType.connectionError,
+            );
+          }
+          return {
+            'items': [_notificationJson()],
+            'totalCount': 1,
+            'page': 1,
+            'pageSize': 20,
+            'totalPages': 1,
+          };
+        },
+        'GET ${ApiEndpoints.notificationsUnreadCount}': (_) => 1,
+      });
+
+      await _pumpReady(
+        tester,
+        [
+          authProvider.overrideWith(() => _FakeAuth(_consumer())),
+          dioProvider.overrideWithValue(dio),
+        ],
+        locale: const Locale('ar'),
+      );
+      await _settle(tester);
+
+      final ar = lookupAppLocalizations(const Locale('ar'));
+      expect(find.byType(ErrorStateWidget), findsOneWidget);
+      expect(find.text(ar.noInternet), findsOneWidget);
+      expect(find.text(ar.retry), findsOneWidget);
+      expect(find.textContaining('Network unavailable'), findsNothing);
+
+      healed = true;
+      await tester.tap(find.text(ar.retry));
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsNothing);
+      // Arabic UI: backend text is wrapped in a first-strong isolate.
+      expect(find.text('\u2068Order Shipped\u2069'), findsOneWidget);
     },
   );
 }

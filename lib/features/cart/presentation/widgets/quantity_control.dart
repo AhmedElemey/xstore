@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -30,7 +30,9 @@ class QuantityControl extends StatelessWidget {
     final atMin = quantity <= 1;
     final atMax = quantity >= maxQuantity;
     final lowStock = maxQuantity <= 3 && enabled;
-    final border = enabled ? AppColors.primary : context.textDisabled;
+    final border = enabled
+        ? context.textSecondary.withValues(alpha: 0.4)
+        : context.borderColor;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,7 +40,6 @@ class QuantityControl extends StatelessWidget {
       children: [
         DecoratedBox(
           decoration: BoxDecoration(
-            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(AppSpacing.x3l),
             border: Border.all(color: border),
           ),
@@ -59,15 +60,21 @@ class QuantityControl extends StatelessWidget {
               Material(
                 color: AppColors.transparent,
                 child: InkWell(
-                  onTap: enabled ? onEditQuantity : null,
+                  // Non-null onTap so a disabled control still wins the
+                  // gesture arena over CartItemCard's outer InkWell.
+                  onTap: enabled ? onEditQuantity : () {},
+                  enableFeedback: enabled,
+                  splashColor: enabled ? null : AppColors.transparent,
+                  highlightColor: enabled ? null : AppColors.transparent,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.sm,
                       vertical: AppSpacing.xs,
                     ),
                     child: Text(
-                      '$quantity',
-                      style: AppTypography.labelLarge.copyWith(
+                      context.formatInt(quantity),
+                      style: AppTypography.mono.copyWith(
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: enabled
                             ? context.textPrimary
@@ -94,8 +101,8 @@ class QuantityControl extends StatelessWidget {
         if (lowStock) ...[
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '${context.l10n.onlyLeftPrefix}$maxQuantity${context.l10n.onlyLeftSuffix}',
-            style: AppTypography.labelSmall.copyWith(color: AppColors.warning),
+            '${context.l10n.onlyLeftPrefix}${context.formatInt(maxQuantity)}${context.l10n.onlyLeftSuffix}',
+            style: AppTypography.labelSmall.copyWith(color: context.amberColor),
           ),
         ],
       ],
@@ -119,12 +126,16 @@ class _QtySegment extends StatelessWidget {
     return Material(
       color: AppColors.transparent,
       child: InkWell(
-        onTap: enabled
-            ? () {
-                HapticFeedback.lightImpact();
-                onTap();
-              }
-            : null,
+        // Always attach a recognizer. `onTap: null` lets the tap fall
+        // through to CartItemCard and open the product.
+        onTap: () {
+          if (!enabled) return;
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        enableFeedback: enabled,
+        splashColor: enabled ? null : AppColors.transparent,
+        highlightColor: enabled ? null : AppColors.transparent,
         borderRadius: BorderRadius.circular(AppSpacing.x3l),
         child: Padding(
           padding: const EdgeInsets.symmetric(

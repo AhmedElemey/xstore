@@ -8,6 +8,7 @@ import 'package:xstore/features/cart/presentation/providers/checkout_provider.da
 import 'package:xstore/features/cart/presentation/providers/checkout_state.dart';
 import 'package:xstore/features/cart/presentation/widgets/checkout_payment_section.dart';
 import 'package:xstore/features/orders/domain/entities/order_entity.dart';
+import 'package:xstore/features/orders/presentation/widgets/order_price_breakdown.dart';
 
 class _SilentCheckout extends Checkout {
   _SilentCheckout({this.note = ''});
@@ -47,18 +48,19 @@ void main() {
     );
 
     expect(find.text(l10n.checkoutPayCodTitle), findsOneWidget);
-    expect(find.text(l10n.checkoutPayCibTitle), findsNothing);
-    expect(find.text(l10n.checkoutCardNumber), findsNothing);
-    expect(find.text(l10n.checkoutCardCvv), findsNothing);
-    expect(find.text(l10n.checkoutCardExpiry), findsNothing);
+    // COD-only launch: no card options or card-entry fields.
+    expect(find.textContaining('CIB'), findsNothing);
+    expect(find.textContaining('Card number'), findsNothing);
+    expect(find.textContaining('CVV'), findsNothing);
+    expect(find.textContaining('MM/YY'), findsNothing);
 
     final ctx = tester.element(find.byType(CheckoutPaymentSection));
     expect(
-      checkoutPaymentLabel(ctx, PaymentMethod.cashOnDelivery),
+      paymentMethodLabel(ctx, PaymentMethod.cashOnDelivery),
       l10n.ordersPaymentCashOnDelivery,
     );
     expect(
-      checkoutPaymentLabel(ctx, PaymentMethod.cibCard),
+      paymentMethodLabel(ctx, PaymentMethod.cibCard),
       l10n.ordersPaymentCib,
     );
   });

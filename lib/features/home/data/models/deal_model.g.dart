@@ -13,6 +13,7 @@ _$DealModelImpl _$$DealModelImplFromJson(Map<String, dynamic> json) =>
       price: (json['price'] as num).toDouble(),
       imageUrl: json['imageUrl'] as String?,
       discountPercent: (json['discountPercent'] as num?)?.toDouble() ?? 0.0,
+      isSoldOut: json['isSoldOut'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$DealModelImplToJson(_$DealModelImpl instance) =>
@@ -22,4 +23,5 @@ Map<String, dynamic> _$$DealModelImplToJson(_$DealModelImpl instance) =>
       'price': instance.price,
       'imageUrl': instance.imageUrl,
       'discountPercent': instance.discountPercent,
+      'isSoldOut': instance.isSoldOut,
     };

@@ -165,4 +165,35 @@ void main() {
     expect(state.brand, isEmpty);
     expect(state.categoryId, '7');
   });
+
+  test('a valid draft can publish without further field edits', () {
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    final notifier = container.read(listingFormNotifierProvider.notifier);
+    notifier.loadForEdit(
+      _editingListing.copyWith(status: ListingStatus.draft),
+    );
+
+    expect(notifier.hasEditChanges, isFalse);
+    expect(notifier.canSubmit, isTrue);
+    expect(notifier.statusForUpdate, ListingStatus.pending);
+  });
+
+  test('paused and active edits still require a real field change', () {
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    final notifier = container.read(listingFormNotifierProvider.notifier);
+    notifier.loadForEdit(_editingListing);
+
+    expect(notifier.canSubmit, isFalse);
+    expect(notifier.statusForUpdate, ListingStatus.paused);
+
+    notifier.updateField('name', 'Wireless Mouse Pro');
+    expect(notifier.canSubmit, isTrue);
+    expect(notifier.statusForUpdate, ListingStatus.paused);
+  });
 }

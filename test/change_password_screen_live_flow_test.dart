@@ -83,12 +83,6 @@ class _FakeSocialAuth implements SocialAuthDatasource {
   Future<SocialAuthResult> signInWithGoogle() =>
       throw UnimplementedError('not exercised by this screen');
   @override
-  Future<SocialAuthResult> signInWithApple() =>
-      throw UnimplementedError('not exercised by this screen');
-  @override
-  Future<SocialAuthResult> signInWithFacebook() =>
-      throw UnimplementedError('not exercised by this screen');
-  @override
   Future<void> signOutSocial() async {}
 }
 
@@ -201,7 +195,7 @@ void main() {
       await tester.tap(find.text('Open Change Password'));
       await _settle(tester);
 
-      expect(find.text('Current Password *'), findsOneWidget);
+      expect(find.text('CURRENT PASSWORD *'), findsOneWidget);
       final fields = find.byType(TextFormField);
       expect(fields, findsNWidgets(3));
       await tester.enterText(fields.at(0), 'OldPassword1!');
@@ -296,7 +290,7 @@ void main() {
       await tester.tap(find.text('Open Change Password'));
       await _settle(tester);
 
-      expect(find.text('Current Password *'), findsNothing);
+      expect(find.text('CURRENT PASSWORD *'), findsNothing);
       final fields = find.byType(TextFormField);
       expect(fields, findsNWidgets(2));
       await tester.enterText(fields.at(0), 'NewPassword2!');

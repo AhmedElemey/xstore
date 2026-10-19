@@ -78,6 +78,31 @@ void main() {
     test('valid 010…', () {
       expect(Validators.egyptPhone(l10n, '01012345678'), isNull);
     });
+
+    test('valid 10-digit national 10… after +20', () {
+      expect(Validators.egyptPhone(l10n, '1012345678'), isNull);
+    });
+  });
+
+  group('egyptNationalSignificantNumber', () {
+    test('strips the trunk 0 from local 01…', () {
+      expect(
+        AppValidators.egyptNationalSignificantNumber('01118340188'),
+        '1118340188',
+      );
+    });
+
+    test('does not prepend 0 while typing a leading 1', () {
+      expect(AppValidators.egyptNationalSignificantNumber('1'), '1');
+      expect(AppValidators.egyptNationalSignificantNumber('1118340188'), '1118340188');
+    });
+
+    test('accepts +20 and 20 prefixes', () {
+      expect(
+        AppValidators.egyptNationalSignificantNumber('+201118340188'),
+        '1118340188',
+      );
+    });
   });
 
   group('isMissingPhoneNumber', () {
@@ -159,6 +184,24 @@ void main() {
 
     test('invalid', () {
       expect(Validators.parseMoneyInput('abc'), isNull);
+    });
+
+    test('comma is a thousands separator only in 3-digit groups', () {
+      expect(Validators.parseMoneyInput('1,250'), 1250);
+      expect(Validators.parseMoneyInput('1,250,000.5'), 1250000.5);
+      expect(Validators.parseMoneyInput('12,5'), isNull);
+      expect(Validators.parseMoneyInput('1,25'), isNull);
+      expect(Validators.parseMoneyInput('1,2345'), isNull);
+      expect(Validators.parseMoneyInput('1.2,5'), isNull);
+    });
+
+    test('Arabic digits and decimal separator', () {
+      expect(Validators.parseMoneyInput('٢٠٠'), 200);
+      expect(Validators.parseMoneyInput('٢٠٠٫٥'), 200.5);
+    });
+
+    test('plain decimal', () {
+      expect(Validators.parseMoneyInput('12.5'), 12.5);
     });
   });
 

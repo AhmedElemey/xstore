@@ -33,6 +33,7 @@ mixin _$SearchResultModel {
   bool get isSellerVerified => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
   bool get hasShipping => throw _privateConstructorUsedError;
+  bool get isSoldOut => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -59,7 +60,8 @@ abstract class $SearchResultModelCopyWith<$Res> {
       String sellerName,
       bool isSellerVerified,
       String location,
-      bool hasShipping});
+      bool hasShipping,
+      bool isSoldOut});
 }
 
 /// @nodoc
@@ -88,6 +90,7 @@ class _$SearchResultModelCopyWithImpl<$Res, $Val extends SearchResultModel>
     Object? isSellerVerified = null,
     Object? location = null,
     Object? hasShipping = null,
+    Object? isSoldOut = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -142,6 +145,10 @@ class _$SearchResultModelCopyWithImpl<$Res, $Val extends SearchResultModel>
           ? _value.hasShipping
           : hasShipping // ignore: cast_nullable_to_non_nullable
               as bool,
+      isSoldOut: null == isSoldOut
+          ? _value.isSoldOut
+          : isSoldOut // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -167,7 +174,8 @@ abstract class _$$SearchResultModelImplCopyWith<$Res>
       String sellerName,
       bool isSellerVerified,
       String location,
-      bool hasShipping});
+      bool hasShipping,
+      bool isSoldOut});
 }
 
 /// @nodoc
@@ -194,6 +202,7 @@ class __$$SearchResultModelImplCopyWithImpl<$Res>
     Object? isSellerVerified = null,
     Object? location = null,
     Object? hasShipping = null,
+    Object? isSoldOut = null,
   }) {
     return _then(_$SearchResultModelImpl(
       id: null == id
@@ -248,6 +257,10 @@ class __$$SearchResultModelImplCopyWithImpl<$Res>
           ? _value.hasShipping
           : hasShipping // ignore: cast_nullable_to_non_nullable
               as bool,
+      isSoldOut: null == isSoldOut
+          ? _value.isSoldOut
+          : isSoldOut // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -268,7 +281,8 @@ class _$SearchResultModelImpl implements _SearchResultModel {
       required this.sellerName,
       required this.isSellerVerified,
       required this.location,
-      required this.hasShipping});
+      required this.hasShipping,
+      this.isSoldOut = false});
 
   factory _$SearchResultModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$SearchResultModelImplFromJson(json);
@@ -299,10 +313,13 @@ class _$SearchResultModelImpl implements _SearchResultModel {
   final String location;
   @override
   final bool hasShipping;
+  @override
+  @JsonKey()
+  final bool isSoldOut;
 
   @override
   String toString() {
-    return 'SearchResultModel(id: $id, name: $name, price: $price, compareAtPrice: $compareAtPrice, imageUrl: $imageUrl, condition: $condition, category: $category, rating: $rating, reviewCount: $reviewCount, sellerName: $sellerName, isSellerVerified: $isSellerVerified, location: $location, hasShipping: $hasShipping)';
+    return 'SearchResultModel(id: $id, name: $name, price: $price, compareAtPrice: $compareAtPrice, imageUrl: $imageUrl, condition: $condition, category: $category, rating: $rating, reviewCount: $reviewCount, sellerName: $sellerName, isSellerVerified: $isSellerVerified, location: $location, hasShipping: $hasShipping, isSoldOut: $isSoldOut)';
   }
 
   @override
@@ -331,7 +348,9 @@ class _$SearchResultModelImpl implements _SearchResultModel {
             (identical(other.location, location) ||
                 other.location == location) &&
             (identical(other.hasShipping, hasShipping) ||
-                other.hasShipping == hasShipping));
+                other.hasShipping == hasShipping) &&
+            (identical(other.isSoldOut, isSoldOut) ||
+                other.isSoldOut == isSoldOut));
   }
 
   @JsonKey(ignore: true)
@@ -350,7 +369,8 @@ class _$SearchResultModelImpl implements _SearchResultModel {
       sellerName,
       isSellerVerified,
       location,
-      hasShipping);
+      hasShipping,
+      isSoldOut);
 
   @JsonKey(ignore: true)
   @override
@@ -381,7 +401,8 @@ abstract class _SearchResultModel implements SearchResultModel {
       required final String sellerName,
       required final bool isSellerVerified,
       required final String location,
-      required final bool hasShipping}) = _$SearchResultModelImpl;
+      required final bool hasShipping,
+      final bool isSoldOut}) = _$SearchResultModelImpl;
 
   factory _SearchResultModel.fromJson(Map<String, dynamic> json) =
       _$SearchResultModelImpl.fromJson;
@@ -412,6 +433,8 @@ abstract class _SearchResultModel implements SearchResultModel {
   String get location;
   @override
   bool get hasShipping;
+  @override
+  bool get isSoldOut;
   @override
   @JsonKey(ignore: true)
   _$$SearchResultModelImplCopyWith<_$SearchResultModelImpl> get copyWith =>

@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -96,21 +95,5 @@ CustomTransitionPage<void> fadeScaleTransition(
         ),
       );
     },
-  );
-}
-
-/// Optional helper for custom tab views (pass real animation values when used).
-Widget sharedAxisTransition({
-  required Widget child,
-  required Animation<double> animation,
-  required Animation<double> secondaryAnimation,
-  SharedAxisTransitionType transitionType =
-      SharedAxisTransitionType.horizontal,
-}) {
-  return SharedAxisTransition(
-    animation: animation,
-    secondaryAnimation: secondaryAnimation,
-    transitionType: transitionType,
-    child: child,
   );
 }

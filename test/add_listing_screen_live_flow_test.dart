@@ -29,7 +29,7 @@
 // escalates to the email-OTP sheet, which touches Firebase the same way
 // documented in profile_verification_screen_live_flow_test.dart. This
 // screen's overall flow is therefore not mode-agnostic (unlike
-// Notifications/MyListings/StoreHours), so this test carries the usual
+// Notifications/MyListings), so this test carries the usual
 // `skip: MockConfig.useMock`. A successful update also `context.go`es to
 // AppRoutes.listingMy, so this needs a real GoRouter harness (like
 // explore_screen_live_flow_test.dart) with a placeholder destination
@@ -48,6 +48,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/core/localization/localization_provider.dart';
 import 'package:xstore/core/localization/localized_text.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
@@ -57,12 +58,18 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/catalog_categories/domain/entities/catalog_category_entity.dart';
 import 'package:xstore/features/catalog_categories/presentation/providers/catalog_category_dependencies.dart';
+import 'package:xstore/features/cities/domain/entities/city_entity.dart';
+import 'package:xstore/features/cities/presentation/providers/city_dependencies.dart';
 import 'package:xstore/features/commission/domain/entities/vendor_commission_wallet.dart';
 import 'package:xstore/features/commission/presentation/providers/commission_config_provider.dart';
 import 'package:xstore/features/commission/presentation/providers/vendor_commission_wallet_provider.dart';
+import 'package:xstore/features/governments/domain/entities/government_entity.dart';
+import 'package:xstore/features/governments/presentation/providers/government_dependencies.dart';
 import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
+import 'package:xstore/features/listing/presentation/providers/listing_form_notifier.dart';
 import 'package:xstore/features/listing/presentation/screens/add_listing_screen.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
+import 'package:xstore/shared/widgets/auth_back_button.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
 
@@ -260,20 +267,181 @@ void main() {
         authProvider.overrideWith(() => FakeAuth(_vendor())),
         dioProvider.overrideWithValue(dio),
         allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
-        vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
+        vendorCommissionWalletProvider.overrideWith(
+          (ref) async => _emptyWallet,
+        ),
         // Never let the real (mock-datasource) order-stats path run under
         // flutter_test — see the 2026-07-19 lesson in flutter-review/SKILL.md.
         vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+        // The Location picker watches these; keep them off the scripted Dio.
+        allGovernmentsProvider.overrideWith((ref) async => const []),
+        allCitiesProvider.overrideWith((ref) async => const []),
       ]);
       await _settle(tester);
 
-      expect(find.text('Update Listing'), findsOneWidget);
+      // Update Listing is disabled until something actually changes — an
+      // untouched update would otherwise round-trip the whole listing to
+      // the backend for no reason, which can knock a paused/active listing
+      // back into pending review (see the 2026-09-21 flutter-review lesson
+      // on this). Editing the name is the change here.
+      final nameField = find.widgetWithText(TextField, 'Wireless Mouse');
+      expect(nameField, findsOneWidget);
+      await tester.enterText(nameField, 'Wireless Mouse Pro');
+      await tester.pump();
 
-      await tester.tap(find.text('Update Listing'));
+      final updateButton = find.text('Update Listing');
+      expect(updateButton, findsOneWidget);
+      await tester.tap(updateButton);
       await _settle(tester);
 
       expect(find.text('Listing updated successfully'), findsOneWidget);
       // Navigated to My Listings after a successful update.
+      expect(find.text('My Listings Screen'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'picking a location from an Arabic UI stores the English label',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+        appLocaleProvider.overrideWith(
+          (ref) => AppLocaleNotifier(ref)..state = AppLanguage.arabic,
+        ),
+        allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
+        vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
+        vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+        allGovernmentsProvider.overrideWith(
+          (ref) async => const [
+            GovernmentEntity(
+              id: 16,
+              name: LocalizedText(en: 'Cairo', ar: 'القاهرة'),
+            ),
+          ],
+        ),
+        allCitiesProvider.overrideWith(
+          (ref) async => const [
+            CityEntity(
+              id: 1,
+              name: LocalizedText(en: 'Nasr City', ar: 'مدينة نصر'),
+              governorateId: 16,
+            ),
+          ],
+        ),
+      ]);
+      await _settle(tester);
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('locationCascadeField')),
+      );
+      await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
+      await _settle(tester);
+      await tester.tap(find.text('القاهرة'));
+      await _settle(tester);
+      await tester.tap(find.text('مدينة نصر'));
+      await _settle(tester);
+
+      expect(
+        container.read(listingFormNotifierProvider).location,
+        'Cairo - Nasr City',
+      );
+    },
+  );
+
+  testWidgets(
+    'Update Listing stays disabled until a field actually changes, and no '
+    'PUT request fires from tapping it while disabled',
+    skip: MockConfig.useMock,
+    (tester) async {
+      // No 'PUT /api/listings' route scripted — if the disabled button
+      // somehow still fired a request, _RoutedInterceptor would reject it
+      // as unscripted and the test would surface that failure.
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
+      });
+
+      await _pumpReady(tester, [
+        authProvider.overrideWith(() => FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+        allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
+        vendorCommissionWalletProvider.overrideWith(
+          (ref) async => _emptyWallet,
+        ),
+        vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+        // The Location picker watches these; keep them off the scripted Dio.
+        allGovernmentsProvider.overrideWith((ref) async => const []),
+        allCitiesProvider.overrideWith((ref) async => const []),
+      ]);
+      await _settle(tester);
+
+      InkWell updateInkWell() => tester.widget<InkWell>(
+        find.ancestor(
+          of: find.text('Update Listing'),
+          matching: find.byType(InkWell),
+        ),
+      );
+
+      expect(
+        updateInkWell().onTap,
+        isNull,
+        reason: 'nothing was changed since the listing loaded for edit',
+      );
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Wireless Mouse'),
+        'Wireless Mouse Pro',
+      );
+      await tester.pump();
+
+      expect(updateInkWell().onTap, isNotNull);
+
+      // Undoing the change (back to the loaded value) disables it again —
+      // this isn't "was the field ever touched", it's "does the form
+      // currently differ from what's saved".
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Wireless Mouse Pro'),
+        'Wireless Mouse',
+      );
+      await tester.pump();
+
+      expect(updateInkWell().onTap, isNull);
+    },
+  );
+
+  testWidgets(
+    'the edit form has a back button that returns to My Listings',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
+      });
+
+      await _pumpReady(tester, [
+        authProvider.overrideWith(() => FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+        allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
+        vendorCommissionWalletProvider.overrideWith(
+          (ref) async => _emptyWallet,
+        ),
+        vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+        // The Location picker watches these; keep them off the scripted Dio.
+        allGovernmentsProvider.overrideWith((ref) async => const []),
+        allCitiesProvider.overrideWith((ref) async => const []),
+      ]);
+      await _settle(tester);
+
+      final backButton = find.byType(AuthBackButton);
+      expect(backButton, findsOneWidget);
+
+      await tester.tap(backButton);
+      await _settle(tester);
+
       expect(find.text('My Listings Screen'), findsOneWidget);
     },
   );

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -11,6 +12,9 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
 import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
@@ -34,6 +38,19 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/utils/require_phone_verified.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/location_cascade_field.dart';
+import '../../../cities/presentation/providers/city_dependencies.dart';
+import '../../../governments/presentation/providers/government_dependencies.dart';
+
+/// Money fields (price, compare-at, shipping): fold Arabic-Indic digits, then
+/// keep only digits, `.` and `,` — so typed or pasted letters never show in
+/// the field while the notifier silently strips them from state.
+final List<TextInputFormatter> _moneyInputFormatters = [
+  TextInputFormatter.withFunction(
+    (_, v) => v.copyWith(text: AppValidators.foldDigits(v.text)),
+  ),
+  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+];
 
 class AddListingScreen extends ConsumerStatefulWidget {
   const AddListingScreen({super.key, this.editingListing});
@@ -52,10 +69,20 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   final _compare = TextEditingController();
   final _description = TextEditingController();
   final _brand = TextEditingController();
-  final _location = TextEditingController();
   final _shippingCost = TextEditingController();
   final _attrKeys = <TextEditingController>[];
   final _attrVals = <TextEditingController>[];
+  // The shell branch keeps this State (and its scroll offset) alive, so a
+  // fresh form must scroll back to the top itself — see the draftRevision
+  // listener in build.
+  final _scroll = ScrollController();
+
+  // Picker selection for the Location field. The listing itself only stores
+  // the "Governorate - City" label (the API takes a free-text `location`),
+  // so these ids just drive the picker's highlight and are cleared whenever
+  // the form is reloaded — the saved label then shows as the field's hint.
+  int? _cityId;
+  int? _governorateId;
 
   // `/listing/add` is a StatefulShellRoute branch — go_router keeps its
   // Page/State alive across navigations to the same path, so tapping
@@ -116,8 +143,8 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     _compare.dispose();
     _description.dispose();
     _brand.dispose();
-    _location.dispose();
     _shippingCost.dispose();
+    _scroll.dispose();
     for (final c in _attrKeys) {
       c.dispose();
     }
@@ -133,7 +160,8 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     _compare.text = s.compareAtPriceInput;
     _description.text = s.description;
     _brand.text = s.brand;
-    _location.text = s.location;
+    _cityId = null;
+    _governorateId = null;
     _shippingCost.text = s.shippingCostInput;
     _syncAttributeControllers(s.attributes);
   }
@@ -162,7 +190,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       context: context,
       builder: (ctx) => Material(
         color: ctx.elevatedSurfaceColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         clipBehavior: Clip.antiAlias,
         child: SafeArea(
           child: Column(
@@ -206,7 +234,46 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     );
   }
 
+  void _onLocationChanged(int? cityId, int? governorateId) {
+    setState(() {
+      _cityId = cityId;
+      _governorateId = governorateId;
+    });
+    // Both lists are already loaded — the picker sheets just showed them.
+    final city = cityId == null
+        ? null
+        : ref
+              .read(allCitiesProvider)
+              .valueOrNull
+              ?.where((c) => c.id == cityId)
+              .firstOrNull;
+    final governorate = ref
+        .read(allGovernmentsProvider)
+        .valueOrNull
+        ?.where((g) => g.id == governorateId)
+        .firstOrNull;
+    // A governorate without a city leaves the field empty, so validation
+    // still asks for a city. The stored label is always English (Arabic only
+    // when the English name is empty) so it doesn't depend on the vendor's UI
+    // language.
+    // TODO(backend): add governorateId/cityId to the listing DTO so location isn't free text.
+    ref
+        .read(listingFormNotifierProvider.notifier)
+        .updateField(
+          'location',
+          city == null || governorate == null
+              ? ''
+              : '${governorate.name.resolve(false)} - '
+                    '${city.name.resolve(false)}',
+        );
+  }
+
   Future<void> _publish() async {
+    // Drop focus from the last-edited field (often shipping cost or an
+    // attribute, near the bottom). Otherwise it stays focused in the
+    // kept-alive shell branch and EditableText scrolls it back into view
+    // when the keyboard reappears, undoing the reset's jump to the top.
+    FocusScope.of(context).unfocus();
     // Proactive check — the backend 403s "Account must be verified to
     // create listings" for an unverified phone; check first instead of
     // letting a guaranteed-failing request go out.
@@ -219,10 +286,12 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     notifier.updateField('compareAtPriceInput', _compare.text);
     notifier.updateField('description', _description.text);
     notifier.updateField('brand', _brand.text);
-    notifier.updateField('location', _location.text);
     notifier.updateField('shippingCostInput', _shippingCost.text);
 
-    final isEditing = ref.read(listingFormNotifierProvider).editingListingId.isNotEmpty;
+    final formBeforeSubmit = ref.read(listingFormNotifierProvider);
+    final isEditing = formBeforeSubmit.editingListingId.isNotEmpty;
+    final isPublishingDraft =
+        formBeforeSubmit.editingStatus == ListingStatus.draft;
     final retryLabel = context.l10n.retry;
     final ok = await notifier.submit(context.l10n);
     if (!mounted) {
@@ -231,7 +300,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     if (ok) {
       AppSnackbar.success(
         context,
-        isEditing
+        isEditing && !isPublishingDraft
             ? context.l10n.listingUpdatedSuccess
             : context.l10n.listingPublishedSuccess,
       );
@@ -287,12 +356,15 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     final showCompareWarn = notifier.showCompareAtWarning;
     final catalogCategories =
         ref.watch(allCatalogCategoriesProvider).valueOrNull ??
-            const <CatalogCategoryEntity>[];
+        const <CatalogCategoryEntity>[];
     final isArabic = ref.watch(appIsArabicProvider);
 
     ref.listen<ListingFormState>(listingFormNotifierProvider, (prev, next) {
       if (prev?.draftRevision != next.draftRevision) {
         _applyStateToControllers(next);
+        // New/reset/loaded form: start at the top, not where the last
+        // submit (the Publish button at the bottom) left off.
+        if (_scroll.hasClients) _scroll.jumpTo(0);
       }
       // Brand lives on a local controller (same as name/price). Category /
       // subcategory changes clear it in notifier state without bumping
@@ -310,121 +382,177 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     final err = form.errors;
     final isEditing = form.editingListingId.isNotEmpty;
 
+    // The Scaffold is the snackbar host; the sky paints behind it.
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: context.backgroundColor,
-        surfaceTintColor: AppColors.transparent,
-        centerTitle: true,
-        title: Text(isEditing ? context.l10n.editListingMenu : context.l10n.addListing),
-        actions: [
-          // Drafts are a create-flow concept only — editing an existing
-          // listing writes straight to the server via Update Listing.
-          if (!isEditing)
-            TextButton(
-              style:
-                  TextButton.styleFrom(foregroundColor: context.textSecondary),
-              onPressed: form.isSubmitting
-                  ? null
-                  : () async {
-                      notifier.updateField('name', _name.text);
-                      notifier.updateField('priceInput', _price.text);
-                      notifier.updateField('compareAtPriceInput', _compare.text);
-                      notifier.updateField('description', _description.text);
-                      notifier.updateField('brand', _brand.text);
-                      notifier.updateField('location', _location.text);
-                      notifier.updateField(
-                        'shippingCostInput',
-                        _shippingCost.text,
-                      );
-                      await notifier.saveDraft();
-                      if (!context.mounted) {
-                        return;
-                      }
-                      // ignore: use_build_context_synchronously
-                      AppSnackbar.success(
-                        context,
-                        context.l10n.listingDraftSaved,
-                      );
-                    },
-              child: Text(context.l10n.saveDraft),
-            ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.md,
-                AppSpacing.lg,
-                AppSpacing.x3l,
+      backgroundColor: Colors.transparent,
+      body: OrbitBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl,
+                  AppSpacing.lg,
+                  AppSpacing.xl,
+                  AppSpacing.lg,
+                ),
+                child: SizedBox(
+                  height: 44,
+                  child: Row(
+                    children: [
+                      // "Add Listing" is a bottom-nav tab root — no back
+                      // button, same as Home/Explore/etc. Editing only ever
+                      // gets here via context.go from My Listings (a tab
+                      // switch, not a push), which leaves no back stack to
+                      // pop, so this is the only way back without the bottom
+                      // nav. _syncEditingListing already resets the form
+                      // when the widget's editingListing later goes back to
+                      // null (a fresh "Add"), so this doesn't need to reset
+                      // anything itself.
+                      if (isEditing) ...[
+                        AuthBackButton(
+                          onPressed: () => context.go(AppRoutes.listingMy),
+                        ),
+                        const Gap(AppSpacing.md),
+                      ],
+                      Expanded(
+                        child: Text(
+                          isEditing
+                              ? context.l10n.editListingMenu
+                              : context.l10n.addListing,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.headlineSmall.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      // Drafts are a create-flow concept only — editing an
+                      // existing listing writes straight to the server via
+                      // Update Listing.
+                      if (!isEditing)
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: context.linkColor,
+                            textStyle: AppTypography.labelLarge.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          onPressed: form.isSubmitting
+                              ? null
+                              : () async {
+                                  notifier.updateField('name', _name.text);
+                                  notifier.updateField(
+                                    'priceInput',
+                                    _price.text,
+                                  );
+                                  notifier.updateField(
+                                    'compareAtPriceInput',
+                                    _compare.text,
+                                  );
+                                  notifier.updateField(
+                                    'description',
+                                    _description.text,
+                                  );
+                                  notifier.updateField('brand', _brand.text);
+                                  notifier.updateField(
+                                    'shippingCostInput',
+                                    _shippingCost.text,
+                                  );
+                                  await notifier.saveDraft();
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+                                  // ignore: use_build_context_synchronously
+                                  AppSnackbar.success(
+                                    context,
+                                    context.l10n.listingDraftSaved,
+                                  );
+                                },
+                          child: Text(context.l10n.saveDraft),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (ref.watch(vendorCommissionWalletProvider).valueOrNull
-                      case final wallet?)
-                    VendorCommissionAlertBanner(wallet: wallet),
-                  _ListingPhotosBasicsSection(
-                    form: form,
-                    notifier: notifier,
-                    errors: err,
-                    openPhotoPicker: _openPhotoSheet,
-                    nameController: _name,
-                    priceController: _price,
-                    compareController: _compare,
-                    descriptionController: _description,
-                    showCompareWarn: showCompareWarn,
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: _scroll,
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.xl,
+                    AppSpacing.md,
+                    AppSpacing.xl,
+                    AppSpacing.x3l,
                   ),
-                  _ListingCategoryBrandSection(
-                    form: form,
-                    notifier: notifier,
-                    errors: err,
-                    brandController: _brand,
-                    categoryDisplay:
-                        _categoryLabel(catalogCategories, isArabic, form.categoryId),
-                    subcategoryDisplay: _subcategoryLabel(
-                      catalogCategories,
-                      isArabic,
-                      form.subcategoryId,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (ref.watch(vendorCommissionWalletProvider).valueOrNull
+                          case final wallet?)
+                        VendorCommissionAlertBanner(wallet: wallet),
+                      _ListingPhotosBasicsSection(
+                        form: form,
+                        notifier: notifier,
+                        errors: err,
+                        openPhotoPicker: _openPhotoSheet,
+                        nameController: _name,
+                        priceController: _price,
+                        compareController: _compare,
+                        descriptionController: _description,
+                        showCompareWarn: showCompareWarn,
+                      ),
+                      _ListingCategoryBrandSection(
+                        form: form,
+                        notifier: notifier,
+                        errors: err,
+                        brandController: _brand,
+                        categoryDisplay: _categoryLabel(
+                          catalogCategories,
+                          isArabic,
+                          form.categoryId,
+                        ),
+                        subcategoryDisplay: _subcategoryLabel(
+                          catalogCategories,
+                          isArabic,
+                          form.subcategoryId,
+                        ),
+                      ),
+                      _ListingShippingAttributesSection(
+                        form: form,
+                        notifier: notifier,
+                        errors: err,
+                        cityId: _cityId,
+                        governorateId: _governorateId,
+                        onLocationChanged: _onLocationChanged,
+                        shippingCostController: _shippingCost,
+                        attrKeyControllers: _attrKeys,
+                        attrValueControllers: _attrVals,
+                      ),
+                      const Gap(AppSpacing.x4l),
+                    ],
                   ),
-                  _ListingShippingAttributesSection(
-                    form: form,
-                    notifier: notifier,
-                    errors: err,
-                    locationController: _location,
-                    shippingCostController: _shippingCost,
-                    attrKeyControllers: _attrKeys,
-                    attrValueControllers: _attrVals,
-                  ),
-                  const Gap(AppSpacing.x4l),
-                ],
+                ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl,
+                  AppSpacing.md,
+                  AppSpacing.xl,
+                  AppSpacing.lg,
+                ),
+                child: XstoreButton(
+                  label: isEditing && form.editingStatus != ListingStatus.draft
+                      ? context.l10n.updateListing
+                      : context.l10n.publishListing,
+                  isLoading: form.isSubmitting,
+                  onPressed: canSubmit && !form.isSubmitting ? _publish : null,
+                ),
+              ),
+            ],
           ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.md,
-                AppSpacing.lg,
-                AppSpacing.lg,
-              ),
-              child: _PublishBar(
-                publishLabel: isEditing
-                    ? context.l10n.updateListing
-                    : context.l10n.publishListing,
-                enabled: canSubmit && !form.isSubmitting,
-                loading: form.isSubmitting,
-                onPressed: _publish,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -461,6 +589,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         context.l10n.listingSelectSubcategory;
   }
 }
+
+/// "0.00" placeholder in the app's digits and decimal mark.
+String _moneyHint(BuildContext context) =>
+    context.isArabic ? '\u0660\u066B\u0660\u0660' : '0.00';
 
 class _ListingPhotosBasicsSection extends ConsumerWidget {
   const _ListingPhotosBasicsSection({
@@ -499,6 +631,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
           errorText: errors['photos'],
           onOpenPicker: openPhotoPicker,
           onRemove: notifier.removePhoto,
+          onRemoveExisting: notifier.removeExistingPhoto,
           onReorder: notifier.reorderPhotos,
         ),
         const Gap(AppSpacing.x3l),
@@ -516,8 +649,9 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
         ListingFormField(
           label: context.l10n.listingPriceLabel,
           controller: priceController,
-          hint: '0.00',
+          hint: _moneyHint(context),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: _moneyInputFormatters,
           prefixText: '${notifier.currencyCode} ',
           errorText: errors['price'],
           onChanged: (v) => notifier.updateField('priceInput', v),
@@ -530,29 +664,23 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
           ),
         ],
         const Gap(AppSpacing.lg),
-        Text(
-          context.l10n.listingCompareAtTitle,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: context.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        SizedBox(height: context.scaledPx(6)),
         ListingFormField(
-          label: '',
+          label: context.l10n.listingCompareAtTitle,
           controller: compareController,
-          hint: '0.00',
+          hint: _moneyHint(context),
           prefixText: '${notifier.currencyCode} ',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: _moneyInputFormatters,
           errorText: errors['compareAt'],
           onChanged: (v) => notifier.updateField('compareAtPriceInput', v),
         ),
+        const Gap(AppSpacing.sm),
         Text(
           context.l10n.listingCompareAtHelper,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: context.textHint,
-                height: 1.35,
-              ),
+          style: AppTypography.bodySmall.copyWith(
+            color: context.textHint,
+            height: 1.35,
+          ),
         ),
         if (showCompareWarn && errors['compareAt'] == null)
           Padding(
@@ -560,11 +688,11 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
             child: Text(
               context.l10n.listingCompareAtWarning,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: context.isDark
-                        ? AppColors.warningLight
-                        : AppColors.warning,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: context.isDark
+                    ? AppColors.warningLight
+                    : AppColors.warning,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         const Gap(AppSpacing.lg),
@@ -671,7 +799,9 @@ class _ListingShippingAttributesSection extends StatelessWidget {
     required this.form,
     required this.notifier,
     required this.errors,
-    required this.locationController,
+    required this.cityId,
+    required this.governorateId,
+    required this.onLocationChanged,
     required this.shippingCostController,
     required this.attrKeyControllers,
     required this.attrValueControllers,
@@ -680,7 +810,9 @@ class _ListingShippingAttributesSection extends StatelessWidget {
   final ListingFormState form;
   final ListingFormNotifier notifier;
   final Map<String, String?> errors;
-  final TextEditingController locationController;
+  final int? cityId;
+  final int? governorateId;
+  final void Function(int? cityId, int? governorateId) onLocationChanged;
   final TextEditingController shippingCostController;
   final List<TextEditingController> attrKeyControllers;
   final List<TextEditingController> attrValueControllers;
@@ -699,22 +831,21 @@ class _ListingShippingAttributesSection extends StatelessWidget {
           onChanged: (q) => notifier.updateField('quantity', q),
         ),
         const Gap(AppSpacing.lg),
-        ListingFormField(
-          label: context.l10n.listingFormLocationLabel,
-          controller: locationController,
-          hint: context.l10n.listingFormLocationHint,
-          prefix: const Icon(LucideIcons.mapPin, size: 22),
+        LocationCascadeField(
+          cityId: cityId,
+          governorateId: governorateId,
+          hint: form.location,
           errorText: errors['location'],
-          onChanged: (v) => notifier.updateField('location', v),
+          onChanged: onLocationChanged,
         ),
         const Gap(AppSpacing.lg),
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
           title: Text(
             context.l10n.listingShippingAvailable,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: context.textPrimary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: context.textPrimary),
           ),
           value: form.shippingAvailable,
           onChanged: (v) => notifier.updateField('shippingAvailable', v),
@@ -724,8 +855,9 @@ class _ListingShippingAttributesSection extends StatelessWidget {
           ListingFormField(
             label: context.l10n.listingShippingCostLabel,
             controller: shippingCostController,
-            hint: '0.00',
+            hint: _moneyHint(context),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: _moneyInputFormatters,
             prefixText: '${notifier.currencyCode} ',
             errorText: errors['shippingCost'],
             onChanged: (v) => notifier.updateField('shippingCostInput', v),
@@ -736,9 +868,9 @@ class _ListingShippingAttributesSection extends StatelessWidget {
         Text(
           context.l10n.listingAttributesSubtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: context.colorScheme.onSurfaceVariant,
-                height: 1.35,
-              ),
+            color: context.colorScheme.onSurfaceVariant,
+            height: 1.35,
+          ),
         ),
         const Gap(AppSpacing.lg),
         AttributesSection(
@@ -747,8 +879,7 @@ class _ListingShippingAttributesSection extends StatelessWidget {
           onAdd: notifier.addAttribute,
           onRemove: notifier.removeAttribute,
           onKeyChanged: (i, v) => notifier.updateAttribute(i, key: v),
-          onValueChanged: (i, v) =>
-              notifier.updateAttribute(i, value: v),
+          onValueChanged: (i, v) => notifier.updateAttribute(i, value: v),
         ),
       ],
     );
@@ -769,7 +900,11 @@ class _AccentSectionTitle extends StatelessWidget {
           width: 4,
           height: 22,
           decoration: BoxDecoration(
-            color: AppColors.primary,
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: context.brandGradient,
+            ),
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -777,10 +912,9 @@ class _AccentSectionTitle extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: AppTypography.headlineSmall.copyWith(
+              fontSize: 16,
               color: context.textPrimary,
-              letterSpacing: context.scaledPx(-0.2),
             ),
           ),
         ),
@@ -811,144 +945,44 @@ class _PickerField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: context.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
+          label.toUpperCase(),
+          style: AppTypography.fieldLabel.copyWith(color: context.labelColor),
         ),
-        SizedBox(height: context.scaledPx(6)),
-        Material(
-          color: context.surfaceVariantColor,
-          borderRadius: BorderRadius.circular(12),
-          child: Semantics(
-            button: true,
-            label: '${label.isNotEmpty ? '$label · ' : ''}$value',
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(12),
-              splashColor: context.primaryColor.withValues(alpha: 0.08),
-              highlightColor: context.primaryColor.withValues(alpha: 0.06),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: context.surfaceVariantColor,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: hasError ? AppColors.error : context.textDisabled,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: hasError ? AppColors.error : context.textDisabled,
-                    ),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: context.scaledPx(AppTypography.rem(0.875)),
-                    vertical: context.scaledPx(AppTypography.rem(0.875)),
-                  ),
-                  suffixIcon: Icon(
-                    LucideIcons.chevronDown,
-                    color: context.iconSecondary,
-                    size: 22,
-                  ),
+        SizedBox(height: context.scaledPx(8)),
+        Semantics(
+          button: true,
+          label: '${label.isNotEmpty ? '$label · ' : ''}$value',
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            // Fill and borders (error included) come from the Orbit theme.
+            child: InputDecorator(
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: context.scaledPx(16),
+                  vertical: context.scaledPx(16),
                 ),
-                child: Text(
-                  value,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: valueIsPlaceholder
-                        ? context.textHint
-                        : context.textPrimary,
-                  ),
+                suffixIcon: Icon(
+                  LucideIcons.chevronDown,
+                  color: context.iconSecondary,
+                  size: 22,
+                ),
+                errorText: hasError ? errorText : null,
+              ),
+              child: Text(
+                value,
+                style: AppTypography.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: valueIsPlaceholder
+                      ? context.textHint
+                      : context.textPrimary,
                 ),
               ),
             ),
           ),
         ),
-        if (hasError)
-          Padding(
-            padding: EdgeInsets.only(
-              top: context.scaledPx(4),
-              left: context.scaledPx(4),
-            ),
-            child: Text(
-              errorText!,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.error),
-            ),
-          ),
       ],
-    );
-  }
-}
-
-class _PublishBar extends StatelessWidget {
-  const _PublishBar({
-    required this.publishLabel,
-    required this.enabled,
-    required this.loading,
-    required this.onPressed,
-  });
-
-  final String publishLabel;
-  final bool enabled;
-  final bool loading;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final gradient = LinearGradient(
-      colors: enabled
-          ? [AppColors.primary, AppColors.accent]
-          : [AppColors.materialGrey400, AppColors.materialGrey500],
-    );
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: enabled
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.35),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 52,
-        child: Material(
-          color: AppColors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: enabled && !loading ? onPressed : null,
-            child: Center(
-              child: loading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: AppColors.white,
-                      ),
-                    )
-                  : Text(
-                      publishLabel,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: AppTypography.rem(1),
-                      ),
-                    ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_store_hours.dart';
 import '../../../../core/network/api_endpoints.dart';
@@ -74,7 +75,7 @@ class StoreHoursDataSourceImpl implements StoreHoursDataSource {
         _cache = fallback;
         return fallback;
       }
-      throw ServerException(e.message ?? 'Failed to fetch store hours');
+      throw mapDioException(e);
     }
   }
 
@@ -111,7 +112,7 @@ class StoreHoursDataSourceImpl implements StoreHoursDataSource {
         _cache = hours;
         return hours;
       }
-      throw ServerException(e.message ?? 'Failed to save store hours');
+      throw mapDioException(e);
     }
   }
 
@@ -169,7 +170,7 @@ class StoreHoursDataSourceImpl implements StoreHoursDataSource {
         );
         return isOpen;
       }
-      throw ServerException(e.message ?? 'Failed to toggle store status');
+      throw mapDioException(e);
     }
   }
 

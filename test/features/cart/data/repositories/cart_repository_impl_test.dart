@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/error/failures.dart';
+import 'package:xstore/core/network/app_error_messages.dart';
 import 'package:xstore/features/cart/data/repositories/cart_repository_impl.dart';
 import 'package:xstore/features/cart/domain/entities/cart_entity.dart';
 import 'package:xstore/features/cart/domain/entities/cart_item_entity.dart';
@@ -69,7 +70,6 @@ PlaceOrderParams _params(String consumerId) => PlaceOrderParams(
       paymentMethod: PaymentMethod.cashOnDelivery,
       subtotal: 95000,
       shippingTotal: 0,
-      discount: 0,
       total: 95000,
     );
 
@@ -176,6 +176,33 @@ void main() {
       expect(result.isLeft(), isTrue);
       expect(addCalled, isFalse);
     });
+
+    test('refuses a sold-out listing with soldOutErrorCode', () async {
+      var addCalled = false;
+      final repo = CartRepositoryImpl(
+        StubCartRemoteDataSource(
+          onBuildLineFromListing: (_, __) async =>
+              _item().copyWith(isAvailable: false),
+          onAddOrUpdateItem: ({required consumerId, required item}) async {
+            addCalled = true;
+            return _cart(consumerId);
+          },
+        ),
+        StubOrdersRepository(),
+      );
+
+      final result = await repo.addFromListing(
+        consumerId: 'consumer_1',
+        listingId: 'listing_1',
+        quantity: 1,
+      );
+
+      result.fold(
+        (f) => expect(f.toString(), soldOutErrorCode),
+        (_) => fail('expected Left'),
+      );
+      expect(addCalled, isFalse);
+    });
   });
 
   group('addOrUpdateItem', () {
@@ -257,91 +284,6 @@ void main() {
       );
 
       final result = await repo.clearCart('consumer_1');
-
-      expect(result.isRight(), isTrue);
-    });
-  });
-
-  group('applyCoupon', () {
-    test('passes through the coupon as Right', () async {
-      final repo = CartRepositoryImpl(
-        StubCartRemoteDataSource(
-          onApplyCoupon: ({required code, required eligibleSubtotal}) async {
-            expect(code, 'SAVE10');
-            expect(eligibleSubtotal, 6000);
-            return const CouponEntity(
-              code: 'SAVE10',
-              discountType: DiscountType.percentage,
-              discountValue: 10,
-            );
-          },
-        ),
-        StubOrdersRepository(),
-      );
-
-      final result = await repo.applyCoupon(
-        consumerId: 'consumer_1',
-        code: 'SAVE10',
-        eligibleSubtotal: 6000,
-      );
-
-      expect(result.isRight(), isTrue);
-    });
-
-    test('maps a CouponException to Failure.validation, not Failure.server',
-        () async {
-      final repo = CartRepositoryImpl(
-        StubCartRemoteDataSource(
-          onApplyCoupon: ({required code, required eligibleSubtotal}) async =>
-              throw CouponException('invalid'),
-        ),
-        StubOrdersRepository(),
-      );
-
-      final result = await repo.applyCoupon(
-        consumerId: 'consumer_1',
-        code: 'BAD',
-        eligibleSubtotal: 100,
-      );
-
-      expect(result.isLeft(), isTrue);
-      result.fold(
-        (f) => expect(f, isA<ValidationFailure>()),
-        (_) => fail('expected Left'),
-      );
-    });
-
-    test('maps any other exception to Failure.server', () async {
-      final repo = CartRepositoryImpl(
-        StubCartRemoteDataSource(
-          onApplyCoupon: ({required code, required eligibleSubtotal}) async =>
-              throw Exception('network down'),
-        ),
-        StubOrdersRepository(),
-      );
-
-      final result = await repo.applyCoupon(
-        consumerId: 'consumer_1',
-        code: 'SAVE10',
-        eligibleSubtotal: 100,
-      );
-
-      expect(result.isLeft(), isTrue);
-      result.fold(
-        (f) => expect(f, isA<ServerFailure>()),
-        (_) => fail('expected Left'),
-      );
-    });
-  });
-
-  group('removeCoupon', () {
-    test('returns Right on success', () async {
-      final repo = CartRepositoryImpl(
-        StubCartRemoteDataSource(onRemoveCoupon: (_) async => _cart('consumer_1')),
-        StubOrdersRepository(),
-      );
-
-      final result = await repo.removeCoupon('consumer_1');
 
       expect(result.isRight(), isTrue);
     });

@@ -22,7 +22,7 @@ abstract final class ApiEndpoints {
       !kReleaseMode,
       'API_BASE_URL resolved empty in release; use --dart-define=API_BASE_URL=...',
     );
-    return 'https://xstoreegy002-001-site1.etempurl.com';
+    return 'https://xstoreegy002001-001-site1.etempurl.com';
   }
 
   // ---------------------------------------------------------------------
@@ -32,10 +32,13 @@ abstract final class ApiEndpoints {
   // the real backend and are kept only until the backend adds routes.
   // ---------------------------------------------------------------------
 
+  // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
   // TODO(backend): no social token-exchange route exists yet.
   // socialLogin matches the spec handed to backend: POST /api/auth/social.
   static const String socialLogin = '$_api/auth/social';
 
+  // TODO(phase-2): store hours/status — UI entry points are commented out.
+  // TODO(backend): store hours/status routes don't exist on the backend yet (always 404).
   /// Legacy store-hours module — not on the confirmed `/api` contract; hosted
   /// backend returns 404 until deployed. See `store_hours_datasource.dart`.
   static String vendorStoreHours(String vendorId) =>
@@ -71,6 +74,10 @@ abstract final class ApiEndpoints {
   /// old `DELETE /users/me` guess, which had no route on this backend.
   static const String deleteAccount = '$_api/auth/delete-account';
 
+  /// CONFIRMED (Postman collection): `PUT /api/auth/language`, JSON body
+  /// `{"preferredLanguage": "ar" | "en"}`; needs the user's X-Auth-Token.
+  static const String updateLanguage = '$_api/auth/language';
+
   /// Passwordless login: request an SMS OTP for an EXISTING account, then
   /// exchange it for a session. CONFIRMED live: [sendLoginOtp] returns
   /// `{message, otp}` (the OTP is echoed while no real SMS gateway is wired),
@@ -78,15 +85,14 @@ abstract final class ApiEndpoints {
   static const String sendLoginOtp = '$_api/auth/send-login-otp';
   static const String loginWithOtp = '$_api/auth/login-with-otp';
 
-  /// Google sign-in, split by the role to create/sign in as. Body is
-  /// `{"idToken": "<google identity token>"}` (the Google ID token from
-  /// google_sign_in — NOT a Firebase token). Auto-creates the account if none
-  /// exists. CONFIRMED live (401 "Invalid Google identity token" on a bad token).
-  static const String googleConsumerLogin = '$_api/auth/google/consumer/login';
-  static const String googleVendorLogin = '$_api/auth/google/vendor/login';
+  // TODO(backend): the live host serves /api/auth/google/login, but the collection lists
+  // /google/consumer/login + /google/vendor/login — backend to confirm before either side changes.
+  /// Google login for an existing account (any role). Body is
+  /// `{"idToken", "clientId"}` — the Google ID token from google_sign_in,
+  /// NOT a Firebase token.
+  static const String googleLogin = '$_api/auth/google/login';
 
-  /// Read-only lookup — does NOT create an account, unlike the two routes
-  /// above. Body `{"idToken", "clientId"}`; response `{exists, role}`
+  /// Read-only lookup — does NOT create an account. Body `{"idToken", "clientId"}`; response `{exists, role}`
   /// (role is null when exists is false). Lets the app skip the buyer/seller
   /// picker for a Google identity that already has an account.
   static const String googleCheckUser = '$_api/auth/google/check-user';
@@ -99,12 +105,6 @@ abstract final class ApiEndpoints {
   static const String storeCategories = '$_api/storecategories';
   static const String catalogCategories = '$_api/categories';
   static const String banners = '$_api/banners';
-
-  /// Generic upload endpoint. CONFIRMED (Postman collection): multipart
-  /// POST, file field key `file`, entityType path segment is one of
-  /// `listing`/`avatar`/`banner`. Replaces the old `/api/auth/avatar`
-  /// guess, which was never confirmed against the backend.
-  static String apiUpload(String entityType) => '$_api/uploads/$entityType';
 
   // Wishlist (all authenticated / user-scoped)
   static const String wishlist = '$_api/wishlist';
@@ -129,19 +129,19 @@ abstract final class ApiEndpoints {
   static String apiListingReview(String listingId, String reviewId) =>
       '$apiListings/$listingId/reviews/$reviewId';
 
-  // Listings (new /api-prefixed contract). Legacy listings/myListings/
-  // listingDetail/listingsSimilar above stay untouched.
+  // Listings (/api-prefixed contract).
   static const String apiListings = '$_api/listings';
   static const String apiMyListings = '$apiListings/my-listings';
   static String apiListingDetail(String id) => '$apiListings/$id';
   static String apiListingSimilar(String id, {int count = 6}) =>
       '$apiListings/$id/similar?count=$count';
+  // CONFIRMED live 400: `"Only cancelled listings can be re-submitted."`
+  // — not paused, not rejected.
   static String apiListingResubmit(String id) => '$apiListings/$id/resubmit';
-  // CONFIRMED (Postman collection): dedicated status-only PUT, no body.
-  // Used for pause — sidesteps the multipart image-wipe risk that the
-  // generic PUT /api/listings update carries (see ListingRemoteDataSource
-  // `_listingFormData`). No equivalent "activate"/"resume" route exists
-  // in the collection, so resume still goes through the generic update.
+  // CONFIRMED (Postman + live 400): bodyless pause PUT. Rejects unless
+  // the listing is already Active (`"Only active listings can be
+  // deactivated."`). `/activate` is not a route (empty 404). Do not use
+  // /deactivate or /resubmit to resume a paused listing.
   static String apiListingDeactivate(String id) => '$apiListings/$id/deactivate';
   // CONFIRMED (Postman collection): dedicated status-only PUT, no body.
   // Used for "Delete listing" — the collection has no DELETE endpoint for
@@ -150,6 +150,12 @@ abstract final class ApiEndpoints {
   // listing reappear as merely paused-and-resumable), so /cancel is the
   // closer semantic match for a listing the vendor wants gone for good.
   static String apiListingCancel(String id) => '$apiListings/$id/cancel';
+  // CONFIRMED (Postman + live probe, 2026-09-24): public GET, Result
+  // envelope with a bool `data` — "can this listing fill `quantity` right
+  // now". Unknown/inactive id → 404 "Listing not found."; quantity <= 0 →
+  // 400. Checked for every line before checkout places any order.
+  static String apiListingStock(String id, int quantity) =>
+      '$apiListings/$id/stock?quantity=$quantity';
 
   // Orders. CONFIRMED (Postman collection + live probe, 2026-08-14): the
   // backend model is ONE listing per order (POST body is
@@ -177,6 +183,7 @@ abstract final class ApiEndpoints {
   static const String vendorOrders = '$_api/vendor/orders';
   static const String vendorOrdersStatus = '$vendorOrders/status';
 
+  // TODO(backend): no route for "orders assigned to a platform courier" exists yet; the call is 404-tolerant (empty list).
   // No confirmed route exists for "orders assigned to a platform courier"
   // on this backend — courier fulfillment lives entirely on the separate
   // delivery-backend microservice (see DeliveryRequestRemoteDataSource).
@@ -193,22 +200,30 @@ abstract final class ApiEndpoints {
   static const String home = '$_api/home';
 
   // ---------------------------------------------------------------------
-  // Analytics — PROPOSED, not yet built on the backend. Contract spec for
-  // the backend team: docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md.
-  // The client batches events locally and POSTs here; until the backend
-  // ships the route it 404s and events stay queued (see
-  // AnalyticsService._flush, which backs off on repeated 404s instead of
-  // hammering a route that doesn't exist yet).
+  // Analytics collector (live, 202 {accepted}). Contract:
+  // docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md. The client
+  // batches events locally and POSTs here while signed in; a 404 or error
+  // keeps them queued and backs off (AnalyticsService._runFlush).
   // ---------------------------------------------------------------------
   static const String analyticsEvents = '$_api/analytics/events';
 
-  // ---------------------------------------------------------------------
-  // Vendor reports — PROPOSED, not yet built on the backend (2026-09-15).
-  // Full contract spec is documented on
-  // VendorReportsRemoteDataSourceImpl in
-  // lib/features/reports/data/datasources/vendor_reports_remote_datasource.dart.
-  // Until the backend ships this route, a live submission 404s and the
-  // failure is surfaced to the user — that is expected, not a bug.
-  // ---------------------------------------------------------------------
+  // Vendor reports. CONFIRMED (Postman collection + live 401-not-404
+  // probe, 2026-09-24); body contract on VendorReportsRemoteDataSourceImpl.
   static const String vendorReports = '$_api/reports/vendor';
+
+  // ---------------------------------------------------------------------
+  // Vendor platform-fee payments — in the backend collection (v10):
+  // multipart fields `method`, `amountEgp`, `receipt`. Background:
+  // docs_business/backend/11_COMMISSION_PAYMENT_REQUESTS_HANDOFF.md.
+  // ---------------------------------------------------------------------
+  // TODO(phase-2): payment history screen — GET /api/vendor/commission-payments?status&page&pageSize;
+  // parse method/status as name or int (fromWire already does).
+  static const String vendorCommissionPayments =
+      '$_api/vendor/commission-payments';
+
+  /// General Settings (the admin dashboard's remote app config): one row per
+  /// key, e.g. `instapay_handle`, `vodafone_cash_handle`, `orange_cash_handle`,
+  /// `etisalat_cash_handle`. Reads are public (no login); the app fetches
+  /// `?page=1&pageSize=20` (+ further pages) at startup and caches the map.
+  static const String generalSettings = '$_api/general-settings';
 }

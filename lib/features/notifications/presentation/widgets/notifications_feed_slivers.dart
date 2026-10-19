@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
@@ -36,15 +36,15 @@ abstract final class NotificationsFeedSlivers {
     );
     final n = ref.read(notificationsProvider.notifier);
     if (isLoading) {
-      return const [
-        SliverFillRemaining(child: NotificationsSkeleton()),
-      ];
+      return const [SliverFillRemaining(child: NotificationsSkeleton())];
     }
     if (error != null) {
       return [
         SliverFillRemaining(
-          child: Center(
-            child: Text(error, style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
+          hasScrollBody: false,
+          child: ErrorStateWidget(
+            message: error,
+            onRetry: n.fetchNotifications,
           ),
         ),
       ];
@@ -63,35 +63,44 @@ abstract final class NotificationsFeedSlivers {
         SliverMainAxisGroup(
           slivers: [
             SliverPersistentHeader(
-              pinned: true,
-              delegate: NotificationGroupHeaderDelegate(g.label),
+              pinned: false,
+              delegate: NotificationGroupHeaderDelegate(
+                _groupLabel(context, g.kind),
+              ),
             ),
             SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, i) {
-                  final e = g.notifications[i];
-                  return RepaintBoundary(
-                    child: NotificationTile(
-                      key: ValueKey<String>('notification-tile-${e.id}'),
-                      entity: e,
-                      markAllReadAnimating: markAllReadAnimating,
-                      onTap: () {
-                        n.markAsRead(e.id);
-                        final r = e.actionRoute;
-                        if (r != null && r.isNotEmpty) context.push(r);
-                      },
-                      onDeleteConfirmed: () => onDelete(context, e),
-                      onSwipeMarkRead: () => n.markAsRead(e.id),
-                      onMarkUnread: () => n.markAsUnread(e.id),
-                    ),
-                  );
-                },
-                childCount: g.notifications.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, i) {
+                final e = g.notifications[i];
+                return RepaintBoundary(
+                  child: NotificationTile(
+                    key: ValueKey<String>('notification-tile-${e.id}'),
+                    entity: e,
+                    markAllReadAnimating: markAllReadAnimating,
+                    onTap: () {
+                      n.markAsRead(e.id);
+                      final r = e.actionRoute;
+                      if (r != null && r.isNotEmpty) context.push(r);
+                    },
+                    onDeleteConfirmed: () => onDelete(context, e),
+                    onSwipeMarkRead: () => n.markAsRead(e.id),
+                    onMarkUnread: () => n.markAsUnread(e.id),
+                  ),
+                );
+              }, childCount: g.notifications.length),
             ),
           ],
         ),
       const SliverToBoxAdapter(child: NotificationActionBar()),
     ];
+  }
+
+  static String _groupLabel(BuildContext context, NotificationGroupKind kind) {
+    final l10n = context.l10n;
+    return switch (kind) {
+      NotificationGroupKind.today => l10n.notificationsGroupToday,
+      NotificationGroupKind.yesterday => l10n.notificationsGroupYesterday,
+      NotificationGroupKind.thisWeek => l10n.notificationsGroupThisWeek,
+      NotificationGroupKind.earlier => l10n.notificationsGroupEarlier,
+    };
   }
 }

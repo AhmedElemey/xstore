@@ -6,6 +6,7 @@ import '../../domain/entities/listing_entity.dart';
 import '../../domain/repositories/listing_repository.dart';
 import '../datasources/listing_remote_datasource.dart';
 import '../models/listing_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class ListingRepositoryImpl implements ListingRepository {
   ListingRepositoryImpl(this._remote);
@@ -56,7 +57,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -70,7 +71,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -84,7 +85,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -108,6 +109,7 @@ class ListingRepositoryImpl implements ListingRepository {
     required Map<String, String> attributes,
     required List<String> imagePaths,
     required ListingStatus status,
+    List<String>? keepImageUrls,
   }) async {
     try {
       final model = await _remote.updateListing(
@@ -129,6 +131,7 @@ class ListingRepositoryImpl implements ListingRepository {
         attributes: attributes,
         imagePaths: imagePaths,
         status: status,
+        keepImageUrls: keepImageUrls,
       );
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -136,7 +139,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -150,7 +153,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -167,21 +170,21 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
   @override
-  Future<Either<Failure, ListingEntity>> deactivateListing(String id) async {
+  Future<Either<Failure, Unit>> deactivateListing(String id) async {
     try {
-      final model = await _remote.deactivateListing(id);
-      return Right(model.toEntity());
+      await _remote.deactivateListing(id);
+      return const Right(unit);
     } on NetworkException catch (e) {
       return Left(Failure.network(e.message));
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

@@ -1,6 +1,6 @@
 // Focused test for the map-pin address picker's effect on order placement
-// (XST-102): a delivery address pinned via showMapAddressPicker
-// (lib/shared/widgets/map_address_picker.dart) carries its own lat/lng on
+// (XST-102): a delivery address pinned via the (since removed) map picker
+// carries its own lat/lng on
 // OrderAddress, and CartRemoteDataSourceImpl.placeOrder must send THOSE
 // coordinates on `POST /api/orders` — not the device's last-known GPS fix
 // (AppLocationCache) — since the two can legitimately differ (ordering for

@@ -116,8 +116,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     String orderId,
     OrderStatus status, {
     DeliveryMethod? deliveryMethod,
-    String? reason,
   }) {
+    // No cancel/reject `reason` — localized/free text; see OrdersNotifier.
     ref.read(analyticsServiceProvider).track(
       AnalyticsEvents.orderStatusChanged,
       properties: {
@@ -125,7 +125,6 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
         AnalyticsProps.status: status.name,
         AnalyticsProps.role: 'vendor',
         if (deliveryMethod != null) AnalyticsProps.method: deliveryMethod.name,
-        if (reason != null) AnalyticsProps.reason: reason,
       },
     );
   }
@@ -152,9 +151,12 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
         error: failure.toString(),
       ),
       (orders) {
+        final previous = {for (final o in state.orders) o.id: o};
         state = state.copyWith(
           isLoading: false,
-          orders: orders,
+          orders: [
+            for (final o in orders) o.keepingStepTimesFrom(previous[o.id]),
+          ],
           hasMore: orders.length >= _vendorPageSize,
           page: 1,
         );
@@ -259,7 +261,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       return false;
     }, (order) {
       _mergeOrder(order);
-      _trackOrderStatus(orderId, OrderStatus.cancelled, reason: reason);
+      _trackOrderStatus(orderId, OrderStatus.cancelled);
       return true;
     });
   }
@@ -355,9 +357,6 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     });
   }
 
-  int statusCount(OrderStatus status) =>
-      state.orders.where((o) => o.status == status).length;
-
   void clearError() {
     state = state.copyWith(error: null);
   }
@@ -380,6 +379,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
                     cancelledAt: cancelledAt ?? o.cancelledAt,
                     deliveryMethod: deliveryMethod ?? o.deliveryMethod,
                     confirmedAt: status == OrderStatus.confirmed ? now : o.confirmedAt,
+                    processingAt:
+                        status == OrderStatus.processing ? now : o.processingAt,
                     updatedAt: now,
                   )
                 : o,
@@ -394,7 +395,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     if (idx < 0) {
       state = state.copyWith(orders: [order, ...state.orders]);
     } else {
-      final next = [...state.orders]..[idx] = order;
+      final next = [...state.orders]
+        ..[idx] = order.keepingStepTimesFrom(state.orders[idx]);
       state = state.copyWith(orders: next);
     }
     _recompute();

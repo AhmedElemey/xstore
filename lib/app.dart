@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'features/auth/presentation/providers/language_sync_provider.dart';
 import 'features/notifications/presentation/providers/fcm_push_handling_provider.dart';
 import 'core/deeplink/deep_link_handling_provider.dart';
 import 'core/localization/app_localizations.dart';
@@ -17,12 +18,12 @@ class XstoreApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(fcmPushHandlingProvider);
+    ref.watch(languageSyncProvider);
     ref.watch(deepLinkHandlingProvider);
     final router = ref.watch(goRouterProvider);
     final currentThemeMode = ref.watch(appThemeModeProvider);
-    final language = ref.watch(appLocaleProvider);
+    ref.watch(appLocaleProvider);
     final locale = ref.read(appLocaleProvider.notifier).locale;
-    final useArabicFont = language == AppLanguage.arabic;
 
     return MaterialApp.router(
       // Role-changing login replaces [GoRouter]. Remount so the old
@@ -48,16 +49,10 @@ class XstoreApp extends ConsumerWidget {
           ),
         );
       },
-      theme: AppTheme.light.copyWith(
-        textTheme: useArabicFont
-            ? AppTheme.light.textTheme.apply(fontFamily: 'Cairo')
-            : AppTheme.light.textTheme,
-      ),
-      darkTheme: AppTheme.dark.copyWith(
-        textTheme: useArabicFont
-            ? AppTheme.dark.textTheme.apply(fontFamily: 'Cairo')
-            : AppTheme.dark.textTheme,
-      ),
+      // Arabic glyphs fall back to the bundled Arabic faces through
+      // AppTypography's fontFamilyFallback — no per-language theme needed.
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: currentThemeMode,
       locale: locale,
       localizationsDelegates: const [

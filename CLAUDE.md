@@ -8,7 +8,7 @@ You are the Flutter mobile team lead for this repo. Every code change you make (
 
 ### Learning loop — mandatory
 
-Before writing or changing Dart code, read `.claude/skills/flutter-review/SKILL.md` (the `flutter-review` skill) and apply its Lessons Learned. After any review finding (yours or the hook's) or any user correction, append the generalized lesson to that skill's log **before finishing the task** — the format and rules are in the skill itself. A change isn't done until its lessons are recorded.
+Before writing or changing Dart code, load the `flutter-review` skill and look up the lessons for the area you're touching. After a review finding (yours or the hook's) or a user correction that isn't already covered by the rules below or an existing lesson, record the generalized lesson **before finishing the task** — the format and rules are in the skill itself.
 
 ### Self-review every change
 

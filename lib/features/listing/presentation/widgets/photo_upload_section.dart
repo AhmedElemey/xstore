@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -19,19 +19,20 @@ class PhotoUploadSection extends StatelessWidget {
     required this.errorText,
     required this.onOpenPicker,
     required this.onRemove,
+    required this.onRemoveExisting,
     required this.onReorder,
     this.existingUrls = const [],
   });
 
   final List<String> paths;
 
-  /// Remote photos already on the listing being edited. Shown read-only —
-  /// there is no confirmed per-image delete endpoint, so these are not
-  /// removable here; adding new local [paths] fills the remaining slots.
+  /// Remote photos already on the listing being edited. Removable via
+  /// [onRemoveExisting]; remaining URLs are what update sends as keepers.
   final List<String> existingUrls;
   final String? errorText;
   final VoidCallback onOpenPicker;
   final void Function(int index) onRemove;
+  final void Function(int index) onRemoveExisting;
   final void Function(int fromIndex, int toIndex) onReorder;
 
   static const double tile = 100;
@@ -48,10 +49,17 @@ class PhotoUploadSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          context.l10n.listingPhotoSectionTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          // The shared listingPhotoSectionTitle key is also used as an
+          // accessibility label on product/explore screens (see
+          // product_image_gallery.dart, product_list_card.dart,
+          // product_grid_card.dart) where an asterisk wouldn't make sense —
+          // the required-field marker is appended here, not baked into the
+          // ARB string, so it only shows on this form's section header.
+          '${context.l10n.listingPhotoSectionTitle} *',
+          style: AppTypography.headlineSmall.copyWith(
+            fontSize: 16,
+            color: context.textPrimary,
+          ),
         ),
         const Gap(AppSpacing.lg),
         SizedBox(
@@ -63,15 +71,20 @@ class PhotoUploadSection extends StatelessWidget {
               children: [
                 for (var i = 0; i < existingUrls.length; i++)
                   Padding(
-                    padding: const EdgeInsets.only(right: AppSpacing.md),
+                    padding: const EdgeInsetsDirectional.only(
+                      end: AppSpacing.md,
+                    ),
                     child: _ExistingPhotoTile(
                       url: existingUrls[i],
                       isCover: i == 0 && paths.isEmpty,
+                      onRemove: () => onRemoveExisting(i),
                     ),
                   ),
                 for (var i = 0; i < paths.length; i++)
                   Padding(
-                    padding: const EdgeInsets.only(right: AppSpacing.md),
+                    padding: const EdgeInsetsDirectional.only(
+                      end: AppSpacing.md,
+                    ),
                     child: _PhotoTile(
                       path: paths[i],
                       index: i,
@@ -82,7 +95,9 @@ class PhotoUploadSection extends StatelessWidget {
                   ),
                 if (showAdd)
                   Padding(
-                    padding: const EdgeInsets.only(right: AppSpacing.md),
+                    padding: const EdgeInsetsDirectional.only(
+                      end: AppSpacing.md,
+                    ),
                     child: _AddPhotoTile(
                       width: addPhotoTileWidth,
                       height: tile,
@@ -96,15 +111,15 @@ class PhotoUploadSection extends StatelessWidget {
         const Gap(AppSpacing.lg),
         Text(
           context.l10n.listingPhotoSectionSubtitle,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: context.textSecondary),
         ),
         if (hasError)
           Padding(
-            padding: EdgeInsets.only(
+            padding: EdgeInsetsDirectional.only(
               top: context.scaledPx(6),
-              left: context.scaledPx(4),
+              start: context.scaledPx(4),
             ),
             child: Text(
               errorText!,
@@ -132,14 +147,15 @@ class _AddPhotoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.transparent,
+      color: context.glassColor,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: CustomPaint(
           foregroundPainter: _DashedBorderPainter(
-            color: context.textDisabled,
-            radius: 12,
+            color: context.linkColor.withValues(alpha: 0.6),
+            radius: 16,
           ),
           child: SizedBox(
             width: width,
@@ -152,7 +168,7 @@ class _AddPhotoTile extends StatelessWidget {
                 children: [
                   Icon(
                     LucideIcons.badgePlus,
-                    color: context.iconSecondary,
+                    color: context.linkColor,
                     size: 24,
                   ),
                   SizedBox(width: context.scaledPx(8)),
@@ -179,21 +195,23 @@ class _AddPhotoTile extends StatelessWidget {
   }
 }
 
-/// Read-only tile for a photo already hosted on the listing being edited —
-/// no remove/drag affordance, since there is no confirmed per-image delete
-/// endpoint (see [PhotoUploadSection.existingUrls]).
 class _ExistingPhotoTile extends StatelessWidget {
-  const _ExistingPhotoTile({required this.url, required this.isCover});
+  const _ExistingPhotoTile({
+    required this.url,
+    required this.isCover,
+    required this.onRemove,
+  });
 
   final String url;
   final bool isCover;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: PhotoUploadSection.tile,
       height: PhotoUploadSection.tile,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         fit: StackFit.expand,
@@ -208,8 +226,8 @@ class _ExistingPhotoTile extends StatelessWidget {
             ),
           ),
           if (isCover)
-            Positioned(
-              left: 6,
+            PositionedDirectional(
+              start: 6,
               bottom: 6,
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -230,6 +248,7 @@ class _ExistingPhotoTile extends StatelessWidget {
                 ),
               ),
             ),
+          _RemovePhotoButton(onRemove: onRemove),
         ],
       ),
     );
@@ -257,7 +276,7 @@ class _PhotoTile extends StatelessWidget {
       data: index,
       feedback: Material(
         elevation: 6,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         clipBehavior: Clip.antiAlias,
         child: SizedBox(
           width: PhotoUploadSection.tile,
@@ -291,7 +310,7 @@ class _PhotoTile extends StatelessWidget {
       width: PhotoUploadSection.tile,
       height: PhotoUploadSection.tile,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: dragTarget ? AppColors.primary : AppColors.transparent,
           width: 2,
@@ -320,8 +339,8 @@ class _PhotoTile extends StatelessWidget {
             ),
           ),
           if (isCover)
-            Positioned(
-              left: 6,
+            PositionedDirectional(
+              start: 6,
               bottom: 6,
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -342,30 +361,41 @@ class _PhotoTile extends StatelessWidget {
                 ),
               ),
             ),
-          Positioned(
-            top: AppSpacing.xs,
-            right: AppSpacing.xs,
-            child: Tooltip(
-              message: MaterialLocalizations.of(context).deleteButtonTooltip,
-              child: Material(
-                color: AppColors.error,
-                shape: const CircleBorder(),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: onRemove,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xs),
-                    child: Icon(
-                      LucideIcons.x,
-                      color: context.surfaceColor,
-                      size: AppSpacing.lg,
-                    ),
-                  ),
-                ),
+          _RemovePhotoButton(onRemove: onRemove),
+        ],
+      ),
+    );
+  }
+}
+
+class _RemovePhotoButton extends StatelessWidget {
+  const _RemovePhotoButton({required this.onRemove});
+
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return PositionedDirectional(
+      top: AppSpacing.xs,
+      end: AppSpacing.xs,
+      child: Tooltip(
+        message: MaterialLocalizations.of(context).deleteButtonTooltip,
+        child: Material(
+          color: AppColors.error,
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onRemove,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xs),
+              child: Icon(
+                LucideIcons.x,
+                color: context.surfaceColor,
+                size: AppSpacing.lg,
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

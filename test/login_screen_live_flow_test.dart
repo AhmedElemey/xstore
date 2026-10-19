@@ -99,12 +99,6 @@ class _FakeSocialAuth implements SocialAuthDatasource {
   Future<SocialAuthResult> signInWithGoogle() async =>
       googleResult ?? (throw UnimplementedError('not exercised by this screen'));
   @override
-  Future<SocialAuthResult> signInWithApple() =>
-      throw UnimplementedError('not exercised by this screen');
-  @override
-  Future<SocialAuthResult> signInWithFacebook() =>
-      throw UnimplementedError('not exercised by this screen');
-  @override
   Future<void> signOutSocial() async {}
 }
 
@@ -329,20 +323,17 @@ void main() {
   );
 
   testWidgets(
-    'Google sign-in for a returning Firebase identity does not send the '
-    'user to Register when check-user reports no Google-linked account',
+    'Google sign-in for a returning Firebase identity still goes to Register '
+    'when check-user reports no account',
     skip: MockConfig.useMock,
     (tester) async {
+      // Firebase `isNewUser: false` must not trigger the auto-creating
+      // Google login — no login route is scripted.
       final dio = _fakeDio({
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
           'exists': false,
           'role': null,
         },
-        'POST ${ApiEndpoints.googleConsumerLogin}': (_) => {
-          'token': 'access-token-email-account',
-          'refreshToken': 'refresh-token-email-account',
-        },
-        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
       });
 
       await tester.pumpWidget(
@@ -374,7 +365,8 @@ void main() {
       await tester.tap(find.text('Continue with Google'));
       await _settle(tester);
 
-      expect(find.text('Register Screen'), findsNothing);
+      expect(find.text('Register Screen'), findsOneWidget);
+      expect(find.text('Home Screen'), findsNothing);
     },
   );
 }

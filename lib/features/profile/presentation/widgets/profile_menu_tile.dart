@@ -56,12 +56,19 @@ class ProfileMenuTile extends StatelessWidget {
             child: subtitle == null
                 ? Text(
                     label,
-                    style: AppTypography.bodyLarge,
+                    style: AppTypography.bodyLarge.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(label, style: AppTypography.bodyLarge),
+                      Text(
+                        label,
+                        style: AppTypography.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       const SizedBox(height: 2),
                       Text(
                         subtitle!,
@@ -88,13 +95,15 @@ class ProfileMenuTile extends StatelessWidget {
                 ),
                 child: Text(
                   '${trailingBadgeCount!}',
-                  style: AppTypography.labelSmall.copyWith(
+                  style: AppTypography.mono.copyWith(
+                    fontSize: 12,
                     color: AppColors.white,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-            if ((trailingBadgeCount ?? 0) > 0) const SizedBox(width: AppSpacing.sm),
+            if ((trailingBadgeCount ?? 0) > 0)
+              const SizedBox(width: AppSpacing.sm),
             if (showChevron)
               Icon(
                 context.chevronForward,
@@ -109,11 +118,7 @@ class ProfileMenuTile extends StatelessWidget {
     if (onTap != null) {
       return Material(
         color: AppColors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppSpacing.sm),
-          child: padded,
-        ),
+        child: InkWell(onTap: onTap, child: padded),
       );
     }
     return padded;

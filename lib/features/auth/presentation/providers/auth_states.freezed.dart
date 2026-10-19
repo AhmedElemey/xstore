@@ -277,7 +277,10 @@ mixin _$RegisterState {
   bool get isLoading => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
   Map<String, String> get stepErrors => throw _privateConstructorUsedError;
-  bool get showVendorSuccessOverlay => throw _privateConstructorUsedError;
+  bool get showVendorSuccessOverlay =>
+      throw _privateConstructorUsedError; // Google ID token when this registration started from a Google sign-in
+// with no matching account; sent as `idToken` + `clientId`.
+  String? get socialIdToken => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $RegisterStateCopyWith<RegisterState> get copyWith =>
@@ -321,7 +324,8 @@ abstract class $RegisterStateCopyWith<$Res> {
       bool isLoading,
       String? error,
       Map<String, String> stepErrors,
-      bool showVendorSuccessOverlay});
+      bool showVendorSuccessOverlay,
+      String? socialIdToken});
 }
 
 /// @nodoc
@@ -368,6 +372,7 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
     Object? error = freezed,
     Object? stepErrors = null,
     Object? showVendorSuccessOverlay = null,
+    Object? socialIdToken = freezed,
   }) {
     return _then(_value.copyWith(
       currentStep: null == currentStep
@@ -494,6 +499,10 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
           ? _value.showVendorSuccessOverlay
           : showVendorSuccessOverlay // ignore: cast_nullable_to_non_nullable
               as bool,
+      socialIdToken: freezed == socialIdToken
+          ? _value.socialIdToken
+          : socialIdToken // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -537,7 +546,8 @@ abstract class _$$RegisterStateImplCopyWith<$Res>
       bool isLoading,
       String? error,
       Map<String, String> stepErrors,
-      bool showVendorSuccessOverlay});
+      bool showVendorSuccessOverlay,
+      String? socialIdToken});
 }
 
 /// @nodoc
@@ -582,6 +592,7 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
     Object? error = freezed,
     Object? stepErrors = null,
     Object? showVendorSuccessOverlay = null,
+    Object? socialIdToken = freezed,
   }) {
     return _then(_$RegisterStateImpl(
       currentStep: null == currentStep
@@ -708,6 +719,10 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
           ? _value.showVendorSuccessOverlay
           : showVendorSuccessOverlay // ignore: cast_nullable_to_non_nullable
               as bool,
+      socialIdToken: freezed == socialIdToken
+          ? _value.socialIdToken
+          : socialIdToken // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -746,7 +761,8 @@ class _$RegisterStateImpl implements _RegisterState {
       this.isLoading = false,
       this.error,
       final Map<String, String> stepErrors = const {},
-      this.showVendorSuccessOverlay = false})
+      this.showVendorSuccessOverlay = false,
+      this.socialIdToken})
       : _stepErrors = stepErrors;
 
   @override
@@ -841,10 +857,14 @@ class _$RegisterStateImpl implements _RegisterState {
   @override
   @JsonKey()
   final bool showVendorSuccessOverlay;
+// Google ID token when this registration started from a Google sign-in
+// with no matching account; sent as `idToken` + `clientId`.
+  @override
+  final String? socialIdToken;
 
   @override
   String toString() {
-    return 'RegisterState(currentStep: $currentStep, totalSteps: $totalSteps, selectedRole: $selectedRole, fullName: $fullName, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, countryCode: $countryCode, dateOfBirth: $dateOfBirth, location: $location, password: $password, confirmPassword: $confirmPassword, isPasswordVisible: $isPasswordVisible, isConfirmPasswordVisible: $isConfirmPasswordVisible, passwordStrength: $passwordStrength, agreedToTerms: $agreedToTerms, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoPath: $storeLogoPath, storeCity: $storeCity, storeWilaya: $storeWilaya, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber, isLoading: $isLoading, error: $error, stepErrors: $stepErrors, showVendorSuccessOverlay: $showVendorSuccessOverlay)';
+    return 'RegisterState(currentStep: $currentStep, totalSteps: $totalSteps, selectedRole: $selectedRole, fullName: $fullName, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, countryCode: $countryCode, dateOfBirth: $dateOfBirth, location: $location, password: $password, confirmPassword: $confirmPassword, isPasswordVisible: $isPasswordVisible, isConfirmPasswordVisible: $isConfirmPasswordVisible, passwordStrength: $passwordStrength, agreedToTerms: $agreedToTerms, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoPath: $storeLogoPath, storeCity: $storeCity, storeWilaya: $storeWilaya, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber, isLoading: $isLoading, error: $error, stepErrors: $stepErrors, showVendorSuccessOverlay: $showVendorSuccessOverlay, socialIdToken: $socialIdToken)';
   }
 
   @override
@@ -913,7 +933,9 @@ class _$RegisterStateImpl implements _RegisterState {
                 .equals(other._stepErrors, _stepErrors) &&
             (identical(
                     other.showVendorSuccessOverlay, showVendorSuccessOverlay) ||
-                other.showVendorSuccessOverlay == showVendorSuccessOverlay));
+                other.showVendorSuccessOverlay == showVendorSuccessOverlay) &&
+            (identical(other.socialIdToken, socialIdToken) ||
+                other.socialIdToken == socialIdToken));
   }
 
   @override
@@ -949,7 +971,8 @@ class _$RegisterStateImpl implements _RegisterState {
         isLoading,
         error,
         const DeepCollectionEquality().hash(_stepErrors),
-        showVendorSuccessOverlay
+        showVendorSuccessOverlay,
+        socialIdToken
       ]);
 
   @JsonKey(ignore: true)
@@ -991,7 +1014,8 @@ abstract class _RegisterState implements RegisterState {
       final bool isLoading,
       final String? error,
       final Map<String, String> stepErrors,
-      final bool showVendorSuccessOverlay}) = _$RegisterStateImpl;
+      final bool showVendorSuccessOverlay,
+      final String? socialIdToken}) = _$RegisterStateImpl;
 
   @override
   int get currentStep;
@@ -1055,6 +1079,9 @@ abstract class _RegisterState implements RegisterState {
   Map<String, String> get stepErrors;
   @override
   bool get showVendorSuccessOverlay;
+  @override // Google ID token when this registration started from a Google sign-in
+// with no matching account; sent as `idToken` + `clientId`.
+  String? get socialIdToken;
   @override
   @JsonKey(ignore: true)
   _$$RegisterStateImplCopyWith<_$RegisterStateImpl> get copyWith =>

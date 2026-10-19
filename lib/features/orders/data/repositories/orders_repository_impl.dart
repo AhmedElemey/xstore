@@ -5,6 +5,7 @@ import '../../domain/entities/order_entity.dart';
 import '../../domain/repositories/orders_repository.dart';
 import '../datasources/orders_remote_datasource.dart';
 import '../models/order_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class OrdersRepositoryImpl implements OrdersRepository {
   OrdersRepositoryImpl(this._remote);
@@ -25,7 +26,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       );
       return Right(rows.map((e) => e.toEntity()).toList());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -43,7 +44,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       );
       return Right(rows.map((e) => e.toEntity()).toList());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -61,7 +62,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       );
       return Right(rows.map((e) => e.toEntity()).toList());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -109,7 +110,9 @@ class OrdersRepositoryImpl implements OrdersRepository {
         row = rows.where((e) => e.id == orderId).firstOrNull;
       }
       if (row == null) {
-        if (byIdError != null) return Left(Failure.server(byIdError.toString()));
+        if (byIdError != null) {
+          return Left(Failure.server(userErrorMessage(byIdError)));
+        }
         return Left(Failure.notFound('Order'));
       }
       final e = row.toEntity();
@@ -118,7 +121,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       }
       return Right(e);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -129,7 +132,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
     try {
       return Right(await _remote.getVendorOrderStats(vendorId: vendorId));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -147,7 +150,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       );
       return Right(row.toEntity());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -165,7 +168,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       );
       return Right(row.toEntity());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -183,7 +186,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       );
       return Right(row.toEntity());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -196,7 +199,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       final row = await _remote.markProcessing(orderId, vendorId: vendorId);
       return Right(row.toEntity());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -214,7 +217,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       );
       return Right(row.toEntity());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -227,7 +230,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       final row = await _remote.markDelivered(orderId, vendorId: vendorId);
       return Right(row.toEntity());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -245,7 +248,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       );
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -255,7 +258,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       await _remote.registerPlacedConsumerOrder(OrderModelX.fromEntity(order));
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

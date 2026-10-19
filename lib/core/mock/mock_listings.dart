@@ -39,6 +39,7 @@ class _CatalogRow {
     required this.imageSeedTens,
     this.brand,
     this.shippingAvailable = true,
+    this.stockQuantity = 10,
   });
 
   final String id;
@@ -57,6 +58,10 @@ class _CatalogRow {
   final String? brand;
   final bool shippingAvailable;
 
+  /// ListingModel defaults a missing stock to 0 (sold out), so every mock row
+  /// carries a real count; 0 keeps the sold-out state visible.
+  final int stockQuantity;
+
   ListingModel toListingModel() {
     return ListingModel(
       id: id,
@@ -71,6 +76,7 @@ class _CatalogRow {
       viewCount: viewCount,
       saveCount: saveCount,
       inquiryCount: inquiryCount,
+      stockQuantity: stockQuantity,
     );
   }
 
@@ -140,6 +146,7 @@ const List<_CatalogRow> _catalog = [
     postedDaysAgo: 5,
     imageSeedTens: 30,
     brand: 'Nike',
+    stockQuantity: 3,
   ),
   _CatalogRow(
     id: 'listing_004',
@@ -348,6 +355,7 @@ const List<_CatalogRow> _catalog = [
     postedDaysAgo: 60,
     imageSeedTens: 140,
     brand: 'LEGO',
+    stockQuantity: 0,
   ),
   _CatalogRow(
     id: 'listing_015',
@@ -404,6 +412,7 @@ const List<_CatalogRow> _catalog = [
     inquiryCount: 445,
     postedDaysAgo: 44,
     imageSeedTens: 170,
+    stockQuantity: 0,
   ),
   _CatalogRow(
     id: 'listing_018',
@@ -473,12 +482,3 @@ List<ListingModel> get mockListingModels =>
 
 List<MockListingMeta> get mockListingMetaList =>
     [for (final r in _catalog) r.toMeta()];
-
-MockListingMeta? mockMetaForListing(String id) {
-  for (final r in _catalog) {
-    if (r.id == id) {
-      return r.toMeta();
-    }
-  }
-  return null;
-}

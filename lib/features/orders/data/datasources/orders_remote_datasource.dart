@@ -524,6 +524,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     return _asVendorOrdersEnvelope(response.data);
   }
 
+  // TODO(backend): the collection doesn't list page/pageSize for GET /api/vendor/orders;
+  // if the server ignores them, load-more duplicates rows — confirm paging support.
   @override
   Future<List<OrderModel>> getVendorOrders({
     required String vendorId,
@@ -562,7 +564,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
           .toList();
       return MockConfig.simulate(_page(mine, page, pageSize));
     }
-    // No confirmed backend route — see ApiEndpoints.ordersCourier doc.
+    // TODO(backend): no courier-orders route yet — see ApiEndpoints.ordersCourier.
     // Treated as "no data" (404-tolerant) rather than a hard error so the
     // courier tab shows an empty state instead of error spam.
     try {
@@ -793,6 +795,11 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         data: {
           'orderIds': [int.tryParse(orderId) ?? orderId],
           'status': orderStatusToWireName(status),
+          // Required by the backend when status is Cancelled.
+          if (status == OrderStatus.cancelled &&
+              localReason != null &&
+              localReason.trim().isNotEmpty)
+            'reason': localReason.trim(),
         },
       );
       // Same Result-envelope risk as cancelOrder: unwrap a possible
@@ -882,11 +889,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    // UNCONFIRMED: no status value for "rejected" is documented — the
-    // collection only shows "confirmed". Using "cancelled" (a value we
-    // know the app itself sends) until the backend confirms a dedicated
-    // rejected status; the reason is applied locally regardless, since no
-    // rejection-reason field is documented on this endpoint either.
+    // No dedicated "rejected" status exists: a vendor rejection is sent as
+    // Cancelled, whose `reason` the backend requires (see
+    // _setVendorOrderStatus).
     return _setVendorOrderStatus(
       orderId: orderId,
       status: OrderStatus.cancelled,
@@ -903,6 +908,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       final now = DateTime.now();
       final next = row.copyWith(
         status: OrderStatus.processing,
+        processingAt: now,
         updatedAt: now,
       );
       _replace(next);
@@ -1067,6 +1073,17 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
             OrderStatus.pending;
 
     final computedTotal = items.fold<double>(0, (a, b) => a + b.total);
+    final subtotal = _envelopeDouble(data, 'subtotal') ?? computedTotal;
+    final discount = _envelopeDouble(data, 'discount') ?? 0;
+    final total = _envelopeDouble(data, 'total') ?? computedTotal;
+    // Live orders send `total` with the listing's shipping already added
+    // (500 item + 20 shipping = 520) but no shipping field, so the
+    // breakdown read 0 and didn't add up. Without an explicit fee, the
+    // gap between total and subtotal − discount is the shipping charge.
+    final shippingCost = _envelopeDouble(data, 'shippingCost') ??
+        _envelopeDouble(data, 'shippingFee') ??
+        _envelopeDouble(data, 'deliveryFee') ??
+        (total - subtotal + discount).clamp(0, double.infinity).toDouble();
 
     final vendorRatingRaw = _envelopeDouble(data, 'vendorRating') ??
         _envelopeDouble(vendorNode ?? const {}, 'rating') ??
@@ -1159,10 +1176,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       paymentMethod: fallbackPayment ?? PaymentMethod.cashOnDelivery,
       isPaid: _envelopeBool(data, 'isPaid'),
       deliveryAddress: deliveryAddress,
-      subtotal: _envelopeDouble(data, 'subtotal') ?? computedTotal,
-      shippingCost: _envelopeDouble(data, 'shippingCost') ?? 0,
-      discount: _envelopeDouble(data, 'discount') ?? 0,
-      total: _envelopeDouble(data, 'total') ?? computedTotal,
+      subtotal: subtotal,
+      shippingCost: shippingCost,
+      discount: discount,
+      total: total,
       trackingNumber: _optString(data, 'trackingNumber'),
       deliveryMethod:
           switch ((_optString(data, 'deliveryMethod') ?? '').toLowerCase()) {
@@ -1183,6 +1200,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       updatedAt:
           DateTime.tryParse(_optString(data, 'updatedAt') ?? '') ?? DateTime.now(),
       confirmedAt: DateTime.tryParse(_optString(data, 'confirmedAt') ?? ''),
+      processingAt: DateTime.tryParse(_optString(data, 'processingAt') ?? ''),
       shippedAt: DateTime.tryParse(_optString(data, 'shippedAt') ?? ''),
       deliveredAt: DateTime.tryParse(_optString(data, 'deliveredAt') ?? ''),
       cancelledAt: DateTime.tryParse(_optString(data, 'cancelledAt') ?? ''),
@@ -1303,7 +1321,11 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         condition: condition.isNotEmpty ? condition : fallback?.condition ?? '',
         price: price,
         quantity: quantity,
-        total: _envelopeDouble(data, 'total') ?? price * quantity,
+        // The order-level `total` includes shipping — it is not this
+        // line's total once the price is known.
+        total: price > 0
+            ? price * quantity
+            : _envelopeDouble(data, 'total') ?? 0,
       ),
     ];
   }

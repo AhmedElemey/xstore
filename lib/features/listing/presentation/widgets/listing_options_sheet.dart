@@ -1,38 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+/// Result popped by [ListingOptionsSheet]. Callers must wait for the
+/// sheet to finish closing before pushing another overlay — popping and
+/// pushing in the same tap callback locks the navigator (`!_debugLocked`).
+enum ListingOptionsAction { edit, pause, resume, stats, delete, resubmit }
+
 /// Bottom sheet: listing actions (edit, pause/resume, stats, delete).
 class ListingOptionsSheet extends StatelessWidget {
-  const ListingOptionsSheet({
-    super.key,
-    required this.listing,
-    required this.onEdit,
-    required this.onPause,
-    required this.onResume,
-    required this.onViewStats,
-    required this.onDelete,
-    required this.onResubmit,
-  });
+  const ListingOptionsSheet({super.key, required this.listing});
 
   final ListingEntity listing;
-  final VoidCallback onEdit;
-  final VoidCallback onPause;
-  final VoidCallback onResume;
-  final VoidCallback onViewStats;
-  final VoidCallback onDelete;
-  final VoidCallback onResubmit;
 
   @override
   Widget build(BuildContext context) {
     final showPause = listing.status == ListingStatus.active;
-    final showResume = listing.status == ListingStatus.paused;
-    final showResubmit = listing.status == ListingStatus.rejected;
+    // TODO(backend): no endpoint to resume a paused listing (backend Q3) —
+    // restore with `listing.status == ListingStatus.paused` and the Resume tile.
+    // final showResume = listing.status == ListingStatus.paused;
+    // TODO(backend): no endpoint to resubmit an admin-rejected listing (backend Q3) —
+    // restore with `listing.status == ListingStatus.rejected` and the Resubmit tile.
+    // final showResubmit = listing.status == ListingStatus.rejected;
 
     return SafeArea(
       child: Padding(
@@ -46,71 +40,63 @@ class ListingOptionsSheet extends StatelessWidget {
                 width: AppSpacing.x3l + AppSpacing.sm,
                 height: AppSpacing.xs,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35),
+                  color: context.borderColor,
                   borderRadius: BorderRadius.circular(AppSpacing.xs),
                 ),
               ),
             ),
             const Gap(AppSpacing.lg),
-            if (showResubmit)
-              ListTile(
-                leading: Icon(LucideIcons.refreshCw, color: AppColors.primary),
-                title: Text(
-                  context.l10n.resubmitListing,
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onResubmit();
-                },
-              ),
+            // TODO(backend): no endpoint to resubmit an admin-rejected listing (backend Q3)
+            // if (showResubmit)
+            //   ListTile(
+            //     leading: Icon(LucideIcons.refreshCw, color: context.linkColor),
+            //     title: Text(
+            //       context.l10n.resubmitListing,
+            //       style: TextStyle(
+            //         color: context.linkColor,
+            //         fontWeight: FontWeight.w600,
+            //       ),
+            //     ),
+            //     onTap: () =>
+            //         Navigator.of(context).pop(ListingOptionsAction.resubmit),
+            //   ),
             ListTile(
               leading: const Icon(LucideIcons.pencil),
               title: Text(context.l10n.editListingMenu),
-              onTap: () {
-                Navigator.of(context).pop();
-                onEdit();
-              },
+              onTap: () => Navigator.of(context).pop(ListingOptionsAction.edit),
             ),
             if (showPause)
               ListTile(
                 leading: const Icon(LucideIcons.pauseCircle),
                 title: Text(context.l10n.pauseListing),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onPause();
-                },
+                onTap: () =>
+                    Navigator.of(context).pop(ListingOptionsAction.pause),
               ),
-            if (showResume)
-              ListTile(
-                leading: const Icon(LucideIcons.playCircle),
-                title: Text(context.l10n.resumeListing),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onResume();
-                },
-              ),
+            // TODO(backend): no endpoint to resume a paused listing (backend Q3)
+            // if (showResume)
+            //   ListTile(
+            //     leading: const Icon(LucideIcons.playCircle),
+            //     title: Text(context.l10n.resumeListing),
+            //     onTap: () =>
+            //         Navigator.of(context).pop(ListingOptionsAction.resume),
+            //   ),
             ListTile(
               leading: const Icon(LucideIcons.barChart2),
               title: Text(context.l10n.viewStatsMenu),
-              onTap: () {
-                Navigator.of(context).pop();
-                onViewStats();
-              },
+              onTap: () =>
+                  Navigator.of(context).pop(ListingOptionsAction.stats),
             ),
             ListTile(
-              leading: Icon(LucideIcons.trash2, color: Theme.of(context).colorScheme.error),
+              leading: Icon(
+                LucideIcons.trash2,
+                color: Theme.of(context).colorScheme.error,
+              ),
               title: Text(
                 context.l10n.deleteListing,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
-              onTap: () {
-                Navigator.of(context).pop();
-                onDelete();
-              },
+              onTap: () =>
+                  Navigator.of(context).pop(ListingOptionsAction.delete),
             ),
             const Gap(AppSpacing.md),
           ],
@@ -128,7 +114,6 @@ class ListingStatsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.x2l),
@@ -138,7 +123,10 @@ class ListingStatsSheet extends StatelessWidget {
           children: [
             Text(
               context.l10n.listingStatsHeading,
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              style: AppTypography.headlineSmall.copyWith(
+                fontSize: 20,
+                color: context.textPrimary,
+              ),
             ),
             const Gap(AppSpacing.x2l),
             _StatRow(
@@ -181,19 +169,18 @@ class _StatRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 22, color: AppColors.primary),
+        Icon(icon, size: 22, color: context.linkColor),
         const Gap(AppSpacing.lg),
         Expanded(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
+          child: Text(label, style: Theme.of(context).textTheme.bodyLarge),
         ),
         Text(
           value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: AppTypography.mono.copyWith(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: context.textPrimary,
+          ),
         ),
       ],
     );

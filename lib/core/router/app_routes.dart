@@ -4,7 +4,6 @@ abstract final class AppRoutes {
   static const onboarding = '/onboarding';
   static const login = '/login';
   static const register = '/register';
-  static const socialRoleSelect = '/social-role-select';
   /// Dedicated sign-in for platform couriers (phone + password / OTP).
   static const courierLogin = '/courier-login';
   static const forgotPassword = '/forgot-password';
@@ -31,6 +30,10 @@ abstract final class AppRoutes {
   static const orders = '/orders';
   static const vendorOrders = '/vendor-orders';
   static const vendorWallet = '/vendor-wallet';
+  // Pushed over the wallet tab (plain stack routes, not shell branches).
+  static const commissionPayment = '/commission-payment';
+  static String commissionPaymentReceiptPath(String methodWireName) =>
+      '$commissionPayment/$methodWireName';
   static const orderDetail = '/order';
   static String orderPath(String orderId) => '$orderDetail/$orderId';
   static const settings = '/settings';
@@ -61,6 +64,7 @@ abstract final class AppRoutes {
   static const product = '/product';
   static const sellerProfile = '/seller';
   static String sellerPath(String sellerId) => '$sellerProfile/$sellerId';
+  // TODO(backend): store hours/status routes don't exist on the backend yet.
   // TODO(phase-2): Store/active hours deferred to next phase — route
   // currently redirects to profile (see app_router.dart).
   static const storeHours = '/store-hours';
@@ -72,8 +76,6 @@ abstract final class AppRoutes {
   /// Consumer package delivery ("send anything" pilot).
   static const sendPackage = '/send-package';
   static const myPackages = '/my-packages';
-
-  static String chatThread(String threadId) => '/chat/$threadId';
 }
 
 /// Vendor-only areas: listing management, incoming orders, wallet, store
@@ -84,6 +86,7 @@ bool isVendorRestrictedRoute(String location) {
       location.startsWith(AppRoutes.vendorOrders) ||
       location == AppRoutes.storeHours ||
       location == AppRoutes.vendorWallet ||
+      location.startsWith(AppRoutes.commissionPayment) ||
       location == AppRoutes.earnings ||
       location == AppRoutes.analytics;
 }
@@ -93,8 +96,8 @@ bool isVendorRestrictedRoute(String location) {
 /// landing here via deep link or stale navigation is sent back to Incoming
 /// Orders.
 ///
-/// `/order/:id` is deliberately NOT here — vendors open it too, via
-/// `/incoming-orders` → [OrdersScreen] → `OrderCard`.
+/// `/order/:id` is deliberately NOT here — a vendor can still land on it,
+/// e.g. from a notification's `actionRoute`.
 bool isConsumerRestrictedRoute(String location) {
   return location == AppRoutes.cart ||
       location == AppRoutes.checkout ||

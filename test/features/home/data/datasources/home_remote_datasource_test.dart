@@ -7,9 +7,8 @@ import 'package:xstore/features/home/data/datasources/home_remote_datasource.dar
 
 /// Resolves (or rejects) every request with a scripted value keyed by
 /// path — same scripted-Dio approach as the wishlist/cart datasource
-/// tests, extended to route by path since fetchHotDeals internally calls
-/// fetchHomeAggregate (GET /api/home) before falling back to GET
-/// /api/listings.
+/// tests, extended to route by path. An unscripted path throws, so a test
+/// scripting only one route also proves no other endpoint was called.
 class _RoutedInterceptor extends Interceptor {
   _RoutedInterceptor(this._routes);
 
@@ -122,17 +121,17 @@ void main() {
       expect(result.single.id, 'b2');
     });
 
-    test('falls back to the static set on an empty response', () async {
+    test('returns no banners (no placeholders) on an empty response',
+        () async {
       dio = buildDio({ApiEndpoints.banners: (_) => <dynamic>[]});
       datasource = HomeRemoteDataSourceImpl(dio);
 
       final result = await datasource.fetchBanners();
 
-      expect(result, hasLength(2));
-      expect(result.map((b) => b.id), ['b1', 'b2']);
+      expect(result, isEmpty);
     });
 
-    test('falls back to the static set when offline instead of throwing',
+    test('returns no banners when offline instead of throwing',
         () async {
       dio = buildDio({
         ApiEndpoints.banners: (options) => _offline(options),
@@ -141,7 +140,7 @@ void main() {
 
       final result = await datasource.fetchBanners();
 
-      expect(result, hasLength(2));
+      expect(result, isEmpty);
     });
 
     test('throws (does not fall back) on a non-offline server error',
@@ -173,6 +172,43 @@ void main() {
       final result = await datasource.fetchCategories();
 
       expect(result.map((c) => c.name), ['Electronics', 'Fashion', 'منزل']);
+    });
+
+    test('reads the category picture from imageUrl (live key), then iconUrl',
+        () async {
+      dio = buildDio({
+        ApiEndpoints.catalogCategories: (_) => [
+              {'id': 1, 'nameEn': 'Beauty', 'imageUrl': '/uploads/beauty.png'},
+              {'id': 2, 'nameEn': 'Toys', 'iconUrl': 'https://cdn.test/toys.png'},
+              {'id': 3, 'nameEn': 'Books', 'imageUrl': '  ', 'iconUrl': null},
+              {'id': 4, 'nameEn': 'Other'},
+            ],
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchCategories();
+
+      expect(result.map((c) => c.iconUrl), [
+        '/uploads/beauty.png',
+        'https://cdn.test/toys.png',
+        null,
+        null,
+      ]);
+    });
+
+    test('hides categories an admin switched off (isActive: false)', () async {
+      dio = buildDio({
+        ApiEndpoints.catalogCategories: (_) => [
+              {'id': 7, 'nameEn': 'Automotive', 'isActive': false},
+              {'id': 4, 'nameEn': 'Beauty', 'isActive': true},
+              {'id': 9, 'nameEn': 'Books'},
+            ],
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchCategories();
+
+      expect(result.map((c) => c.name), ['Beauty', 'Books']);
     });
 
     test('falls back to the static set when offline', () async {
@@ -246,6 +282,45 @@ void main() {
       expect(result!.hotDeals.map((d) => d.id), ['live']);
     });
 
+    test('flags stockQuantity 0 as sold out; a missing count is not',
+        () async {
+      dio = buildDio({
+        ApiEndpoints.home: (_) => {
+              'banners': <dynamic>[],
+              'hotDeals': [
+                {..._activeListing(id: 'empty'), 'stockQuantity': 0},
+                {..._activeListing(id: 'stocked'), 'stockQuantity': 4},
+                _activeListing(id: 'unknown'),
+              ],
+              'newArrivals': <dynamic>[],
+              'recommendedForYou': <dynamic>[],
+            },
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchHomeAggregate();
+
+      expect(
+        {for (final d in result!.hotDeals) d.id: d.isSoldOut},
+        {'empty': true, 'stocked': false, 'unknown': false},
+      );
+    });
+
+    test('caps hot deals at the carousel size', () async {
+      dio = buildDio({
+        ApiEndpoints.home: (_) => {
+              'hotDeals': [
+                for (var i = 0; i < 12; i++) _activeListing(id: 'd$i'),
+              ],
+            },
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchHomeAggregate();
+
+      expect(result!.hotDeals, hasLength(10));
+    });
+
     test('returns null when every section is empty', () async {
       dio = buildDio({
         ApiEndpoints.home: (_) => {
@@ -271,44 +346,9 @@ void main() {
   }, skip: skipMock);
 
   group('fetchHotDeals', () {
-    test('uses the aggregate\'s hotDeals when present, without calling /api/listings',
-        () async {
-      var listingsCalled = false;
-      final interceptor = _RoutedInterceptor({
-        ApiEndpoints.home: (_) => {
-              'banners': <dynamic>[],
-              'hotDeals': [_activeListing(id: 'from_aggregate')],
-              'newArrivals': <dynamic>[],
-              'recommendedForYou': <dynamic>[],
-            },
-        ApiEndpoints.apiListings: (_) {
-          listingsCalled = true;
-          return <dynamic>[];
-        },
-      });
-      dio = Dio(BaseOptions(baseUrl: 'https://example.test'))
-        ..interceptors.add(interceptor);
-      datasource = HomeRemoteDataSourceImpl(dio);
-
-      final result = await datasource.fetchHotDeals();
-
-      expect(result.single.id, 'from_aggregate');
-      expect(
-        listingsCalled,
-        isFalse,
-        reason: 'should not derive from /api/listings when the aggregate has data',
-      );
-    });
-
-    test('derives from /api/listings sorted by discount when the aggregate is empty',
+    test('derives from /api/listings sorted by discount, without GET /api/home',
         () async {
       dio = buildDio({
-        ApiEndpoints.home: (_) => {
-              'banners': <dynamic>[],
-              'hotDeals': <dynamic>[],
-              'newArrivals': <dynamic>[],
-              'recommendedForYou': <dynamic>[],
-            },
         ApiEndpoints.apiListings: (_) => [
               _activeListing(id: 'small_discount', price: 90, compareAtPrice: 100),
               _activeListing(id: 'big_discount', price: 50, compareAtPrice: 100),
@@ -325,7 +365,6 @@ void main() {
     test('falls back to static deals when offline on the /api/listings derivation',
         () async {
       dio = buildDio({
-        ApiEndpoints.home: (options) => _offline(options),
         ApiEndpoints.apiListings: (options) => _offline(options),
       });
       datasource = HomeRemoteDataSourceImpl(dio);

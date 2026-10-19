@@ -4,6 +4,7 @@ import '../../../../core/mock/mock_config.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
+import '../../../../core/network/json_list_unwrap.dart';
 import '../../../listing/data/models/listing_model.dart'
     show isPublicLiveListingStatus;
 import '../models/search_result_model.dart';
@@ -16,6 +17,8 @@ abstract interface class ExploreRemoteDataSource {
     double? maxPrice,
     String? condition,
     int? categoryId,
+    bool? shippingAvailable,
+    double? minimumRating,
   });
 
   Future<List<String>> getSuggestions(String query);
@@ -37,16 +40,20 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
     double? maxPrice,
     String? condition,
     int? categoryId,
+    bool? shippingAvailable,
+    double? minimumRating,
   }) async {
     try {
       // GET /api/listings supports keyword/categoryId/minPrice/maxPrice/
-      // condition/sortBy/page/pageSize. minPrice/maxPrice/condition/
-      // categoryId are sent server-side (categoryId only when exactly one
-      // category is selected — the endpoint takes a single id, not a list;
-      // explore_provider.dart resolves the id and keeps a client-side
-      // narrowing pass for the multi-select case). Rating, location and
-      // shipping filters stay client-side, and sortBy stays client-side
-      // because its accepted tokens are unconfirmed.
+      // condition/sortBy/shippingAvailable/minimumRating/page/pageSize.
+      // minPrice/maxPrice/condition/categoryId are sent server-side
+      // (categoryId only when exactly one category is selected — the
+      // endpoint takes a single id, not a list; explore_provider.dart
+      // resolves the id and keeps a client-side narrowing pass for the
+      // multi-select case). shippingAvailable/minimumRating are sent too, but
+      // explore_provider.dart still applies them client-side as a safety net
+      // in case the server ignores them. Location stays client-side.
+      // TODO(backend): accepted `sortBy` values — sort stays client-side.
       final response = await _dio.get<dynamic>(
         ApiEndpoints.apiListings,
         queryParameters: {
@@ -56,12 +63,15 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
           if (condition != null && condition.isNotEmpty)
             'condition': condition,
           if (categoryId != null) 'categoryId': categoryId,
+          if (shippingAvailable ?? false) 'shippingAvailable': true,
+          if (minimumRating != null && minimumRating > 0)
+            'minimumRating': minimumRating,
           'page': page,
           'pageSize': pageSize,
         },
         options: ApiAuthHeaders.public(),
       );
-      var maps = _liveListingMaps(_unwrapObjectList(response.data));
+      var maps = _liveListingMaps(unwrapJsonObjectList(response.data));
 
       // GET /api/listings is geo-filtered to stores within 50 km of
       // X-Latitude/X-Longitude. Seeded/dummy vendors often have store
@@ -108,7 +118,7 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
         queryParameters: {'keyword': q, 'page': 1, 'pageSize': 12},
         options: ApiAuthHeaders.public(),
       );
-      var maps = _liveListingMaps(_unwrapObjectList(response.data));
+      var maps = _liveListingMaps(unwrapJsonObjectList(response.data));
       if (maps.isEmpty) {
         maps = await _liveListingsFromHome(query: q);
       }
@@ -145,7 +155,7 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
       final seen = <String>{};
       final out = <Map<String, dynamic>>[];
       for (final key in ['newArrivals', 'recommendedForYou', 'hotDeals']) {
-        for (final item in _liveListingMaps(_unwrapObjectList(map[key]))) {
+        for (final item in _liveListingMaps(unwrapJsonObjectList(map[key]))) {
           final id = (item['id'] ?? '').toString();
           if (id.isEmpty || !seen.add(id)) continue;
           out.add(item);
@@ -153,8 +163,8 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
       }
       return out.where((e) {
         if (!_matchesKeyword(e, query)) return false;
-        if (minPrice != null && _num(e['price']) < minPrice) return false;
-        if (maxPrice != null && _num(e['price']) > maxPrice) return false;
+        if (minPrice != null && jsonDouble(e['price']) < minPrice) return false;
+        if (maxPrice != null && jsonDouble(e['price']) > maxPrice) return false;
         if (condition != null &&
             condition.isNotEmpty &&
             (e['condition'] ?? '').toString() != condition) {
@@ -189,26 +199,4 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
     return title.contains(q);
   }
 
-  double _num(Object? v) =>
-      v is num ? v.toDouble() : double.tryParse(v?.toString() ?? '') ?? 0;
-
-  List<Map<String, dynamic>> _unwrapObjectList(dynamic data) {
-    if (data is List) {
-      return data
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
-    }
-    if (data is Map) {
-      final m = Map<String, dynamic>.from(data);
-      final items = m['items'] ?? m['data'] ?? m['results'] ?? m['listings'];
-      if (items is List) {
-        return items
-            .whereType<Map>()
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList();
-      }
-    }
-    return const [];
-  }
 }

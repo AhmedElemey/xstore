@@ -8,12 +8,12 @@ void main() {
       //   Pending = 0, Confirmed = 1, Processing = 2,
       //   Shipped = 3, Delivered = 4, Cancelled = 5
       // }
-      expect(orderStatusToWire(OrderStatus.pending), 0);
-      expect(orderStatusToWire(OrderStatus.confirmed), 1);
-      expect(orderStatusToWire(OrderStatus.processing), 2);
-      expect(orderStatusToWire(OrderStatus.shipped), 3);
-      expect(orderStatusToWire(OrderStatus.delivered), 4);
-      expect(orderStatusToWire(OrderStatus.cancelled), 5);
+      expect(orderStatusFromWire(0), OrderStatus.pending);
+      expect(orderStatusFromWire(1), OrderStatus.confirmed);
+      expect(orderStatusFromWire(2), OrderStatus.processing);
+      expect(orderStatusFromWire(3), OrderStatus.shipped);
+      expect(orderStatusFromWire(4), OrderStatus.delivered);
+      expect(orderStatusFromWire(5), OrderStatus.cancelled);
     });
 
     test('PUT /vendor/orders/status sends the C# enum name', () {
@@ -25,9 +25,9 @@ void main() {
       expect(orderStatusToWireName(OrderStatus.cancelled), 'Cancelled');
     });
 
-    test('every status round-trips wire → enum → wire', () {
+    test('every status parses from its int and string wire code', () {
       for (final s in OrderStatus.values) {
-        final wire = orderStatusToWire(s);
+        final wire = s.index; // C# declaration order matches the enum.
         expect(orderStatusFromWire(wire), s,
             reason: 'int $wire should parse back to $s');
         expect(orderStatusFromWire('$wire'), s,

@@ -8,6 +8,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
 
 /// Verifies the signed-in user's phone number via the backend OTP flow
@@ -24,10 +25,7 @@ Future<bool> verifyPhoneNow(
   final result = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: context.surfaceColor,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.lg)),
-    ),
+    showDragHandle: true,
     builder: (_) => _PhoneVerificationSheet(phoneNumber: phoneNumber),
   );
   return result ?? false;
@@ -115,11 +113,10 @@ class _PhoneVerificationSheetState
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
+        padding: EdgeInsetsDirectional.only(
+          start: AppSpacing.x2l,
+          end: AppSpacing.x2l,
+          bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.x2l,
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -128,56 +125,80 @@ class _PhoneVerificationSheetState
             children: [
               Text(
                 context.l10n.verifyYourNumber,
-                style: AppTypography.titleMedium
-                    .copyWith(fontWeight: FontWeight.w700),
+                style: AppTypography.headlineSmall.copyWith(
+                  fontSize: AppTypography.rem(1.25),
+                  color: context.textPrimary,
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 _codeSent
                     ? context.l10n.phoneOtpSentToAssociatedEmail
                     : widget.phoneNumber,
-                style: AppTypography.bodyMedium,
+                style: AppTypography.body15.copyWith(
+                  height: 1.5,
+                  color: context.textSecondary,
+                ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.x2l),
+              Text(
+                context.l10n.courierModeOtp.toUpperCase(),
+                style: AppTypography.fieldLabel.copyWith(
+                  color: context.labelColor,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
               TextField(
                 controller: _otpController,
                 keyboardType: TextInputType.number,
                 autofocus: true,
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.ltr,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(6),
                 ],
+                style: AppTypography.mono.copyWith(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 8,
+                  color: context.textPrimary,
+                ),
                 decoration: InputDecoration(
-                  labelText: context.l10n.courierModeOtp,
-                  border: const OutlineInputBorder(),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.lg,
+                  ),
                   errorText: _error,
                 ),
                 onSubmitted: (_) {
                   if (_otpController.text.trim().length == 6) _verify();
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.xl),
               ListenableBuilder(
                 listenable: _otpController,
-                builder: (context, _) => FilledButton(
+                builder: (context, _) => XstoreButton(
+                  label: context.l10n.verifyAndContinue,
+                  isLoading: _isVerifying,
                   onPressed: _isVerifying ||
                           !_codeSent ||
                           _otpController.text.trim().length != 6
                       ? null
                       : _verify,
-                  child: _isVerifying
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(context.l10n.verifyAndContinue),
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
-              TextButton(
-                onPressed: _isSending ? null : _sendCode,
-                child: Text(context.l10n.resendCode),
+              Center(
+                child: TextButton(
+                  onPressed: _isSending ? null : _sendCode,
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.linkColor,
+                    minimumSize: const Size(0, 44),
+                  ),
+                  child: Text(context.l10n.resendCode),
+                ),
               ),
             ],
           ),

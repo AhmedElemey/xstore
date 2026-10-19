@@ -12,17 +12,18 @@ import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/change_password_screen.dart';
 import '../../features/auth/presentation/screens/courier_login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
-import '../../features/auth/presentation/screens/social_role_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/domain/entities/social_auth_result.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
+import '../../features/commission/domain/entities/commission_payment_method.dart';
+import '../../features/commission/presentation/screens/commission_payment_method_screen.dart';
+import '../../features/commission/presentation/screens/commission_payment_receipt_screen.dart';
 import '../../features/commission/presentation/screens/vendor_wallet_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/delivery/presentation/screens/courier_cash_screen.dart';
 import '../../features/delivery/presentation/screens/courier_deliveries_screen.dart';
-import '../../features/delivery/presentation/screens/my_package_requests_screen.dart';
-import '../../features/delivery/presentation/screens/send_package_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/listing/domain/entities/listing_entity.dart';
@@ -40,8 +41,7 @@ import '../../features/profile/presentation/screens/profile_verification_screen.
 import '../../features/profile/presentation/providers/profile_verification_provider.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
-// TODO(phase-2): Re-enable once store/active hours ships.
-// import '../../features/store/presentation/screens/store_hours_screen.dart';
+import '../../features/general_settings/presentation/providers/general_settings_provider.dart';
 import '../../shared/screens/app_error_screen.dart';
 import '../../shared/screens/server_error_screen.dart';
 import '../../shared/screens/trust_info_screens.dart';
@@ -123,7 +123,11 @@ List<StatefulShellBranch> _courierShellBranches() => [
       ),
     ];
 
-String _routerInitialLocation(AsyncValue<UserEntity?> auth) {
+String _routerInitialLocation(
+  AsyncValue<UserEntity?> auth, {
+  required bool settingsReady,
+}) {
+  if (!settingsReady) return AppRoutes.splash;
   return auth.when(
     data: (user) {
       if (user == null) return AppRoutes.login;
@@ -157,7 +161,10 @@ GoRouter goRouter(GoRouterRef ref) {
   };
 
   final router = GoRouter(
-    initialLocation: _routerInitialLocation(ref.read(authProvider)),
+    initialLocation: _routerInitialLocation(
+      ref.read(authProvider),
+      settingsReady: ref.read(generalSettingsProvider).hasValue,
+    ),
     refreshListenable: refresh,
     errorBuilder: (context, state) => AppErrorScreen(
       onRetry: () => context.go(AppRoutes.home),
@@ -204,7 +211,13 @@ GoRouter goRouter(GoRouterRef ref) {
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,
-          const RegisterScreen(),
+          // Extra is the Google profile to prefill (in-memory only; a cold
+          // deep link opens a blank form).
+          RegisterScreen(
+            googlePrefill: state.extra is SocialAuthResult
+                ? state.extra as SocialAuthResult
+                : null,
+          ),
         ),
       ),
       GoRoute(
@@ -213,14 +226,6 @@ GoRouter goRouter(GoRouterRef ref) {
           context,
           state,
           const CourierLoginScreen(),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.socialRoleSelect,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const SocialRoleScreen(),
         ),
       ),
       GoRoute(
@@ -295,23 +300,21 @@ GoRouter goRouter(GoRouterRef ref) {
           const CheckoutScreen(),
         ),
       ),
-      // Consumer package delivery — plain stack routes (not shell tabs),
-      // so `context.push` from profile/my-packages is safe.
+      // TODO(phase-2): "Send a package" / "My packages" (package delivery
+      // requests) are deferred to the next phase — nothing in the app links
+      // to them yet. The screens stay in lib/features/delivery; to restore,
+      // swap these redirects back to their screens:
+      //   sendPackage → slideUpTransition(SendPackageScreen(
+      //       args: state.extra as SendPackageArgs?))
+      //   myPackages  → slideRightTransition(const MyPackageRequestsScreen())
+      // and add an entry point (e.g. a Profile menu item).
       GoRoute(
         path: AppRoutes.sendPackage,
-        pageBuilder: (context, state) => slideUpTransition(
-          context,
-          state,
-          SendPackageScreen(args: state.extra as SendPackageArgs?),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.myPackages,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const MyPackageRequestsScreen(),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: '${AppRoutes.vendorOrders}/:orderId',
@@ -320,6 +323,34 @@ GoRouter goRouter(GoRouterRef ref) {
           state,
           VendorOrderDetailScreen(
             orderId: state.pathParameters['orderId'] ?? '',
+          ),
+        ),
+      ),
+      // Vendor pays platform fees: pick a method, then upload the receipt.
+      // The method rides in the path (not `extra`) so a restart or deep
+      // link still has it; an unknown method goes back to the method list.
+      GoRoute(
+        path: AppRoutes.commissionPayment,
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const CommissionPaymentMethodScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '${AppRoutes.commissionPayment}/:method',
+        redirect: (_, state) =>
+            CommissionPaymentMethod.fromWire(state.pathParameters['method']) ==
+                    null
+                ? AppRoutes.commissionPayment
+                : null,
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          CommissionPaymentReceiptScreen(
+            method: CommissionPaymentMethod.fromWire(
+              state.pathParameters['method'],
+            )!,
           ),
         ),
       ),
@@ -422,11 +453,12 @@ GoRouter goRouter(GoRouterRef ref) {
           const NotificationsScreen(),
         ),
       ),
-      // TODO(phase-2): Notification settings deferred (local-only prefs).
+      // No notification settings screen; keep old deep links off a dead end.
       GoRoute(
         path: AppRoutes.notificationSettings,
         redirect: (_, __) => AppRoutes.profile,
       ),
+      // No chat screen; an FCM `actionRoute` can still send /chat/{id}.
       GoRoute(
         path: '/chat/:threadId',
         redirect: (_, __) => AppRoutes.notifications,
@@ -446,6 +478,7 @@ GoRouter goRouter(GoRouterRef ref) {
         ),
       ),
       // TODO(phase-2): Store/active hours screen deferred to next phase.
+      // TODO(backend): store hours/status routes don't exist on the backend yet.
       // Route redirects to profile in the meantime instead of dead-ending.
       GoRoute(
         path: AppRoutes.storeHours,

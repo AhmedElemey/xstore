@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,8 +17,6 @@ import '../providers/profile_provider.dart';
 import 'delete_account_dialog.dart';
 import 'profile_menu_section.dart';
 import 'profile_menu_tile.dart';
-// TODO(phase-2): Re-enable once push/email preference sync ships.
-// import 'profile_switch_tile.dart';
 import 'theme_toggle_tile.dart';
 import 'language_toggle_tile.dart';
 import '../../../../core/animations/app_dialogs.dart';
@@ -61,20 +59,18 @@ class ProfileMenuBlocks extends ConsumerWidget {
       context: context,
       child: DeleteAccountDialog(
         onConfirm: (password, confirmationText) async {
-          final result =
-              await ref.read(profileNotifierProvider.notifier).deleteAccount(
-                    password: password,
-                    confirmationText: confirmationText,
-                  );
+          final result = await ref
+              .read(profileNotifierProvider.notifier)
+              .deleteAccount(
+                password: password,
+                confirmationText: confirmationText,
+              );
           if (result.deleted) {
             await ref.read(authProvider.notifier).logout();
             return;
           }
           if (!context.mounted || result.error == null) return;
-          AppSnackbar.error(
-            context,
-            resolveAppError(context, result.error),
-          );
+          AppSnackbar.error(context, resolveAppError(context, result.error));
         },
       ),
     );
@@ -82,9 +78,6 @@ class ProfileMenuBlocks extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // TODO(phase-2): Push/email preference toggles deferred to next phase.
-    // final push = ref.watch(profileNotifierProvider).pushNotificationsEnabled;
-    // final email = ref.watch(profileNotifierProvider).emailUpdatesEnabled;
     final pendingVendorOrders = ref.watch(
       vendorOrdersProvider.select((s) => s.pendingCount),
     );
@@ -111,32 +104,25 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     trailingBadgeCount: pendingVendorOrders,
                     onTap: () => context.go(AppRoutes.vendorOrders),
                   ),
-                  // Package delivery deferred to phase 2.
-                  // ProfileMenuTile(
-                  //   icon: LucideIcons.package,
-                  //   iconBackground: AppColors.warning,
-                  //   label: context.l10n.menuMyPackages,
-                  //   onTap: () => context.push(AppRoutes.myPackages),
-                  // ),
                 ]
               : isCourier
-                  ? [
-                      // Shell-branch tabs — switch with go, never push
-                      // (see StatefulShellRoute lesson).
-                      ProfileMenuTile(
-                        icon: LucideIcons.truck,
-                        iconBackground: AppColors.primary,
-                        label: context.l10n.navDeliveries,
-                        onTap: () => context.go(AppRoutes.deliveries),
-                      ),
-                      ProfileMenuTile(
-                        icon: LucideIcons.wallet,
-                        iconBackground: AppColors.success,
-                        label: context.l10n.navCash,
-                        onTap: () => context.go(AppRoutes.courierCash),
-                      ),
-                    ]
-                  : [
+              ? [
+                  // Shell-branch tabs — switch with go, never push
+                  // (see StatefulShellRoute lesson).
+                  ProfileMenuTile(
+                    icon: LucideIcons.truck,
+                    iconBackground: AppColors.primary,
+                    label: context.l10n.navDeliveries,
+                    onTap: () => context.go(AppRoutes.deliveries),
+                  ),
+                  ProfileMenuTile(
+                    icon: LucideIcons.wallet,
+                    iconBackground: AppColors.success,
+                    label: context.l10n.navCash,
+                    onTap: () => context.go(AppRoutes.courierCash),
+                  ),
+                ]
+              : [
                   ProfileMenuTile(
                     icon: LucideIcons.shoppingBag,
                     iconBackground: AppColors.primary,
@@ -144,13 +130,6 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     // Shell-branch tab — go, never push.
                     onTap: () => context.go(AppRoutes.orders),
                   ),
-                  // Package delivery deferred to phase 2.
-                  // ProfileMenuTile(
-                  //   icon: LucideIcons.package,
-                  //   iconBackground: AppColors.warning,
-                  //   label: context.l10n.menuMyPackages,
-                  //   onTap: () => context.push(AppRoutes.myPackages),
-                  // ),
                   ProfileMenuTile(
                     icon: LucideIcons.heart,
                     iconBackground: AppColors.accent,
@@ -186,60 +165,17 @@ class ProfileMenuBlocks extends ConsumerWidget {
               label: context.l10n.menuChangePassword,
               onTap: () => context.push(AppRoutes.changePassword),
             ),
-            // Notification preference screen deferred to phase 2
-            // (local SharedPreferences only; no backend sync).
-            // ProfileMenuTile(
-            //   icon: LucideIcons.bell,
-            //   iconBackground: AppColors.accent,
-            //   label: context.l10n.menuNotificationsSettings,
-            //   onTap: () => context.push(AppRoutes.notificationSettings),
-            // ),
-            // Payment methods deferred to phase 2 (checkout still collects
-            // a one-off address for COD; only the payment method itself —
-            // cards/wallets — is unbuilt).
-            // ProfileMenuTile(
-            //   icon: LucideIcons.creditCard,
-            //   iconBackground: AppColors.success,
-            //   label: context.l10n.menuPaymentMethods,
-            //   onTap: () => context.push(AppRoutes.paymentMethods),
-            // ),
           ],
         ),
         const SizedBox(height: AppSpacing.x2l),
         ProfileMenuSection(
           title: context.l10n.sectionPreferences,
-          children: [
-            const ThemeToggleTile(),
-            const LanguageToggleTile(),
-            // Push and email preference toggles deferred to phase 2
-            // (no backend sync yet; local-only switches would lie).
-            // ProfileSwitchTile(
-            //   icon: LucideIcons.bellOff,
-            //   iconBackground: context.textSecondary,
-            //   label: context.l10n.pushNotifications,
-            //   value: push,
-            //   onChanged: ref.read(profileNotifierProvider.notifier).togglePushNotifications,
-            // ),
-            // ProfileSwitchTile(
-            //   icon: LucideIcons.mail,
-            //   iconBackground: AppColors.primary,
-            //   label: context.l10n.emailUpdates,
-            //   value: email,
-            //   onChanged: ref.read(profileNotifierProvider.notifier).toggleEmailUpdates,
-            // ),
-          ],
+          children: [const ThemeToggleTile(), const LanguageToggleTile()],
         ),
         const SizedBox(height: AppSpacing.x2l),
         ProfileMenuSection(
           title: context.l10n.sectionSupport,
           children: [
-            // Help center deferred to phase 2.
-            // ProfileMenuTile(
-            //   icon: LucideIcons.messageCircle,
-            //   iconBackground: AppColors.primary,
-            //   label: context.l10n.menuHelpCenter,
-            //   onTap: () => context.push(AppRoutes.help),
-            // ),
             ProfileMenuTile(
               icon: LucideIcons.fileText,
               iconBackground: context.textSecondary,
@@ -262,26 +198,31 @@ class ProfileMenuBlocks extends ConsumerWidget {
               icon: LucideIcons.share2,
               iconBackground: AppColors.accent,
               label: context.l10n.menuShareApp,
-                    onTap: () => _shareApp(context),
+              onTap: () => _shareApp(context),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.x2l),
-        Text(
-          context.l10n.sectionDangerZone,
-          style: AppTypography.labelSmall.copyWith(
-            color: context.textSecondary,
-            letterSpacing: 1.1,
-            fontWeight: FontWeight.w600,
+        Padding(
+          padding: const EdgeInsetsDirectional.only(start: AppSpacing.xs),
+          child: Text(
+            context.l10n.sectionDangerZone.toUpperCase(),
+            style: AppTypography.fieldLabel.copyWith(color: context.labelColor),
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
         OutlinedButton(
           onPressed: onLogout,
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.error,
-            side: const BorderSide(color: AppColors.error),
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            foregroundColor: context.colorScheme.error,
+            backgroundColor: context.glassColor,
+            side: BorderSide(
+              color: context.colorScheme.error.withValues(alpha: 0.6),
+            ),
+            minimumSize: const Size.fromHeight(48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+            ),
           ),
           child: Text(context.l10n.logOut),
         ),
@@ -291,7 +232,9 @@ class ProfileMenuBlocks extends ConsumerWidget {
             onPressed: () => _deleteAccount(context, ref),
             child: Text(
               context.l10n.deleteAccount,
-              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colorScheme.error,
+              ),
             ),
           ),
         ),
@@ -299,10 +242,9 @@ class ProfileMenuBlocks extends ConsumerWidget {
         Center(
           child: Text(
             context.l10n.profileFooterLine,
-            style: AppTypography.labelSmall.copyWith(color: context.textDisabled),
+            style: AppTypography.labelSmall.copyWith(color: context.labelColor),
           ),
         ),
-        const SizedBox(height: AppSpacing.x3l),
       ],
     );
   }

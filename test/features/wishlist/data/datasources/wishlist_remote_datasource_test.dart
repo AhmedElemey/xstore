@@ -311,37 +311,6 @@ void main() {
     });
   });
 
-  group('clearWishlist', () {
-    test('DELETEs /api/wishlist/{consumerId}', () async {
-      RequestOptions? captured;
-      dio = buildDio((options) {
-        captured = options;
-        return null;
-      });
-      datasource = WishlistRemoteDataSourceImpl(dio);
-
-      await datasource.clearWishlist('consumer_1');
-
-      expect(captured!.method, 'DELETE');
-      expect(captured!.path, '/api/wishlist/consumer_1');
-    });
-
-    test('maps a connection timeout to a NetworkException', () async {
-      dio = buildDio(
-        (options) => DioException(
-          requestOptions: options,
-          type: DioExceptionType.connectionTimeout,
-        ),
-      );
-      datasource = WishlistRemoteDataSourceImpl(dio);
-
-      expect(
-        () => datasource.clearWishlist('consumer_1'),
-        throwsA(isA<NetworkException>()),
-      );
-    });
-  });
-
   group('buildFromListingId', () {
     test(
       'GETs /api/listings/{id} and reads a flat (unwrapped) payload',
@@ -379,7 +348,6 @@ void main() {
         expect(result.vendorName, 'Sara');
         expect(result.vendorStoreName, 'Sara');
         expect(result.rating, 4.8);
-        // Free shipping above the 20,000 threshold.
         expect(result.shippingCost, 0.0);
         expect(result.id, startsWith('wish_'));
       },
@@ -402,8 +370,7 @@ void main() {
 
       expect(result.listingId, 'listing_5');
       expect(result.listingName, 'Desk Lamp');
-      // Below the 20,000 free-shipping threshold.
-      expect(result.shippingCost, 500.0);
+      expect(result.shippingCost, 0.0);
     });
 
     test('reads vendor/seller details from a nested seller object', () async {

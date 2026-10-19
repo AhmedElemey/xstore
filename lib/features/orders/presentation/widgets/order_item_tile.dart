@@ -27,7 +27,7 @@ class OrderItemTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.sm),
+            borderRadius: BorderRadius.circular(14),
             child: SizedBox(
               width: 60,
               height: 60,
@@ -56,7 +56,8 @@ class OrderItemTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.listingName,
+                  context.isolate(item.listingName),
+                  textDirection: context.textDirectionOf(item.listingName),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.titleSmall.copyWith(
@@ -81,9 +82,11 @@ class OrderItemTile extends StatelessWidget {
                 ],
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '${context.formatCurrency(item.price)} × ${item.quantity} = ${context.formatCurrency(item.total)}',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: context.textSecondary,
+                  '${context.formatCurrency(item.price)} × ${context.formatInt(item.quantity)} = ${context.formatCurrency(item.total)}',
+                  style: AppTypography.mono.copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: context.amberColor,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -93,14 +96,14 @@ class OrderItemTile extends StatelessWidget {
                   child: Text(
                     context.l10n.ordersViewProduct,
                     style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
+                      color: context.linkColor,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
                 if (showStockHint)
                   Text(
-                    context.l10n.vendorLowStockHint(item.quantity),
+                    context.l10n.vendorLowStockHint(context.formatInt(item.quantity)),
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.warning,
                     ),

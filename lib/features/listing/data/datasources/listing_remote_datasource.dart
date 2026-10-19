@@ -59,6 +59,7 @@ abstract interface class ListingRemoteDataSource {
     required Map<String, String> attributes,
     required List<String> imagePaths,
     required ListingStatus status,
+    List<String>? keepImageUrls,
   });
 
   Future<void> deleteListing(String id);
@@ -75,7 +76,9 @@ abstract interface class ListingRemoteDataSource {
   /// (Postman collection) to exist as a plain PUT with no body — used
   /// instead of the generic multipart update so pausing never sends an
   /// empty `imageFiles` set (see `_listingFormData`'s image-wipe risk).
-  Future<ListingModel> deactivateListing(String id);
+  /// The response body is not a listing DTO, so it's ignored — callers
+  /// already know the resulting status.
+  Future<void> deactivateListing(String id);
 
   /// Drops the offline-scaffold cache. Must be called on logout — the
   /// datasource is a keepAlive singleton, so without this a second account
@@ -130,6 +133,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required List<String> imagePaths,
     String? id,
     ListingStatus? status,
+    List<String>? keepImageUrls,
   }) async {
     final fields = <String, dynamic>{
       if (id != null) 'id': id,
@@ -157,9 +161,16 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       fields['Attributes[$i].Value'] = entry.value;
       i++;
     }
-
     final formData = FormData.fromMap(fields);
-    for (final path in imagePaths.take(_maxImagesPerListing)) {
+    // `savedImageUrls` repeats once per kept URL; a Map can't hold
+    // repeated keys, so they're added to the form fields directly.
+    final keptUrls = keepImageUrls?.take(_maxImagesPerListing) ?? const [];
+    for (final url in keptUrls) {
+      formData.fields.add(MapEntry('savedImageUrls', url));
+    }
+    final keptCount = keptUrls.length;
+    final newSlots = _maxImagesPerListing - keptCount;
+    for (final path in imagePaths.take(newSlots)) {
       // photoPaths can be restored from a saved draft across app
       // sessions; the OS may evict image_picker's cache in the meantime.
       // Skip a stale path rather than let MultipartFile.fromFile throw
@@ -214,6 +225,11 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           location: location,
           attributes: attributes,
           imagePaths: imagePaths,
+          // C# `ListingStatus` defaults to 0 = Draft when this field is
+          // omitted, so Publish created rows that never entered the admin
+          // PENDING queue. Live Active listings have `reviewedAt` set by
+          // `PUT /api/admin/listings/{id}/approve` — vendors submit Pending.
+          status: ListingStatus.pending,
         ),
         options: ApiAuthHeaders.authenticated(),
       );
@@ -276,7 +292,8 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       }
       return List<ListingModel>.from(_localMine);
     } on DioException catch (e) {
-      if (_isOffline(e)) {
+      // Offline with nothing cached is a failure, not "no listings".
+      if (_isOffline(e) && _localMine.isNotEmpty) {
         return List<ListingModel>.from(_localMine);
       }
       throw mapDioException(e);
@@ -326,6 +343,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required Map<String, String> attributes,
     required List<String> imagePaths,
     required ListingStatus status,
+    List<String>? keepImageUrls,
   }) async {
     try {
       // Spec: id is sent in the BODY, PUT to the collection root — not
@@ -351,6 +369,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           attributes: attributes,
           imagePaths: imagePaths,
           status: status,
+          keepImageUrls: keepImageUrls,
         ),
         options: ApiAuthHeaders.authenticated(),
       );
@@ -384,9 +403,9 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           shippingCost: shippingCost,
           location: location,
           attributes: attributes,
-          // imagePaths are local file paths (usually empty here — this
-          // fallback only fires for status mutations); keep the cached
-          // model's existing hosted imageUrls untouched via copyWith.
+          // Status-only resume omits keepImageUrls (null) so hosted
+          // images stay as cached. Edit passes the remaining set.
+          imageUrls: keepImageUrls ?? _localMine[idx].imageUrls,
         );
         _localMine[idx] = updated;
         return updated;
@@ -461,37 +480,28 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   }
 
   @override
-  Future<ListingModel> deactivateListing(String id) async {
+  Future<void> deactivateListing(String id) async {
     try {
-      final response = await _dio.put<Map<String, dynamic>>(
+      await _dio.put<void>(
         ApiEndpoints.apiListingDeactivate(id),
         options: ApiAuthHeaders.authenticated(),
       );
-      final data = response.data;
-      if (data == null) {
-        throw const ServerException('Empty response');
-      }
-      final model = ListingModel.fromJson(data);
-      final idx = _localMine.indexWhere((e) => e.id == id);
-      if (idx != -1) {
-        _localMine[idx] = model;
-      }
-      return model;
+      _markCachedPaused(id);
     } on DioException catch (e) {
-      if (_isOffline(e)) {
-        // Same caveat as resubmitListing above: only meaningful if the
-        // listing is already in the local cache.
-        final idx = _localMine.indexWhere((e) => e.id == id);
-        if (idx != -1) {
-          final updated = _localMine[idx].copyWith(
-            status: listingStatusToWire(ListingStatus.paused).toString(),
-          );
-          _localMine[idx] = updated;
-          return updated;
-        }
-      }
+      // Same caveat as resubmitListing above: the offline fallback only
+      // applies when the listing is already in the local cache.
+      if (_isOffline(e) && _markCachedPaused(id)) return;
       throw mapDioException(e);
     }
+  }
+
+  bool _markCachedPaused(String id) {
+    final idx = _localMine.indexWhere((e) => e.id == id);
+    if (idx == -1) return false;
+    _localMine[idx] = _localMine[idx].copyWith(
+      status: listingStatusToWire(ListingStatus.paused).toString(),
+    );
+    return true;
   }
 
   bool _isOffline(DioException e) {

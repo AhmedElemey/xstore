@@ -38,13 +38,6 @@ double cashToCollectFromSender(DeliveryRequestEntity request) =>
       _ => 0,
     };
 
-/// Whether the courier is holding the sender's cash (collected at pickup,
-/// held until handover to xStore).
-bool courierHoldsPackageCash(DeliveryRequestEntity request) =>
-    (request.status == DeliveryRequestStatus.pickedUp ||
-        request.status == DeliveryRequestStatus.delivered) &&
-    request.price != null;
-
 /// Privacy rule: the customer's name/phone are hidden from couriers until
 /// the request is confirmed (i.e. it actually became their task).
 bool courierSeesCustomerIdentity(DeliveryRequestStatus status) =>

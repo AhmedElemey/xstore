@@ -140,12 +140,6 @@ abstract class AppLocalizations {
   /// **'Password'**
   String get password;
 
-  /// No description provided for @createAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Create account'**
-  String get createAccount;
-
   /// No description provided for @signInPrompt.
   ///
   /// In en, this message translates to:
@@ -175,12 +169,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Must start with 010, 011, 012, or 015'**
   String get phoneInvalidPrefix;
-
-  /// No description provided for @phoneInvalidNumber.
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid phone number'**
-  String get phoneInvalidNumber;
 
   /// No description provided for @phoneTooManyRequests.
   ///
@@ -290,12 +278,6 @@ abstract class AppLocalizations {
   /// **'Incorrect code. Please try again.'**
   String get otpInvalidCode;
 
-  /// No description provided for @otpSessionExpired.
-  ///
-  /// In en, this message translates to:
-  /// **'Code expired. Request a new one.'**
-  String get otpSessionExpired;
-
   /// No description provided for @verify.
   ///
   /// In en, this message translates to:
@@ -347,20 +329,8 @@ abstract class AppLocalizations {
   /// No description provided for @genericError.
   ///
   /// In en, this message translates to:
-  /// **'Something went wrong. Please try again.'**
+  /// **'Something went wrong. Please try again later.'**
   String get genericError;
-
-  /// No description provided for @emailTab.
-  ///
-  /// In en, this message translates to:
-  /// **'Email'**
-  String get emailTab;
-
-  /// No description provided for @phoneTab.
-  ///
-  /// In en, this message translates to:
-  /// **'Phone'**
-  String get phoneTab;
 
   /// No description provided for @continueWithGoogle.
   ///
@@ -392,41 +362,29 @@ abstract class AppLocalizations {
   /// **'Welcome back'**
   String get welcomeBack;
 
-  /// No description provided for @chooseYourRole.
-  ///
-  /// In en, this message translates to:
-  /// **'How will you use xStore?'**
-  String get chooseYourRole;
-
-  /// No description provided for @socialRoleSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'One last step — choose your account type'**
-  String get socialRoleSubtitle;
-
-  /// No description provided for @socialWelcomeGreeting.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome, {name}! 👋'**
-  String socialWelcomeGreeting(String name);
-
-  /// No description provided for @socialRoleLastStep.
-  ///
-  /// In en, this message translates to:
-  /// **'One last step — how will you use xStore?'**
-  String get socialRoleLastStep;
-
-  /// No description provided for @socialWelcomeFallbackName.
-  ///
-  /// In en, this message translates to:
-  /// **'there'**
-  String get socialWelcomeFallbackName;
-
   /// No description provided for @googleAccountNotFound.
   ///
   /// In en, this message translates to:
-  /// **'No account found for this Google account. Please register.'**
+  /// **'No account yet for this Google account. Finish signing up, we\'ve filled in your details.'**
   String get googleAccountNotFound;
+
+  /// No description provided for @googleSignInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in failed. Please try again.'**
+  String get googleSignInFailed;
+
+  /// No description provided for @socialAccountExists.
+  ///
+  /// In en, this message translates to:
+  /// **'An account with this email already exists. Try a different sign-in method.'**
+  String get socialAccountExists;
+
+  /// No description provided for @socialAccountDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled. Contact support.'**
+  String get socialAccountDisabled;
 
   /// No description provided for @searchHint.
   ///
@@ -500,41 +458,11 @@ abstract class AppLocalizations {
   /// **'↩️ Easy Returns'**
   String get easyReturnsBadge;
 
-  /// No description provided for @productTrustFastShipping.
-  ///
-  /// In en, this message translates to:
-  /// **'Fast Shipping'**
-  String get productTrustFastShipping;
-
-  /// No description provided for @productTrustSecurePayment.
-  ///
-  /// In en, this message translates to:
-  /// **'Secure Payment'**
-  String get productTrustSecurePayment;
-
-  /// No description provided for @productTrustEasyReturns.
-  ///
-  /// In en, this message translates to:
-  /// **'Easy Returns'**
-  String get productTrustEasyReturns;
-
   /// No description provided for @shopNow.
   ///
   /// In en, this message translates to:
   /// **'Shop Now'**
   String get shopNow;
-
-  /// No description provided for @categoryQueryMens.
-  ///
-  /// In en, this message translates to:
-  /// **'mens_fashion'**
-  String get categoryQueryMens;
-
-  /// No description provided for @categoryQueryWomens.
-  ///
-  /// In en, this message translates to:
-  /// **'womens_fashion'**
-  String get categoryQueryWomens;
 
   /// No description provided for @notifications.
   ///
@@ -679,156 +607,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Yesterday'**
   String get notificationsTimeYesterday;
-
-  /// No description provided for @notificationSettingsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Notification settings'**
-  String get notificationSettingsTitle;
-
-  /// No description provided for @notificationSettingsSave.
-  ///
-  /// In en, this message translates to:
-  /// **'Save Preferences'**
-  String get notificationSettingsSave;
-
-  /// No description provided for @notificationSettingsSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Preferences saved'**
-  String get notificationSettingsSaved;
-
-  /// No description provided for @notificationSettingsSectionOrders.
-  ///
-  /// In en, this message translates to:
-  /// **'Order updates'**
-  String get notificationSettingsSectionOrders;
-
-  /// No description provided for @notificationSettingsSectionDeals.
-  ///
-  /// In en, this message translates to:
-  /// **'Deals & offers'**
-  String get notificationSettingsSectionDeals;
-
-  /// No description provided for @notificationSettingsSectionStore.
-  ///
-  /// In en, this message translates to:
-  /// **'Store updates'**
-  String get notificationSettingsSectionStore;
-
-  /// No description provided for @notificationSettingsSectionMessages.
-  ///
-  /// In en, this message translates to:
-  /// **'Messages'**
-  String get notificationSettingsSectionMessages;
-
-  /// No description provided for @notificationSettingsSectionDelivery.
-  ///
-  /// In en, this message translates to:
-  /// **'Delivery'**
-  String get notificationSettingsSectionDelivery;
-
-  /// No description provided for @notificationSettingsOrderConfirmed.
-  ///
-  /// In en, this message translates to:
-  /// **'Order confirmed'**
-  String get notificationSettingsOrderConfirmed;
-
-  /// No description provided for @notificationSettingsOrderShipped.
-  ///
-  /// In en, this message translates to:
-  /// **'Order shipped'**
-  String get notificationSettingsOrderShipped;
-
-  /// No description provided for @notificationSettingsOrderDelivered.
-  ///
-  /// In en, this message translates to:
-  /// **'Order delivered'**
-  String get notificationSettingsOrderDelivered;
-
-  /// No description provided for @notificationSettingsOrderCancelled.
-  ///
-  /// In en, this message translates to:
-  /// **'Order cancelled'**
-  String get notificationSettingsOrderCancelled;
-
-  /// No description provided for @notificationSettingsFlashSales.
-  ///
-  /// In en, this message translates to:
-  /// **'Flash sales'**
-  String get notificationSettingsFlashSales;
-
-  /// No description provided for @notificationSettingsPriceDrops.
-  ///
-  /// In en, this message translates to:
-  /// **'Price drops'**
-  String get notificationSettingsPriceDrops;
-
-  /// No description provided for @notificationSettingsBackInStock.
-  ///
-  /// In en, this message translates to:
-  /// **'Back in stock'**
-  String get notificationSettingsBackInStock;
-
-  /// No description provided for @notificationSettingsPromotional.
-  ///
-  /// In en, this message translates to:
-  /// **'Promotional offers'**
-  String get notificationSettingsPromotional;
-
-  /// No description provided for @notificationSettingsNewOrders.
-  ///
-  /// In en, this message translates to:
-  /// **'New orders'**
-  String get notificationSettingsNewOrders;
-
-  /// No description provided for @notificationSettingsListingApproved.
-  ///
-  /// In en, this message translates to:
-  /// **'Listing approved'**
-  String get notificationSettingsListingApproved;
-
-  /// No description provided for @notificationSettingsListingRejected.
-  ///
-  /// In en, this message translates to:
-  /// **'Listing rejected'**
-  String get notificationSettingsListingRejected;
-
-  /// No description provided for @notificationSettingsLowStock.
-  ///
-  /// In en, this message translates to:
-  /// **'Low stock alerts'**
-  String get notificationSettingsLowStock;
-
-  /// No description provided for @notificationSettingsPaymentReceived.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment received'**
-  String get notificationSettingsPaymentReceived;
-
-  /// No description provided for @notificationSettingsNewMessages.
-  ///
-  /// In en, this message translates to:
-  /// **'New messages'**
-  String get notificationSettingsNewMessages;
-
-  /// No description provided for @notificationSettingsPush.
-  ///
-  /// In en, this message translates to:
-  /// **'Push notifications'**
-  String get notificationSettingsPush;
-
-  /// No description provided for @notificationSettingsEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Email notifications'**
-  String get notificationSettingsEmail;
-
-  /// No description provided for @notificationSettingsSms.
-  ///
-  /// In en, this message translates to:
-  /// **'SMS notifications'**
-  String get notificationSettingsSms;
 
   /// No description provided for @addListing.
   ///
@@ -1094,18 +872,6 @@ abstract class AppLocalizations {
   /// **'Stock & Shipping'**
   String get listingSectionStockShipping;
 
-  /// No description provided for @listingFormLocationLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Location *'**
-  String get listingFormLocationLabel;
-
-  /// No description provided for @listingFormLocationHint.
-  ///
-  /// In en, this message translates to:
-  /// **'City, Region'**
-  String get listingFormLocationHint;
-
   /// No description provided for @listingShippingAvailable.
   ///
   /// In en, this message translates to:
@@ -1172,41 +938,11 @@ abstract class AppLocalizations {
   /// **'Good'**
   String get listingCondGood;
 
-  /// No description provided for @vendorAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Vendor Account'**
-  String get vendorAccount;
-
-  /// No description provided for @customerAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Customer account'**
-  String get customerAccount;
-
   /// No description provided for @theme.
   ///
   /// In en, this message translates to:
   /// **'Theme'**
   String get theme;
-
-  /// No description provided for @themeSystem.
-  ///
-  /// In en, this message translates to:
-  /// **'System'**
-  String get themeSystem;
-
-  /// No description provided for @themeLight.
-  ///
-  /// In en, this message translates to:
-  /// **'Light'**
-  String get themeLight;
-
-  /// No description provided for @themeDark.
-  ///
-  /// In en, this message translates to:
-  /// **'Dark'**
-  String get themeDark;
 
   /// No description provided for @darkMode.
   ///
@@ -1286,35 +1022,11 @@ abstract class AppLocalizations {
   /// **'My Orders'**
   String get menuMyOrders;
 
-  /// No description provided for @menuAnalytics.
-  ///
-  /// In en, this message translates to:
-  /// **'Analytics'**
-  String get menuAnalytics;
-
-  /// No description provided for @menuEarnings.
-  ///
-  /// In en, this message translates to:
-  /// **'Earnings'**
-  String get menuEarnings;
-
   /// No description provided for @menuWishlist.
   ///
   /// In en, this message translates to:
   /// **'Wishlist'**
   String get menuWishlist;
-
-  /// No description provided for @menuRecentlyViewed.
-  ///
-  /// In en, this message translates to:
-  /// **'Recently Viewed'**
-  String get menuRecentlyViewed;
-
-  /// No description provided for @menuMyReviews.
-  ///
-  /// In en, this message translates to:
-  /// **'My Reviews'**
-  String get menuMyReviews;
 
   /// No description provided for @menuPersonalInfo.
   ///
@@ -1334,53 +1046,11 @@ abstract class AppLocalizations {
   /// **'Change Password'**
   String get menuChangePassword;
 
-  /// No description provided for @menuNotificationsSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Notifications'**
-  String get menuNotificationsSettings;
-
-  /// No description provided for @menuLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Language'**
-  String get menuLanguage;
-
-  /// No description provided for @menuPaymentMethods.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment Methods'**
-  String get menuPaymentMethods;
-
   /// No description provided for @menuAddresses.
   ///
   /// In en, this message translates to:
   /// **'My Addresses'**
   String get menuAddresses;
-
-  /// No description provided for @menuDarkMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Dark Mode'**
-  String get menuDarkMode;
-
-  /// No description provided for @menuPushNotifications.
-  ///
-  /// In en, this message translates to:
-  /// **'Push Notifications'**
-  String get menuPushNotifications;
-
-  /// No description provided for @menuEmailUpdates.
-  ///
-  /// In en, this message translates to:
-  /// **'Email Updates'**
-  String get menuEmailUpdates;
-
-  /// No description provided for @menuHelpCenter.
-  ///
-  /// In en, this message translates to:
-  /// **'Help Center'**
-  String get menuHelpCenter;
 
   /// No description provided for @menuTerms.
   ///
@@ -1405,12 +1075,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share xStore'**
   String get menuShareApp;
-
-  /// No description provided for @manageStore.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage Store'**
-  String get manageStore;
 
   /// No description provided for @statSales.
   ///
@@ -1454,113 +1118,17 @@ abstract class AppLocalizations {
   /// **'Total Saved'**
   String get statTotalSaved;
 
-  /// No description provided for @currencyDzd.
-  ///
-  /// In en, this message translates to:
-  /// **'EGP'**
-  String get currencyDzd;
-
   /// No description provided for @storeInformation.
   ///
   /// In en, this message translates to:
   /// **'Store Information'**
   String get storeInformation;
 
-  /// No description provided for @fullNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Full Name'**
-  String get fullNameLabel;
-
-  /// No description provided for @emailAddressLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Email Address'**
-  String get emailAddressLabel;
-
-  /// No description provided for @phoneNumberLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Phone Number'**
-  String get phoneNumberLabel;
-
-  /// No description provided for @dateOfBirthLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Date of Birth'**
-  String get dateOfBirthLabel;
-
-  /// No description provided for @locationCityLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Location / City'**
-  String get locationCityLabel;
-
-  /// No description provided for @bioLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Bio / About'**
-  String get bioLabel;
-
-  /// No description provided for @bioHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Tell buyers a bit about yourself'**
-  String get bioHint;
-
-  /// No description provided for @storeNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Name'**
-  String get storeNameLabel;
-
   /// No description provided for @storeCategoryLabel.
   ///
   /// In en, this message translates to:
   /// **'Store Category'**
   String get storeCategoryLabel;
-
-  /// No description provided for @storeDescriptionLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Description'**
-  String get storeDescriptionLabel;
-
-  /// No description provided for @storeCityLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Store City'**
-  String get storeCityLabel;
-
-  /// No description provided for @storeWilayaLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Governorate'**
-  String get storeWilayaLabel;
-
-  /// No description provided for @whatsappLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'WhatsApp Number'**
-  String get whatsappLabel;
-
-  /// No description provided for @whatsappProductPrefill.
-  ///
-  /// In en, this message translates to:
-  /// **'Hi, I\'m interested in {title}'**
-  String whatsappProductPrefill(String title);
-
-  /// No description provided for @whatsappStorePrefill.
-  ///
-  /// In en, this message translates to:
-  /// **'Hi, I saw your store {name} on xStore'**
-  String whatsappStorePrefill(String name);
-
-  /// No description provided for @whatsappSellerUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t open WhatsApp.'**
-  String get whatsappSellerUnavailable;
 
   /// No description provided for @instagramLabel.
   ///
@@ -1628,12 +1196,6 @@ abstract class AppLocalizations {
   /// **'DELETE'**
   String get deleteConfirmKeyword;
 
-  /// No description provided for @choosePhotoSource.
-  ///
-  /// In en, this message translates to:
-  /// **'Profile photo'**
-  String get choosePhotoSource;
-
   /// No description provided for @takePhoto.
   ///
   /// In en, this message translates to:
@@ -1657,30 +1219,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile updated'**
   String get profileUpdatedSuccess;
-
-  /// No description provided for @languageTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Language'**
-  String get languageTitle;
-
-  /// No description provided for @languageEnglish.
-  ///
-  /// In en, this message translates to:
-  /// **'English'**
-  String get languageEnglish;
-
-  /// No description provided for @languageFrench.
-  ///
-  /// In en, this message translates to:
-  /// **'French'**
-  String get languageFrench;
-
-  /// No description provided for @languageArabic.
-  ///
-  /// In en, this message translates to:
-  /// **'Arabic'**
-  String get languageArabic;
 
   /// No description provided for @profileFooterLine.
   ///
@@ -1724,12 +1262,6 @@ abstract class AppLocalizations {
   /// **'This store isn\'t available right now'**
   String get storeUnavailableNow;
 
-  /// No description provided for @followStore.
-  ///
-  /// In en, this message translates to:
-  /// **'Follow Store'**
-  String get followStore;
-
   /// No description provided for @share.
   ///
   /// In en, this message translates to:
@@ -1766,36 +1298,6 @@ abstract class AppLocalizations {
   /// **'Response Rate'**
   String get vendorStoreStatResponse;
 
-  /// No description provided for @placeholderScreenSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'This screen is coming soon.'**
-  String get placeholderScreenSubtitle;
-
-  /// No description provided for @trustInfoPaymentMethodsBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved payment methods aren\'t available yet. Checkout is cash on delivery only — pay when your order arrives.'**
-  String get trustInfoPaymentMethodsBody;
-
-  /// No description provided for @trustInfoAddressesBody.
-  ///
-  /// In en, this message translates to:
-  /// **'A saved address book is coming soon. For now, choose or add your delivery address during checkout before you place an order.'**
-  String get trustInfoAddressesBody;
-
-  /// No description provided for @trustInfoTermsBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Our Terms of Service are not published in the app yet. We don\'t show placeholder legal text here. Full terms will appear on this screen before launch.'**
-  String get trustInfoTermsBody;
-
-  /// No description provided for @trustInfoPrivacyBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Our Privacy Policy is not published in the app yet. We don\'t show placeholder legal text here. How we collect and use your data will be documented here before launch.'**
-  String get trustInfoPrivacyBody;
-
   /// No description provided for @legalDraftNotice.
   ///
   /// In en, this message translates to:
@@ -1813,36 +1315,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'—'**
   String get newSellerEmDash;
-
-  /// No description provided for @notificationSettingsDeviceOnly.
-  ///
-  /// In en, this message translates to:
-  /// **'These apply on this device only until preferences sync to your account.'**
-  String get notificationSettingsDeviceOnly;
-
-  /// No description provided for @trustInfoHelpBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Help articles and live support aren\'t available in the app yet. For order questions, open My Orders. You can manage alerts under Notification settings.'**
-  String get trustInfoHelpBody;
-
-  /// No description provided for @trustInfoActionCheckout.
-  ///
-  /// In en, this message translates to:
-  /// **'Go to checkout'**
-  String get trustInfoActionCheckout;
-
-  /// No description provided for @trustInfoHelpViewOrders.
-  ///
-  /// In en, this message translates to:
-  /// **'Go to My Orders'**
-  String get trustInfoHelpViewOrders;
-
-  /// No description provided for @trustInfoHelpNotifications.
-  ///
-  /// In en, this message translates to:
-  /// **'Notification settings'**
-  String get trustInfoHelpNotifications;
 
   /// No description provided for @iosAppStoreUrl.
   ///
@@ -1898,12 +1370,6 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
-  /// No description provided for @navCart.
-  ///
-  /// In en, this message translates to:
-  /// **'Cart'**
-  String get navCart;
-
   /// No description provided for @navAddListing.
   ///
   /// In en, this message translates to:
@@ -1922,6 +1388,138 @@ abstract class AppLocalizations {
   /// **'Your platform fees are up to date.'**
   String get walletGoodStanding;
 
+  /// No description provided for @walletPayFees.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay platform fees'**
+  String get walletPayFees;
+
+  /// No description provided for @commissionPaymentMethodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose payment method'**
+  String get commissionPaymentMethodTitle;
+
+  /// No description provided for @commissionPaymentMethodSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send your platform fees using one of these methods, then upload the transfer receipt. Once our team approves it, the amount is deducted from what you owe.'**
+  String get commissionPaymentMethodSubtitle;
+
+  /// No description provided for @commissionPaymentMethodInstaPay.
+  ///
+  /// In en, this message translates to:
+  /// **'InstaPay'**
+  String get commissionPaymentMethodInstaPay;
+
+  /// No description provided for @commissionPaymentMethodVodafoneCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Vodafone Cash'**
+  String get commissionPaymentMethodVodafoneCash;
+
+  /// No description provided for @commissionPaymentMethodOrangeCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange Cash'**
+  String get commissionPaymentMethodOrangeCash;
+
+  /// No description provided for @commissionPaymentMethodEtisalatCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Etisalat Cash'**
+  String get commissionPaymentMethodEtisalatCash;
+
+  /// No description provided for @commissionPaymentMethodBankHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant bank transfer'**
+  String get commissionPaymentMethodBankHint;
+
+  /// No description provided for @commissionPaymentMethodWalletHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile wallet'**
+  String get commissionPaymentMethodWalletHint;
+
+  /// No description provided for @commissionPaymentReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload receipt'**
+  String get commissionPaymentReceiptTitle;
+
+  /// No description provided for @commissionPaymentSendTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the payment to'**
+  String get commissionPaymentSendTo;
+
+  /// No description provided for @commissionPaymentNoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'The {method} account isn\'t set up yet. Contact xStore support before sending money.'**
+  String commissionPaymentNoAccount(String method);
+
+  /// No description provided for @commissionPaymentCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get commissionPaymentCopied;
+
+  /// No description provided for @commissionPaymentAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount you sent (LE)'**
+  String get commissionPaymentAmountLabel;
+
+  /// No description provided for @commissionPaymentAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount you sent'**
+  String get commissionPaymentAmountInvalid;
+
+  /// No description provided for @commissionPaymentReceiptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer receipt'**
+  String get commissionPaymentReceiptLabel;
+
+  /// No description provided for @commissionPaymentReceiptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a screenshot or photo of the successful transfer'**
+  String get commissionPaymentReceiptHint;
+
+  /// No description provided for @commissionPaymentReceiptUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt image is no longer available. Please add it again.'**
+  String get commissionPaymentReceiptUnavailable;
+
+  /// No description provided for @commissionPaymentReceiptInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a JPG, PNG or WebP image under 5 MB.'**
+  String get commissionPaymentReceiptInvalid;
+
+  /// No description provided for @commissionPaymentRemoveReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove receipt'**
+  String get commissionPaymentRemoveReceipt;
+
+  /// No description provided for @commissionPaymentSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for review'**
+  String get commissionPaymentSubmit;
+
+  /// No description provided for @commissionPaymentSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment sent for review. Your balance updates once it\'s approved.'**
+  String get commissionPaymentSubmitted;
+
   /// No description provided for @exploreSearchPlaceholder.
   ///
   /// In en, this message translates to:
@@ -1939,12 +1537,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Filters'**
   String get filters;
-
-  /// No description provided for @addFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'+ Filters'**
-  String get addFilters;
 
   /// No description provided for @applyFilters.
   ///
@@ -2090,18 +1682,6 @@ abstract class AppLocalizations {
   /// **'Shipping available'**
   String get shippingOnly;
 
-  /// No description provided for @gridView.
-  ///
-  /// In en, this message translates to:
-  /// **'Grid'**
-  String get gridView;
-
-  /// No description provided for @listView.
-  ///
-  /// In en, this message translates to:
-  /// **'List'**
-  String get listView;
-
   /// No description provided for @ratingStars4Plus.
   ///
   /// In en, this message translates to:
@@ -2119,12 +1699,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'⭐ 2+'**
   String get ratingStars2Plus;
-
-  /// No description provided for @starChar.
-  ///
-  /// In en, this message translates to:
-  /// **'★'**
-  String get starChar;
 
   /// No description provided for @ordersEmptyTitle.
   ///
@@ -2192,89 +1766,17 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get ordersFilterCancelled;
 
-  /// No description provided for @ordersFilterRefunded.
-  ///
-  /// In en, this message translates to:
-  /// **'Refunded'**
-  String get ordersFilterRefunded;
-
-  /// No description provided for @ordersSortHighestValue.
-  ///
-  /// In en, this message translates to:
-  /// **'Highest Value'**
-  String get ordersSortHighestValue;
-
-  /// No description provided for @ordersSortNeedsAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Needs Action'**
-  String get ordersSortNeedsAction;
-
-  /// No description provided for @ordersCountLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'orders'**
-  String get ordersCountLabel;
-
-  /// No description provided for @ordersStatPendingLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending'**
-  String get ordersStatPendingLabel;
-
-  /// No description provided for @ordersStatActiveLabelTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Active'**
-  String get ordersStatActiveLabelTitle;
-
-  /// No description provided for @ordersStatMonthLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Month'**
-  String get ordersStatMonthLabel;
-
-  /// No description provided for @ordersStatTotalLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Total'**
-  String get ordersStatTotalLabel;
-
-  /// No description provided for @ordersMoreItemsSuffix.
-  ///
-  /// In en, this message translates to:
-  /// **'more item'**
-  String get ordersMoreItemsSuffix;
-
-  /// No description provided for @ordersMoreItemsSuffixPlural.
-  ///
-  /// In en, this message translates to:
-  /// **'more items'**
-  String get ordersMoreItemsSuffixPlural;
-
   /// No description provided for @ordersQtyTotalLinePrefix.
   ///
   /// In en, this message translates to:
   /// **'Qty'**
   String get ordersQtyTotalLinePrefix;
 
-  /// No description provided for @ordersFromStorePrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'From'**
-  String get ordersFromStorePrefix;
-
   /// No description provided for @ordersEstimatedDelivery.
   ///
   /// In en, this message translates to:
   /// **'🚚 Estimated'**
   String get ordersEstimatedDelivery;
-
-  /// No description provided for @ordersPaymentLine.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment'**
-  String get ordersPaymentLine;
 
   /// No description provided for @ordersTrackOrder.
   ///
@@ -2305,12 +1807,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delivery location updated'**
   String get ordersDeliveryLocationUpdated;
-
-  /// No description provided for @ordersConfirmReceipt.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Receipt'**
-  String get ordersConfirmReceipt;
 
   /// No description provided for @ordersLeaveReview.
   ///
@@ -2354,12 +1850,6 @@ abstract class AppLocalizations {
   /// **'Mark as Delivered'**
   String get ordersMarkDelivered;
 
-  /// No description provided for @ordersViewTracking.
-  ///
-  /// In en, this message translates to:
-  /// **'View Tracking'**
-  String get ordersViewTracking;
-
   /// No description provided for @ordersShopAgain.
   ///
   /// In en, this message translates to:
@@ -2377,12 +1867,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Browse Products'**
   String get ordersBrowseProducts;
-
-  /// No description provided for @ordersDetailTitlePrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'Order #'**
-  String get ordersDetailTitlePrefix;
 
   /// No description provided for @ordersShareSummary.
   ///
@@ -2402,35 +1886,11 @@ abstract class AppLocalizations {
   /// **'Buyer Info'**
   String get ordersBuyerInfo;
 
-  /// No description provided for @ordersMessageSeller.
-  ///
-  /// In en, this message translates to:
-  /// **'💬 Message Seller'**
-  String get ordersMessageSeller;
-
-  /// No description provided for @ordersMessageSellerSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Messaging — coming soon'**
-  String get ordersMessageSellerSoon;
-
-  /// No description provided for @ordersWhatsapp.
-  ///
-  /// In en, this message translates to:
-  /// **'💬 WhatsApp'**
-  String get ordersWhatsapp;
-
   /// No description provided for @ordersDeliveryAddressTitle.
   ///
   /// In en, this message translates to:
   /// **'Delivery Address'**
   String get ordersDeliveryAddressTitle;
-
-  /// No description provided for @ordersItemsSectionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Items Ordered'**
-  String get ordersItemsSectionTitle;
 
   /// No description provided for @ordersTrackingSectionTitle.
   ///
@@ -2492,12 +1952,6 @@ abstract class AppLocalizations {
   /// **'View Product'**
   String get ordersViewProduct;
 
-  /// No description provided for @ordersCopyTracking.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy'**
-  String get ordersCopyTracking;
-
   /// No description provided for @ordersTrackingCopied.
   ///
   /// In en, this message translates to:
@@ -2509,18 +1963,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Track on Courier Website'**
   String get ordersTrackOnCourier;
-
-  /// No description provided for @ordersCourierWebsiteSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Courier tracking — coming soon'**
-  String get ordersCourierWebsiteSoon;
-
-  /// No description provided for @ordersCurrentLocationMock.
-  ///
-  /// In en, this message translates to:
-  /// **'In transit — Cairo hub'**
-  String get ordersCurrentLocationMock;
 
   /// No description provided for @ordersExpectedPrefix.
   ///
@@ -2593,18 +2035,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get ordersCancelReasonOther;
-
-  /// No description provided for @ordersConfirmReceiptTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm receipt?'**
-  String get ordersConfirmReceiptTitle;
-
-  /// No description provided for @ordersConfirmReceiptBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm you received this order?'**
-  String get ordersConfirmReceiptBody;
 
   /// No description provided for @ordersConfirm.
   ///
@@ -2756,41 +2186,17 @@ abstract class AppLocalizations {
   /// **'This order was cancelled'**
   String get statusSubtitleCancelled;
 
-  /// No description provided for @statusSubtitleRefunded.
-  ///
-  /// In en, this message translates to:
-  /// **'Refund processed'**
-  String get statusSubtitleRefunded;
-
-  /// No description provided for @ordersFiltersMoreSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'More filters — coming soon'**
-  String get ordersFiltersMoreSoon;
-
   /// No description provided for @orderHashPrefix.
   ///
   /// In en, this message translates to:
   /// **'Order #'**
   String get orderHashPrefix;
 
-  /// No description provided for @vendorNeedsAttention.
-  ///
-  /// In en, this message translates to:
-  /// **'Needs attention'**
-  String get vendorNeedsAttention;
-
   /// No description provided for @wishlistEmptyTitle.
   ///
   /// In en, this message translates to:
   /// **'Your wishlist is empty'**
   String get wishlistEmptyTitle;
-
-  /// No description provided for @wishlistDiscoverProducts.
-  ///
-  /// In en, this message translates to:
-  /// **'Discover products'**
-  String get wishlistDiscoverProducts;
 
   /// No description provided for @wishlistForBuyersTitle.
   ///
@@ -2804,30 +2210,6 @@ abstract class AppLocalizations {
   /// **'Explore as Buyer'**
   String get wishlistExploreAsBuyer;
 
-  /// No description provided for @wishlistSelect.
-  ///
-  /// In en, this message translates to:
-  /// **'Select'**
-  String get wishlistSelect;
-
-  /// No description provided for @wishlistCancelSelect.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get wishlistCancelSelect;
-
-  /// No description provided for @wishlistSort.
-  ///
-  /// In en, this message translates to:
-  /// **'Sort'**
-  String get wishlistSort;
-
-  /// No description provided for @wishlistSortRecentlyAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'Recently Added'**
-  String get wishlistSortRecentlyAdded;
-
   /// No description provided for @wishlistSortPriceLow.
   ///
   /// In en, this message translates to:
@@ -2839,18 +2221,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Price: High to Low'**
   String get wishlistSortPriceHigh;
-
-  /// No description provided for @wishlistSortPriceDrop.
-  ///
-  /// In en, this message translates to:
-  /// **'Price Drop'**
-  String get wishlistSortPriceDrop;
-
-  /// No description provided for @wishlistSortBiggestDiscount.
-  ///
-  /// In en, this message translates to:
-  /// **'Biggest Discount'**
-  String get wishlistSortBiggestDiscount;
 
   /// No description provided for @wishlistSortNameAz.
   ///
@@ -2888,12 +2258,6 @@ abstract class AppLocalizations {
   /// **'View Price Drops'**
   String get wishlistViewPriceDrops;
 
-  /// No description provided for @wishlistPriceDropBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Price Drop'**
-  String get wishlistPriceDropBadge;
-
   /// No description provided for @wishlistOutOfStock.
   ///
   /// In en, this message translates to:
@@ -2924,12 +2288,6 @@ abstract class AppLocalizations {
   /// **'✓ In Cart'**
   String get wishlistInCartCta;
 
-  /// No description provided for @wishlistSwipeAddCart.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Cart'**
-  String get wishlistSwipeAddCart;
-
   /// No description provided for @wishlistMoveAllToCart.
   ///
   /// In en, this message translates to:
@@ -2947,12 +2305,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Cart'**
   String get wishlistViewCart;
-
-  /// No description provided for @wishlistRemoveSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove Selected'**
-  String get wishlistRemoveSelected;
 
   /// No description provided for @wishlistSavedSnack.
   ///
@@ -2977,12 +2329,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show All Items'**
   String get wishlistShowAllItems;
-
-  /// No description provided for @wishlistReviewsWord.
-  ///
-  /// In en, this message translates to:
-  /// **'reviews'**
-  String get wishlistReviewsWord;
 
   /// No description provided for @wishlistGridContentDesc.
   ///
@@ -3020,18 +2366,6 @@ abstract class AppLocalizations {
   /// **'Added to cart'**
   String get wishlistSingleAddedToCart;
 
-  /// No description provided for @wishlistSelectAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Select All'**
-  String get wishlistSelectAll;
-
-  /// No description provided for @wishlistDeselectAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Deselect All'**
-  String get wishlistDeselectAll;
-
   /// No description provided for @cartForBuyersTitle.
   ///
   /// In en, this message translates to:
@@ -3056,18 +2390,6 @@ abstract class AppLocalizations {
   /// **'Clear Cart'**
   String get cartClearConfirm;
 
-  /// No description provided for @cartSelectAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Select All'**
-  String get cartSelectAll;
-
-  /// No description provided for @cartTotalLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Total'**
-  String get cartTotalLabel;
-
   /// No description provided for @cartEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -3083,14 +2405,8 @@ abstract class AppLocalizations {
   /// No description provided for @cartOrWishlist.
   ///
   /// In en, this message translates to:
-  /// **'Or check your Wishlist'**
+  /// **'Or check your Wishlist →'**
   String get cartOrWishlist;
-
-  /// No description provided for @cartWishlistArrow.
-  ///
-  /// In en, this message translates to:
-  /// **'Wishlist →'**
-  String get cartWishlistArrow;
 
   /// No description provided for @cartRemove.
   ///
@@ -3103,12 +2419,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'♡ Save for Later'**
   String get cartSaveForLater;
-
-  /// No description provided for @cartUnavailableBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Unavailable'**
-  String get cartUnavailableBadge;
 
   /// No description provided for @cartSwipeRemove.
   ///
@@ -3134,48 +2444,6 @@ abstract class AppLocalizations {
   /// **'🚫 Pickup Only'**
   String get cartPickupOnly;
 
-  /// No description provided for @cartPromoHeading.
-  ///
-  /// In en, this message translates to:
-  /// **'🏷️ Have a promo code?'**
-  String get cartPromoHeading;
-
-  /// No description provided for @cartCouponHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter coupon code…'**
-  String get cartCouponHint;
-
-  /// No description provided for @cartApply.
-  ///
-  /// In en, this message translates to:
-  /// **'Apply'**
-  String get cartApply;
-
-  /// No description provided for @cartCouponRemove.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove'**
-  String get cartCouponRemove;
-
-  /// No description provided for @cartCouponInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid coupon code'**
-  String get cartCouponInvalid;
-
-  /// No description provided for @cartCouponUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Coupons aren\'t available yet'**
-  String get cartCouponUnavailable;
-
-  /// No description provided for @cartCouponMinOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'Minimum order 5,000 EGP required'**
-  String get cartCouponMinOrder;
-
   /// No description provided for @cartOrderSummary.
   ///
   /// In en, this message translates to:
@@ -3188,29 +2456,11 @@ abstract class AppLocalizations {
   /// **'Shipping'**
   String get cartShippingLine;
 
-  /// No description provided for @cartFreeShippingThresholdNote.
-  ///
-  /// In en, this message translates to:
-  /// **'🚚 Items priced {threshold} and up ship free'**
-  String cartFreeShippingThresholdNote(Object threshold);
-
   /// No description provided for @cartTotalLine.
   ///
   /// In en, this message translates to:
   /// **'Total'**
   String get cartTotalLine;
-
-  /// No description provided for @cartCashOnDeliveryNote.
-  ///
-  /// In en, this message translates to:
-  /// **'💳 Cash on Delivery available'**
-  String get cartCashOnDeliveryNote;
-
-  /// No description provided for @cartSecureCheckout.
-  ///
-  /// In en, this message translates to:
-  /// **'🔒 Secure checkout guaranteed'**
-  String get cartSecureCheckout;
 
   /// No description provided for @cartProceedCheckout.
   ///
@@ -3278,29 +2528,11 @@ abstract class AppLocalizations {
   /// **'Full Name'**
   String get checkoutFullName;
 
-  /// No description provided for @checkoutPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'Phone'**
-  String get checkoutPhone;
-
   /// No description provided for @checkoutStreet.
   ///
   /// In en, this message translates to:
   /// **'Street'**
   String get checkoutStreet;
-
-  /// No description provided for @checkoutCity.
-  ///
-  /// In en, this message translates to:
-  /// **'City'**
-  String get checkoutCity;
-
-  /// No description provided for @checkoutWilaya.
-  ///
-  /// In en, this message translates to:
-  /// **'Governorate'**
-  String get checkoutWilaya;
 
   /// No description provided for @checkoutPostalCode.
   ///
@@ -3392,36 +2624,6 @@ abstract class AppLocalizations {
   /// **'Enter a city'**
   String get checkoutErrorAddressCity;
 
-  /// No description provided for @checkoutPickOnMap.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick on Map'**
-  String get checkoutPickOnMap;
-
-  /// No description provided for @checkoutConfirmLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Location'**
-  String get checkoutConfirmLocation;
-
-  /// No description provided for @checkoutMapPinDropped.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag the map to move the pin to your delivery spot'**
-  String get checkoutMapPinDropped;
-
-  /// No description provided for @checkoutMapOutsideEgypt.
-  ///
-  /// In en, this message translates to:
-  /// **'Delivery pin must be within Egypt'**
-  String get checkoutMapOutsideEgypt;
-
-  /// No description provided for @checkoutLocationPinned.
-  ///
-  /// In en, this message translates to:
-  /// **'Location pinned'**
-  String get checkoutLocationPinned;
-
   /// No description provided for @checkoutPaymentTitle.
   ///
   /// In en, this message translates to:
@@ -3439,60 +2641,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pay when your order arrives'**
   String get checkoutPayCodSubtitle;
-
-  /// No description provided for @checkoutPayCibTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'💳 CIB Card'**
-  String get checkoutPayCibTitle;
-
-  /// No description provided for @checkoutPayCibSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Debit/Credit card payment'**
-  String get checkoutPayCibSubtitle;
-
-  /// No description provided for @checkoutPayDahabiTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'🟡 Dahabicard'**
-  String get checkoutPayDahabiTitle;
-
-  /// No description provided for @checkoutPayDahabiSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Egypt Post golden card'**
-  String get checkoutPayDahabiSubtitle;
-
-  /// No description provided for @checkoutPayBaridiTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'🟢 BaridiMob'**
-  String get checkoutPayBaridiTitle;
-
-  /// No description provided for @checkoutPayBaridiSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Egypt Post mobile payment'**
-  String get checkoutPayBaridiSubtitle;
-
-  /// No description provided for @checkoutCardExpiry.
-  ///
-  /// In en, this message translates to:
-  /// **'MM/YY'**
-  String get checkoutCardExpiry;
-
-  /// No description provided for @checkoutCardCvv.
-  ///
-  /// In en, this message translates to:
-  /// **'CVV'**
-  String get checkoutCardCvv;
-
-  /// No description provided for @checkoutCardNumber.
-  ///
-  /// In en, this message translates to:
-  /// **'Card number'**
-  String get checkoutCardNumber;
 
   /// No description provided for @checkoutDeliveryNoteLabel.
   ///
@@ -3518,24 +2666,6 @@ abstract class AppLocalizations {
   /// **'By placing this order you agree to our'**
   String get checkoutTermsBefore;
 
-  /// No description provided for @checkoutTermsAnd.
-  ///
-  /// In en, this message translates to:
-  /// **'and'**
-  String get checkoutTermsAnd;
-
-  /// No description provided for @checkoutReturnPolicy.
-  ///
-  /// In en, this message translates to:
-  /// **'Return Policy'**
-  String get checkoutReturnPolicy;
-
-  /// No description provided for @checkoutPlaceOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'🛒 Place Order'**
-  String get checkoutPlaceOrder;
-
   /// No description provided for @checkoutErrorNoAddress.
   ///
   /// In en, this message translates to:
@@ -3554,30 +2684,6 @@ abstract class AppLocalizations {
   /// **'No items selected for checkout'**
   String get checkoutErrorNoItems;
 
-  /// No description provided for @checkoutErrorCard.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a valid card number'**
-  String get checkoutErrorCard;
-
-  /// No description provided for @checkoutErrorExpiry.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a valid expiry date (MM/YY)'**
-  String get checkoutErrorExpiry;
-
-  /// No description provided for @checkoutErrorCvv.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a valid CVV (3–4 digits)'**
-  String get checkoutErrorCvv;
-
-  /// No description provided for @checkoutPaymentSecure.
-  ///
-  /// In en, this message translates to:
-  /// **'Your payment info is encrypted'**
-  String get checkoutPaymentSecure;
-
   /// No description provided for @checkoutErrorGeneric.
   ///
   /// In en, this message translates to:
@@ -3590,6 +2696,12 @@ abstract class AppLocalizations {
   /// **'Please verify your phone number to place an order'**
   String get checkoutErrorPhoneNotVerified;
 
+  /// No description provided for @checkoutErrorOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Some items no longer have enough stock. We updated your cart — please review it and place the order again. Nothing was ordered yet.'**
+  String get checkoutErrorOutOfStock;
+
   /// No description provided for @checkoutPartialOrderTitle.
   ///
   /// In en, this message translates to:
@@ -3599,8 +2711,8 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutPartialOrderWarning.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 item} other{{count} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.'**
-  String checkoutPartialOrderWarning(int count);
+  /// **'{count, plural, =1{1 item} other{{countText} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.'**
+  String checkoutPartialOrderWarning(int count, String countText);
 
   /// No description provided for @checkoutPartialOrderAck.
   ///
@@ -3620,29 +2732,17 @@ abstract class AppLocalizations {
   /// **'Track My Order'**
   String get orderTrackCta;
 
+  /// No description provided for @orderPlacedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your order! We\'ll let you know as soon as it ships.'**
+  String get orderPlacedSubtitle;
+
   /// No description provided for @orderContinueShopping.
   ///
   /// In en, this message translates to:
   /// **'Continue Shopping'**
   String get orderContinueShopping;
-
-  /// No description provided for @couponDetailSave10.
-  ///
-  /// In en, this message translates to:
-  /// **'10% discount applied!'**
-  String get couponDetailSave10;
-
-  /// No description provided for @couponDetailFree500.
-  ///
-  /// In en, this message translates to:
-  /// **'500 EGP discount applied!'**
-  String get couponDetailFree500;
-
-  /// No description provided for @couponDetailWelcome.
-  ///
-  /// In en, this message translates to:
-  /// **'15% discount applied!'**
-  String get couponDetailWelcome;
 
   /// No description provided for @youMayAlsoLike.
   ///
@@ -3812,29 +2912,11 @@ abstract class AppLocalizations {
   /// **'Stock quantity *'**
   String get stockQuantityRequired;
 
-  /// No description provided for @chatSeller.
-  ///
-  /// In en, this message translates to:
-  /// **'Chat'**
-  String get chatSeller;
-
-  /// No description provided for @chatSellerSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Chat with seller — coming soon'**
-  String get chatSellerSoon;
-
   /// No description provided for @addedToCart.
   ///
   /// In en, this message translates to:
   /// **'Added to cart!'**
   String get addedToCart;
-
-  /// No description provided for @expressCheckoutSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Express checkout — coming soon'**
-  String get expressCheckoutSoon;
 
   /// No description provided for @buyNow.
   ///
@@ -3932,18 +3014,6 @@ abstract class AppLocalizations {
   /// **'✅ Verified Seller'**
   String get verifiedSeller;
 
-  /// No description provided for @sellerRatingMid.
-  ///
-  /// In en, this message translates to:
-  /// **' Seller · '**
-  String get sellerRatingMid;
-
-  /// No description provided for @sellerSalesSuffix.
-  ///
-  /// In en, this message translates to:
-  /// **' sales'**
-  String get sellerSalesSuffix;
-
   /// No description provided for @onlyLeftPrefix.
   ///
   /// In en, this message translates to:
@@ -3986,12 +3056,6 @@ abstract class AppLocalizations {
   /// **'Inquiries'**
   String get listingInquiries;
 
-  /// No description provided for @editListing.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit'**
-  String get editListing;
-
   /// No description provided for @editListingMenu.
   ///
   /// In en, this message translates to:
@@ -4027,12 +3091,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resume'**
   String get resumeListing;
-
-  /// No description provided for @listingStats.
-  ///
-  /// In en, this message translates to:
-  /// **'Statistics'**
-  String get listingStats;
 
   /// No description provided for @deleteListing.
   ///
@@ -4100,6 +3158,18 @@ abstract class AppLocalizations {
   /// **'Sold'**
   String get sold;
 
+  /// No description provided for @soldOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold out'**
+  String get soldOut;
+
+  /// No description provided for @addToCartSoldOut.
+  ///
+  /// In en, this message translates to:
+  /// **'This item is sold out and can\'t be added to your cart.'**
+  String get addToCartSoldOut;
+
   /// No description provided for @pending.
   ///
   /// In en, this message translates to:
@@ -4160,6 +3230,12 @@ abstract class AppLocalizations {
   /// **'Listing resubmitted for review'**
   String get resubmitSuccess;
 
+  /// No description provided for @splashSettingsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load app settings. Check your connection and try again.'**
+  String get splashSettingsError;
+
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:
@@ -4190,12 +3266,6 @@ abstract class AppLocalizations {
   /// **'Something went wrong on our end. Please try again in a moment.'**
   String get serverErrorMessage;
 
-  /// No description provided for @emptyInbox.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing here yet'**
-  String get emptyInbox;
-
   /// No description provided for @incomingOrders.
   ///
   /// In en, this message translates to:
@@ -4213,12 +3283,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm All Pending'**
   String get vendorConfirmAllPending;
-
-  /// No description provided for @vendorViewAnalytics.
-  ///
-  /// In en, this message translates to:
-  /// **'View Analytics'**
-  String get vendorViewAnalytics;
 
   /// No description provided for @vendorStatPendingOrders.
   ///
@@ -4280,12 +3344,6 @@ abstract class AppLocalizations {
   /// **'By Buyer Name A–Z'**
   String get vendorSortBuyerName;
 
-  /// No description provided for @vendorNewOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'NEW ORDER'**
-  String get vendorNewOrder;
-
   /// No description provided for @vendorRejectOrder.
   ///
   /// In en, this message translates to:
@@ -4346,12 +3404,6 @@ abstract class AppLocalizations {
   /// **'Shipping Information'**
   String get vendorShippingInfoTitle;
 
-  /// No description provided for @vendorViewOnMap.
-  ///
-  /// In en, this message translates to:
-  /// **'View on Map'**
-  String get vendorViewOnMap;
-
   /// No description provided for @vendorCollectOnDelivery.
   ///
   /// In en, this message translates to:
@@ -4375,30 +3427,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm Shipment'**
   String get vendorConfirmShipment;
-
-  /// No description provided for @vendorExportOrders.
-  ///
-  /// In en, this message translates to:
-  /// **'Export Orders'**
-  String get vendorExportOrders;
-
-  /// No description provided for @vendorOrderSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Order Settings'**
-  String get vendorOrderSettings;
-
-  /// No description provided for @vendorPrintOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'Print Order'**
-  String get vendorPrintOrder;
-
-  /// No description provided for @vendorReportIssue.
-  ///
-  /// In en, this message translates to:
-  /// **'Report Issue'**
-  String get vendorReportIssue;
 
   /// No description provided for @vendorReasonItemUnavailable.
   ///
@@ -4447,12 +3475,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'XS-TRACK-2024-001'**
   String get vendorTrackingHint;
-
-  /// No description provided for @vendorShippingNoteHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Package handed to courier, estimated 3–5 days'**
-  String get vendorShippingNoteHint;
 
   /// No description provided for @vendorOrderRejectedSnack.
   ///
@@ -4520,12 +3542,6 @@ abstract class AppLocalizations {
   /// **'This order was cancelled'**
   String get vendorStatusCancelled;
 
-  /// No description provided for @vendorStatusRefunded.
-  ///
-  /// In en, this message translates to:
-  /// **'Refunded'**
-  String get vendorStatusRefunded;
-
   /// No description provided for @didntReceiveCode.
   ///
   /// In en, this message translates to:
@@ -4554,7 +3570,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'🔔 You have {n} unread notifications'**
-  String notificationsUnreadBannerLine(int n);
+  String notificationsUnreadBannerLine(String n);
 
   /// No description provided for @notificationsEmptyFilterTitle.
   ///
@@ -4578,67 +3594,49 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{m}m ago'**
-  String notificationsTimeMinutesAgo(int m);
+  String notificationsTimeMinutesAgo(String m);
 
   /// No description provided for @notificationsTimeHoursAgo.
   ///
   /// In en, this message translates to:
   /// **'{h}h ago'**
-  String notificationsTimeHoursAgo(int h);
+  String notificationsTimeHoursAgo(String h);
 
   /// No description provided for @applyFiltersCount.
   ///
   /// In en, this message translates to:
   /// **'Apply Filters ({n})'**
-  String applyFiltersCount(int n);
+  String applyFiltersCount(String n);
 
   /// No description provided for @ordersCountLine.
   ///
   /// In en, this message translates to:
   /// **'{n} orders'**
-  String ordersCountLine(int n);
+  String ordersCountLine(String n);
 
   /// No description provided for @ordersMoreItems.
   ///
   /// In en, this message translates to:
   /// **'+ {n} more items'**
-  String ordersMoreItems(int n);
+  String ordersMoreItems(String n);
 
   /// No description provided for @ordersItemsSectionCount.
   ///
   /// In en, this message translates to:
   /// **'Items Ordered ({n})'**
-  String ordersItemsSectionCount(int n);
-
-  /// No description provided for @wishlistAppBarTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'My Wishlist ({n})'**
-  String wishlistAppBarTitle(int n);
-
-  /// No description provided for @wishlistSelectedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{n} selected'**
-  String wishlistSelectedCount(int n);
+  String ordersItemsSectionCount(String n);
 
   /// No description provided for @wishlistPriceDropBanner.
   ///
   /// In en, this message translates to:
-  /// **'🎉 Price drop on {n} items in your wishlist!'**
-  String wishlistPriceDropBanner(int n);
+  /// **'🎉 {n, plural, =1{Price drop on 1 item} other{Price drop on {nText} items}} in your wishlist!'**
+  String wishlistPriceDropBanner(int n, String nText);
 
   /// No description provided for @wishlistPriceDropPercent.
   ///
   /// In en, this message translates to:
-  /// **'↓ {p}% Price Drop'**
-  String wishlistPriceDropPercent(int p);
-
-  /// No description provided for @wishlistMoveAllSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'{n} items added to cart'**
-  String wishlistMoveAllSummary(int n);
+  /// **'↓ {p} Price Drop'**
+  String wishlistPriceDropPercent(String p);
 
   /// No description provided for @wishlistShareText.
   ///
@@ -4650,25 +3648,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{total} items · {avail} available'**
-  String wishlistItemsAvailableLine(int total, int avail);
-
-  /// No description provided for @wishlistAddToCartSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Cart ({n})'**
-  String wishlistAddToCartSelected(int n);
-
-  /// No description provided for @wishlistRemoveSelectedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove Selected ({n})'**
-  String wishlistRemoveSelectedCount(int n);
-
-  /// No description provided for @wishlistFilterEmptyTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No {filterName} items'**
-  String wishlistFilterEmptyTitle(String filterName);
+  String wishlistItemsAvailableLine(String total, String avail);
 
   /// No description provided for @wishlistAddedToCartCount.
   ///
@@ -4680,19 +3660,13 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'My Cart ({n} items)'**
-  String cartAppBarTitle(int n);
+  String cartAppBarTitle(String n);
 
   /// No description provided for @cartClearBody.
   ///
   /// In en, this message translates to:
   /// **'This will remove all {n} items from your cart.'**
-  String cartClearBody(int n);
-
-  /// No description provided for @cartSelectAllCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Select All ({n} items)'**
-  String cartSelectAllCount(int n);
+  String cartClearBody(String n);
 
   /// No description provided for @cartRemovedSnack.
   ///
@@ -4704,43 +3678,19 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'🚚 +{amount} EGP shipping'**
-  String cartShippingPaid(int amount);
-
-  /// No description provided for @cartCouponApplied.
-  ///
-  /// In en, this message translates to:
-  /// **'✅ \"{code}\" — {detail}'**
-  String cartCouponApplied(String code, String detail);
+  String cartShippingPaid(String amount);
 
   /// No description provided for @cartSubtotalLine.
   ///
   /// In en, this message translates to:
   /// **'Subtotal ({n} items)'**
-  String cartSubtotalLine(int n);
-
-  /// No description provided for @cartCouponLine.
-  ///
-  /// In en, this message translates to:
-  /// **'Coupon ({code})'**
-  String cartCouponLine(String code);
-
-  /// No description provided for @cartProceedCheckoutTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Proceed to Checkout ({total})'**
-  String cartProceedCheckoutTotal(String total);
-
-  /// No description provided for @cartCheckoutItems.
-  ///
-  /// In en, this message translates to:
-  /// **'Checkout ({n} items)'**
-  String cartCheckoutItems(int n);
+  String cartSubtotalLine(String n);
 
   /// No description provided for @checkoutItemsFromSellers.
   ///
   /// In en, this message translates to:
   /// **'{items} items from {sellers} sellers'**
-  String checkoutItemsFromSellers(int items, int sellers);
+  String checkoutItemsFromSellers(String items, String sellers);
 
   /// No description provided for @checkoutPlaceOrderTotal.
   ///
@@ -4758,13 +3708,13 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{n} orders confirmed successfully'**
-  String vendorOrdersConfirmed(int n);
+  String vendorOrdersConfirmed(String n);
 
   /// No description provided for @vendorLowStockHint.
   ///
   /// In en, this message translates to:
   /// **'{qty} units remaining after this order'**
-  String vendorLowStockHint(int qty);
+  String vendorLowStockHint(String qty);
 
   /// No description provided for @enterYourPhoneNumber.
   ///
@@ -4789,12 +3739,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'you@email.com'**
   String get enterEmailHint;
-
-  /// No description provided for @validEmailOrPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'Valid email or 10+ digit phone'**
-  String get validEmailOrPhone;
 
   /// No description provided for @passwordMask.
   ///
@@ -5084,12 +4028,6 @@ abstract class AppLocalizations {
   /// **'Analytics & sales insights'**
   String get sellerFeature3;
 
-  /// No description provided for @sellerFeature4.
-  ///
-  /// In en, this message translates to:
-  /// **'Direct chat with buyers'**
-  String get sellerFeature4;
-
   /// No description provided for @dateOfBirthOptional.
   ///
   /// In en, this message translates to:
@@ -5120,35 +4058,11 @@ abstract class AppLocalizations {
   /// **'e.g. Ahmed Mohamed'**
   String get fullNameHint;
 
-  /// No description provided for @fullNameArRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Full Name (Arabic) *'**
-  String get fullNameArRequired;
-
   /// No description provided for @emailAddressRequired.
   ///
   /// In en, this message translates to:
   /// **'Email Address *'**
   String get emailAddressRequired;
-
-  /// No description provided for @emailAddressOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'Email Address (optional — for password recovery)'**
-  String get emailAddressOptional;
-
-  /// No description provided for @locationCityRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Location / City *'**
-  String get locationCityRequired;
-
-  /// No description provided for @locationHintAlgiers.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. Cairo'**
-  String get locationHintAlgiers;
 
   /// No description provided for @secureYourAccount.
   ///
@@ -5294,29 +4208,11 @@ abstract class AppLocalizations {
   /// **'Describe your store and what makes it unique...'**
   String get storeDescriptionHint;
 
-  /// No description provided for @storeLogoOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Logo (optional)'**
-  String get storeLogoOptional;
-
   /// No description provided for @storeLogoRequired.
   ///
   /// In en, this message translates to:
   /// **'Store Logo *'**
   String get storeLogoRequired;
-
-  /// No description provided for @cityRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'City *'**
-  String get cityRequired;
-
-  /// No description provided for @wilayaRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Governorate *'**
-  String get wilayaRequired;
 
   /// No description provided for @sellerFallbackName.
   ///
@@ -5358,25 +4254,13 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Step {current} of {total}'**
-  String stepOf(int current, int total);
+  String stepOf(String current, String total);
 
   /// No description provided for @vendorWelcome.
   ///
   /// In en, this message translates to:
   /// **'Welcome to xStore, {name}! 🎉'**
   String vendorWelcome(String name);
-
-  /// No description provided for @pushNotifications.
-  ///
-  /// In en, this message translates to:
-  /// **'Push Notifications'**
-  String get pushNotifications;
-
-  /// No description provided for @emailUpdates.
-  ///
-  /// In en, this message translates to:
-  /// **'Email Updates'**
-  String get emailUpdates;
 
   /// No description provided for @wishlistEmptySubtitle.
   ///
@@ -5426,168 +4310,6 @@ abstract class AppLocalizations {
   /// **'Store Hours'**
   String get storeHours;
 
-  /// No description provided for @storeOpenNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Now'**
-  String get storeOpenNow;
-
-  /// No description provided for @storeClosedNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Closed'**
-  String get storeClosedNow;
-
-  /// No description provided for @storeStatusOpen.
-  ///
-  /// In en, this message translates to:
-  /// **'Your store is currently OPEN'**
-  String get storeStatusOpen;
-
-  /// No description provided for @storeStatusClosed.
-  ///
-  /// In en, this message translates to:
-  /// **'Your store is currently CLOSED'**
-  String get storeStatusClosed;
-
-  /// No description provided for @storeOpenDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Customers can place orders now'**
-  String get storeOpenDesc;
-
-  /// No description provided for @storeClosedDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Customers cannot place orders now'**
-  String get storeClosedDesc;
-
-  /// No description provided for @closeStoreNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Close Store Now'**
-  String get closeStoreNow;
-
-  /// No description provided for @openStoreNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Store Now'**
-  String get openStoreNow;
-
-  /// No description provided for @closedMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a message for customers (optional)'**
-  String get closedMessage;
-
-  /// No description provided for @closedMessageTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Closed message'**
-  String get closedMessageTitle;
-
-  /// No description provided for @closedMessageHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. Back in 1 hour, Closed for holiday'**
-  String get closedMessageHint;
-
-  /// No description provided for @weeklySchedule.
-  ///
-  /// In en, this message translates to:
-  /// **'Weekly Schedule'**
-  String get weeklySchedule;
-
-  /// No description provided for @weeklyScheduleSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Set your working hours for each day'**
-  String get weeklyScheduleSubtitle;
-
-  /// No description provided for @copyHoursToAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy hours to all days'**
-  String get copyHoursToAll;
-
-  /// No description provided for @quickPresets.
-  ///
-  /// In en, this message translates to:
-  /// **'Quick Presets'**
-  String get quickPresets;
-
-  /// No description provided for @quickPresetsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Apply a schedule template instantly'**
-  String get quickPresetsSubtitle;
-
-  /// No description provided for @presetStandard.
-  ///
-  /// In en, this message translates to:
-  /// **'Standard (9AM–6PM)'**
-  String get presetStandard;
-
-  /// No description provided for @presetExtended.
-  ///
-  /// In en, this message translates to:
-  /// **'Extended (9AM–11PM)'**
-  String get presetExtended;
-
-  /// No description provided for @presetMorning.
-  ///
-  /// In en, this message translates to:
-  /// **'Morning Only (8AM–2PM)'**
-  String get presetMorning;
-
-  /// No description provided for @presetFullWeek.
-  ///
-  /// In en, this message translates to:
-  /// **'Full Week'**
-  String get presetFullWeek;
-
-  /// No description provided for @presetWeekdays.
-  ///
-  /// In en, this message translates to:
-  /// **'Weekdays Only (Sat–Thu)'**
-  String get presetWeekdays;
-
-  /// No description provided for @presetWithoutFriday.
-  ///
-  /// In en, this message translates to:
-  /// **'Without Friday'**
-  String get presetWithoutFriday;
-
-  /// No description provided for @saveWorkingHours.
-  ///
-  /// In en, this message translates to:
-  /// **'Save Working Hours'**
-  String get saveWorkingHours;
-
-  /// No description provided for @workingHoursSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Working hours saved! ✅'**
-  String get workingHoursSaved;
-
-  /// No description provided for @storeNowOpen.
-  ///
-  /// In en, this message translates to:
-  /// **'Store is now Open 🟢'**
-  String get storeNowOpen;
-
-  /// No description provided for @storeNowClosed.
-  ///
-  /// In en, this message translates to:
-  /// **'Store is now Closed 🔴'**
-  String get storeNowClosed;
-
-  /// No description provided for @open24Hours.
-  ///
-  /// In en, this message translates to:
-  /// **'Open 24 Hours'**
-  String get open24Hours;
-
   /// No description provided for @from.
   ///
   /// In en, this message translates to:
@@ -5599,192 +4321,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'To'**
   String get to;
-
-  /// No description provided for @copyFrom.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy from:'**
-  String get copyFrom;
-
-  /// No description provided for @copyingFrom.
-  ///
-  /// In en, this message translates to:
-  /// **'Copying from:'**
-  String get copyingFrom;
-
-  /// No description provided for @applyToSelectedDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Apply to Selected Days'**
-  String get applyToSelectedDays;
-
-  /// No description provided for @selectAllDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Select All'**
-  String get selectAllDays;
-
-  /// No description provided for @deselectAllDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Deselect All'**
-  String get deselectAllDays;
-
-  /// No description provided for @openLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Open'**
-  String get openLabel;
-
-  /// No description provided for @closedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Closed'**
-  String get closedLabel;
-
-  /// No description provided for @opensAt.
-  ///
-  /// In en, this message translates to:
-  /// **'Opens at {time}'**
-  String opensAt(String time);
-
-  /// No description provided for @closesAt.
-  ///
-  /// In en, this message translates to:
-  /// **'Closes at {time}'**
-  String closesAt(String time);
-
-  /// No description provided for @opensOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Opens {day} at {time}'**
-  String opensOn(String day, String time);
-
-  /// No description provided for @storeHoursTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Hours'**
-  String get storeHoursTitle;
-
-  /// No description provided for @todayLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Today'**
-  String get todayLabel;
-
-  /// No description provided for @daySaturday.
-  ///
-  /// In en, this message translates to:
-  /// **'Saturday'**
-  String get daySaturday;
-
-  /// No description provided for @daySunday.
-  ///
-  /// In en, this message translates to:
-  /// **'Sunday'**
-  String get daySunday;
-
-  /// No description provided for @dayMonday.
-  ///
-  /// In en, this message translates to:
-  /// **'Monday'**
-  String get dayMonday;
-
-  /// No description provided for @dayTuesday.
-  ///
-  /// In en, this message translates to:
-  /// **'Tuesday'**
-  String get dayTuesday;
-
-  /// No description provided for @dayWednesday.
-  ///
-  /// In en, this message translates to:
-  /// **'Wednesday'**
-  String get dayWednesday;
-
-  /// No description provided for @dayThursday.
-  ///
-  /// In en, this message translates to:
-  /// **'Thursday'**
-  String get dayThursday;
-
-  /// No description provided for @dayFriday.
-  ///
-  /// In en, this message translates to:
-  /// **'Friday'**
-  String get dayFriday;
-
-  /// No description provided for @dayShortSat.
-  ///
-  /// In en, this message translates to:
-  /// **'Sat'**
-  String get dayShortSat;
-
-  /// No description provided for @dayShortSun.
-  ///
-  /// In en, this message translates to:
-  /// **'Sun'**
-  String get dayShortSun;
-
-  /// No description provided for @dayShortMon.
-  ///
-  /// In en, this message translates to:
-  /// **'Mon'**
-  String get dayShortMon;
-
-  /// No description provided for @dayShortTue.
-  ///
-  /// In en, this message translates to:
-  /// **'Tue'**
-  String get dayShortTue;
-
-  /// No description provided for @dayShortWed.
-  ///
-  /// In en, this message translates to:
-  /// **'Wed'**
-  String get dayShortWed;
-
-  /// No description provided for @dayShortThu.
-  ///
-  /// In en, this message translates to:
-  /// **'Thu'**
-  String get dayShortThu;
-
-  /// No description provided for @dayShortFri.
-  ///
-  /// In en, this message translates to:
-  /// **'Fri'**
-  String get dayShortFri;
-
-  /// No description provided for @invalidHoursError.
-  ///
-  /// In en, this message translates to:
-  /// **'Closing time must be after opening time'**
-  String get invalidHoursError;
-
-  /// No description provided for @discardChanges.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard Changes'**
-  String get discardChanges;
-
-  /// No description provided for @discardChangesConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard unsaved changes?'**
-  String get discardChangesConfirm;
-
-  /// No description provided for @applyPresetConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Apply {preset} hours to all days?'**
-  String applyPresetConfirm(String preset);
-
-  /// No description provided for @storeClosedWarning.
-  ///
-  /// In en, this message translates to:
-  /// **'This store is currently closed. You can still order — seller will respond when they reopen.'**
-  String get storeClosedWarning;
 
   /// No description provided for @storeLocation.
   ///
@@ -6014,12 +4550,6 @@ abstract class AppLocalizations {
   /// **'Enter a valid phone number'**
   String get validationRegisterPhoneInvalid;
 
-  /// No description provided for @validationCityRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'City is required'**
-  String get validationCityRequired;
-
   /// No description provided for @validationAgeMinimum18.
   ///
   /// In en, this message translates to:
@@ -6085,24 +4615,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'City and governorate are required'**
   String get validationStoreCityWilayaRequired;
-
-  /// No description provided for @validationFullNameArRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Arabic full name is required'**
-  String get validationFullNameArRequired;
-
-  /// No description provided for @validationStoreNameArRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Arabic store name is required'**
-  String get validationStoreNameArRequired;
-
-  /// No description provided for @validationStoreDescriptionArShort.
-  ///
-  /// In en, this message translates to:
-  /// **'Describe your store in Arabic'**
-  String get validationStoreDescriptionArShort;
 
   /// No description provided for @listingValidationPhotosRequired.
   ///
@@ -6314,12 +4826,6 @@ abstract class AppLocalizations {
   /// **'Delivered'**
   String get courierDeliverAction;
 
-  /// No description provided for @courierCollectAmount.
-  ///
-  /// In en, this message translates to:
-  /// **'Collect {amount}'**
-  String courierCollectAmount(String amount);
-
   /// No description provided for @courierPrepaidChip.
   ///
   /// In en, this message translates to:
@@ -6409,12 +4915,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Directions in Google Maps'**
   String get courierNavigateHint;
-
-  /// No description provided for @loginAsCourierDemo.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in as delivery driver (demo)'**
-  String get loginAsCourierDemo;
 
   /// No description provided for @loginAsCourier.
   ///
@@ -6509,8 +5009,8 @@ abstract class AppLocalizations {
   /// No description provided for @courierItemsSummary.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 item} other{{count} items}} · {total}'**
-  String courierItemsSummary(int count, String total);
+  /// **'{count, plural, =1{1 item} other{{countText} items}} · {total}'**
+  String courierItemsSummary(int count, String countText, String total);
 
   /// No description provided for @courierCollectFromCustomer.
   ///
@@ -6539,8 +5039,8 @@ abstract class AppLocalizations {
   /// No description provided for @courierPackagesCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 package} other{{count} packages}}'**
-  String courierPackagesCount(int count);
+  /// **'{count, plural, =1{1 package} other{{countText} packages}}'**
+  String courierPackagesCount(int count, String countText);
 
   /// No description provided for @courierPackagePickupConfirmTitle.
   ///
@@ -6794,12 +5294,6 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get packageStatusCancelled;
 
-  /// No description provided for @menuMyPackages.
-  ///
-  /// In en, this message translates to:
-  /// **'My packages'**
-  String get menuMyPackages;
-
   /// No description provided for @deliveryMethodSheetTitle.
   ///
   /// In en, this message translates to:
@@ -6830,24 +5324,6 @@ abstract class AppLocalizations {
   /// **'A courier picks up and delivers — the shipping fee is collected on your behalf.'**
   String get deliveryMethodPlatformSubtitle;
 
-  /// No description provided for @requestCustomDeliveryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Request custom delivery'**
-  String get requestCustomDeliveryTitle;
-
-  /// No description provided for @requestCustomDeliverySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Need a different pickup or drop-off point for this order? Request it and we\'ll price it for you.'**
-  String get requestCustomDeliverySubtitle;
-
-  /// No description provided for @requestCustomDeliveryAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Request custom delivery'**
-  String get requestCustomDeliveryAction;
-
   /// No description provided for @packageRejectReasonHint.
   ///
   /// In en, this message translates to:
@@ -6865,6 +5341,378 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Linked to an order'**
   String get packageOrderLinkedLabel;
+
+  /// No description provided for @passwordStrengthWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak'**
+  String get passwordStrengthWeak;
+
+  /// No description provided for @passwordStrengthFair.
+  ///
+  /// In en, this message translates to:
+  /// **'Fair'**
+  String get passwordStrengthFair;
+
+  /// No description provided for @passwordStrengthGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get passwordStrengthGood;
+
+  /// No description provided for @passwordStrengthStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong'**
+  String get passwordStrengthStrong;
+
+  /// No description provided for @passwordRuleMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get passwordRuleMinLength;
+
+  /// No description provided for @passwordRuleUppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'One uppercase letter'**
+  String get passwordRuleUppercase;
+
+  /// No description provided for @passwordRuleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'One number'**
+  String get passwordRuleNumber;
+
+  /// No description provided for @passwordRuleSpecial.
+  ///
+  /// In en, this message translates to:
+  /// **'One special character (!@#\$...)'**
+  String get passwordRuleSpecial;
+
+  /// No description provided for @listingsEmptyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No listings yet'**
+  String get listingsEmptyNone;
+
+  /// No description provided for @listingsEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No {status} listings'**
+  String listingsEmptyFiltered(String status);
+
+  /// No description provided for @listingsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start selling by adding your first listing'**
+  String get listingsEmptySubtitle;
+
+  /// No description provided for @listingsEmptyCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Your First Listing'**
+  String get listingsEmptyCta;
+
+  /// No description provided for @listingPostedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted {date}'**
+  String listingPostedOn(String date);
+
+  /// No description provided for @courierPackageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Package'**
+  String get courierPackageTitle;
+
+  /// No description provided for @whatsappProductPrefill.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, I\'m interested in {title}'**
+  String whatsappProductPrefill(String title);
+
+  /// No description provided for @whatsappStorePrefill.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, I saw your store {name} on xStore'**
+  String whatsappStorePrefill(String name);
+
+  /// No description provided for @whatsappSellerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open WhatsApp.'**
+  String get whatsappSellerUnavailable;
+
+  /// No description provided for @ordersWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'💬 WhatsApp'**
+  String get ordersWhatsapp;
+
+  /// No description provided for @cartApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get cartApply;
+
+  /// No description provided for @cartCouponLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon ({code})'**
+  String cartCouponLine(String code);
+
+  /// No description provided for @storeStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Your store is currently OPEN'**
+  String get storeStatusOpen;
+
+  /// No description provided for @storeStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your store is currently CLOSED'**
+  String get storeStatusClosed;
+
+  /// No description provided for @storeOpenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers can place orders now'**
+  String get storeOpenDesc;
+
+  /// No description provided for @storeClosedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers cannot place orders now'**
+  String get storeClosedDesc;
+
+  /// No description provided for @closeStoreNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Store Now'**
+  String get closeStoreNow;
+
+  /// No description provided for @openStoreNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Store Now'**
+  String get openStoreNow;
+
+  /// No description provided for @closedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a message for customers (optional)'**
+  String get closedMessage;
+
+  /// No description provided for @closedMessageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed message'**
+  String get closedMessageTitle;
+
+  /// No description provided for @closedMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Back in 1 hour, Closed for holiday'**
+  String get closedMessageHint;
+
+  /// No description provided for @weeklySchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Schedule'**
+  String get weeklySchedule;
+
+  /// No description provided for @weeklyScheduleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your working hours for each day'**
+  String get weeklyScheduleSubtitle;
+
+  /// No description provided for @copyHoursToAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy hours to all days'**
+  String get copyHoursToAll;
+
+  /// No description provided for @quickPresets.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Presets'**
+  String get quickPresets;
+
+  /// No description provided for @quickPresetsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply a schedule template instantly'**
+  String get quickPresetsSubtitle;
+
+  /// No description provided for @presetStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard (9AM–6PM)'**
+  String get presetStandard;
+
+  /// No description provided for @presetExtended.
+  ///
+  /// In en, this message translates to:
+  /// **'Extended (9AM–11PM)'**
+  String get presetExtended;
+
+  /// No description provided for @presetMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning Only (8AM–2PM)'**
+  String get presetMorning;
+
+  /// No description provided for @presetFullWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Week'**
+  String get presetFullWeek;
+
+  /// No description provided for @presetWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays Only (Sat–Thu)'**
+  String get presetWeekdays;
+
+  /// No description provided for @presetWithoutFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Without Friday'**
+  String get presetWithoutFriday;
+
+  /// No description provided for @saveWorkingHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Working Hours'**
+  String get saveWorkingHours;
+
+  /// No description provided for @workingHoursSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours saved! ✅'**
+  String get workingHoursSaved;
+
+  /// No description provided for @storeNowOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Store is now Open 🟢'**
+  String get storeNowOpen;
+
+  /// No description provided for @storeNowClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Store is now Closed 🔴'**
+  String get storeNowClosed;
+
+  /// No description provided for @open24Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Open 24 Hours'**
+  String get open24Hours;
+
+  /// No description provided for @copyFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy from:'**
+  String get copyFrom;
+
+  /// No description provided for @applyToSelectedDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to Selected Days'**
+  String get applyToSelectedDays;
+
+  /// No description provided for @selectAllDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAllDays;
+
+  /// No description provided for @deselectAllDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect All'**
+  String get deselectAllDays;
+
+  /// No description provided for @openLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get openLabel;
+
+  /// No description provided for @closedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get closedLabel;
+
+  /// No description provided for @storeHoursTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Hours'**
+  String get storeHoursTitle;
+
+  /// No description provided for @daySaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get daySaturday;
+
+  /// No description provided for @daySunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get daySunday;
+
+  /// No description provided for @dayMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get dayMonday;
+
+  /// No description provided for @dayTuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get dayTuesday;
+
+  /// No description provided for @dayWednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get dayWednesday;
+
+  /// No description provided for @dayThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get dayThursday;
+
+  /// No description provided for @dayFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get dayFriday;
+
+  /// No description provided for @invalidHoursError.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing time must be after opening time'**
+  String get invalidHoursError;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard Changes'**
+  String get discardChanges;
+
+  /// No description provided for @applyPresetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply {preset} hours to all days?'**
+  String applyPresetConfirm(String preset);
 }
 
 class _AppLocalizationsDelegate

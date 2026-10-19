@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/entities/vendor_commission_wallet.dart';
 import 'commission_config_provider.dart';
 
@@ -23,7 +24,11 @@ Future<VendorCommissionWallet> vendorCommissionWallet(
     return empty;
   }
 
-  final snapshot = await ref.watch(vendorCommissionSnapshotProvider.future);
+  // A failed fetch keeps this fail-open (listing publishing and the alert
+  // banner must not break); the wallet screen shows the snapshot's error.
+  final snapshot = await ref
+      .watch(vendorCommissionSnapshotProvider.future)
+      .then<OrderStatsEntity?>((s) => s, onError: (_) => null);
   if (snapshot == null) return empty;
 
   return VendorCommissionWallet(

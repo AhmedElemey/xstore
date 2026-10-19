@@ -189,6 +189,40 @@ void main() {
     },
   );
 
+  for (final (stock, soldOut) in <(Object?, bool)>[(null, false), (0, true)]) {
+    testWidgets(
+      'stockQuantity ${stock ?? 'missing'} -> ${soldOut ? 'sold out' : 'available'} on the sticky bar',
+      skip: MockConfig.useMock,
+      (tester) async {
+        final listing = _listingJson();
+        if (stock == null) {
+          listing.remove('stockQuantity');
+        } else {
+          listing['stockQuantity'] = stock;
+        }
+        final dio = _fakeDio({
+          'GET ${ApiEndpoints.apiListingDetail('9001')}': (_) => listing,
+          'GET ${ApiEndpoints.apiListingSimilar('9001')}': (_) => <dynamic>[],
+          'GET ${ApiEndpoints.apiListingReviews('9001')}': (_) => {
+            'items': <dynamic>[],
+            'totalCount': 0,
+          },
+        });
+
+        await tester.pumpWidget(
+          _harness([
+            authProvider.overrideWith(() => _FakeAuth(_consumer())),
+            dioProvider.overrideWithValue(dio),
+          ], '9001'),
+        );
+        await _settle(tester);
+
+        expect(find.text('Sold out'), soldOut ? findsOneWidget : findsNothing);
+        expect(find.text('Add to Cart'), soldOut ? findsNothing : findsOneWidget);
+      },
+    );
+  }
+
   testWidgets(
     'consumer adds the product to cart from the sticky bar',
     skip: MockConfig.useMock,

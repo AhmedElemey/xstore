@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/animations/animated_widgets.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class QuantitySelector extends StatelessWidget {
@@ -18,17 +18,18 @@ class QuantitySelector extends StatelessWidget {
   });
 
   final int quantity;
-  final int maxQuantity;
+  /// Null when the stock count is unknown (no upper bound shown).
+  final int? maxQuantity;
   final VoidCallback onDecrement;
   final VoidCallback onIncrement;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final lowStock = maxQuantity <= 5 && maxQuantity > 0;
+    final max = maxQuantity;
+    final lowStock = max != null && max <= 5 && max > 0;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -36,42 +37,56 @@ class QuantitySelector extends StatelessWidget {
             children: [
               Text(
                 context.l10n.quantity,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                style: AppTypography.labelLarge.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: context.labelColor,
                 ),
               ),
               const Spacer(),
-              Row(
-                children: [
-                  _StepperIcon(
-                    icon: LucideIcons.minus,
-                    onTap: quantity > 1 ? onDecrement : null,
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    width: AppSpacing.x3l + AppSpacing.sm,
-                    child: AnimatedCounter(
-                      value: quantity,
-                      style: theme.textTheme.titleMedium!.copyWith(
-                        fontWeight: FontWeight.w700,
+              // Bordered pill: [-] n [+]
+              Container(
+                height: 44,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: context.borderColor),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _StepperButton(
+                      icon: LucideIcons.minus,
+                      onTap: quantity > 1 ? onDecrement : null,
+                    ),
+                    SizedBox(
+                      width: 28,
+                      child: Center(
+                        child: AnimatedCounter(
+                          value: quantity,
+                          style: AppTypography.mono.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: context.textPrimary,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  _StepperIcon(
-                    icon: LucideIcons.plus,
-                    onTap: quantity < maxQuantity ? onIncrement : null,
-                  ),
-                ],
+                    _StepperButton(
+                      icon: LucideIcons.plus,
+                      onTap: max == null || quantity < max ? onIncrement : null,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
           if (lowStock) ...[
             const Gap(AppSpacing.sm),
             Text(
-              '${context.l10n.onlyLeftPrefix}$maxQuantity${context.l10n.onlyLeftSuffix}',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: AppColors.warning,
+              '${context.l10n.onlyLeftPrefix}${context.formatInt(max)}${context.l10n.onlyLeftSuffix}',
+              style: AppTypography.bodyMedium.copyWith(
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
+                color: context.amberColor,
               ),
             ),
           ],
@@ -81,8 +96,8 @@ class QuantitySelector extends StatelessWidget {
   }
 }
 
-class _StepperIcon extends StatelessWidget {
-  const _StepperIcon({required this.icon, required this.onTap});
+class _StepperButton extends StatelessWidget {
+  const _StepperButton({required this.icon, required this.onTap});
 
   final IconData icon;
   final VoidCallback? onTap;
@@ -91,26 +106,24 @@ class _StepperIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final disabled = onTap == null;
     return Material(
-      color: disabled
-          ? Theme.of(context).colorScheme.surfaceContainerHighest
-          : Theme.of(context).colorScheme.primaryContainer,
-      shape: const CircleBorder(),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap == null
+      type: MaterialType.transparency,
+      child: InkResponse(
+        onTap: disabled
             ? null
             : () {
                 HapticFeedback.lightImpact();
                 onTap!();
               },
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
+        radius: 22,
+        child: SizedBox(
+          width: 44,
+          height: 44,
           child: Icon(
             icon,
-            size: AppSpacing.xl + AppSpacing.xs,
+            size: 18,
             color: disabled
-                ? Theme.of(context).disabledColor
-                : Theme.of(context).colorScheme.onPrimaryContainer,
+                ? context.labelColor.withValues(alpha: 0.5)
+                : context.textPrimary,
           ),
         ),
       ),

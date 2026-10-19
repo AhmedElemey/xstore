@@ -3,11 +3,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import '../../../../core/constants/app_colors.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
@@ -25,6 +25,8 @@ import '../widgets/listing_sort_bar.dart';
 import '../widgets/listing_stats_banner.dart';
 import '../widgets/resubmit_listing_sheet.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/my_listings_skeleton.dart';
 
@@ -36,6 +38,9 @@ class MyListingsScreen extends ConsumerStatefulWidget {
 }
 
 class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
+  // Bottom padding so the last card scrolls clear of the New Listing pill.
+  static const double _fabClearance = 88;
+
   final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(true);
 
   void _onScrollNotification(ScrollNotification n) {
@@ -61,64 +66,39 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   }
 
   Future<void> _openSearch() async {
-    final controller = TextEditingController(
-      text: ref.read(myListingsNotifierProvider).searchQuery,
-    );
     await showAnimatedDialog<void>(
       context: context,
-      child: AlertDialog(
-        title: Text(context.l10n.myListingsSearchTitle),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(hintText: context.l10n.myListingsSearchHint),
-          onSubmitted: (v) {
-            ref.read(myListingsNotifierProvider.notifier).setSearchQuery(v);
-            Navigator.of(context).pop();
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              ref.read(myListingsNotifierProvider.notifier).setSearchQuery('');
-              Navigator.of(context).pop();
-            },
-            child: Text(context.l10n.myListingsSearchClear),
-          ),
-          FilledButton(
-            onPressed: () {
-              ref
-                  .read(myListingsNotifierProvider.notifier)
-                  .setSearchQuery(controller.text);
-              Navigator.of(context).pop();
-            },
-            child: Text(context.l10n.myListingsSearchSubmit),
-          ),
-        ],
+      child: _ListingSearchDialog(
+        initialQuery: ref.read(myListingsNotifierProvider).searchQuery,
+        onClear: () =>
+            ref.read(myListingsNotifierProvider.notifier).setSearchQuery(''),
+        onSubmit: (q) =>
+            ref.read(myListingsNotifierProvider.notifier).setSearchQuery(q),
       ),
     );
-    controller.dispose();
   }
 
   Future<void> _confirmDelete(ListingEntity listing) async {
     final ok = await showAnimatedDialog<bool>(
       context: context,
-      child: AlertDialog(
-        title: Text(context.l10n.myListingsDeleteTitle),
-        content: Text(context.l10n.myListingsDeleteBody(listing.title)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+      child: Builder(
+        builder: (dialogContext) => AlertDialog(
+          title: Text(context.l10n.myListingsDeleteTitle),
+          content: Text(context.l10n.myListingsDeleteBody(listing.title)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(context.l10n.cancel),
             ),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(context.l10n.deleteListing),
-          ),
-        ],
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(dialogContext).colorScheme.error,
+              ),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(context.l10n.deleteListing),
+            ),
+          ],
+        ),
       ),
     );
     if (ok == true && mounted) {
@@ -132,8 +112,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     final ok = await showAnimatedBottomSheet<bool>(
       context: context,
       builder: (ctx) => Material(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        color: context.elevatedSurfaceColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         clipBehavior: Clip.antiAlias,
         child: ResubmitListingSheet(
           listing: listing,
@@ -143,12 +123,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         ),
       ),
     );
-    if (!mounted || ok != true) {
-      // Failure already surfaces via the screen's existing ref.listen on
-      // state.error (same pattern pause/resume relies on) — no need to
-      // toast it again here.
-      return;
-    }
+    // A failure stays in the sheet, shown inline — nothing to toast here.
+    if (!mounted || ok != true) return;
     AppSnackbar.success(context, context.l10n.resubmitSuccess);
   }
 
@@ -168,41 +144,44 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     );
   }
 
-  void _showOptions(ListingEntity listing) {
-    showAnimatedBottomSheet<void>(
+  Future<void> _showOptions(ListingEntity listing) async {
+    final action = await showAnimatedBottomSheet<ListingOptionsAction>(
       context: context,
       isScrollControlled: true,
       builder: (ctx) => Material(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        color: context.elevatedSurfaceColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         clipBehavior: Clip.antiAlias,
-        child: ListingOptionsSheet(
-          listing: listing,
-          onEdit: () => _openEdit(listing),
-          onPause: () => ref
-              .read(myListingsNotifierProvider.notifier)
-              .pauseListing(listing.id),
-          onResume: () => ref
-              .read(myListingsNotifierProvider.notifier)
-              .resumeListing(listing.id),
-          onViewStats: () {
-            showAnimatedBottomSheet<void>(
-              context: context,
-              builder: (_) => Material(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: ListingStatsSheet(listing: listing),
-              ),
-            );
-          },
-          onDelete: () => _confirmDelete(listing),
-          onResubmit: () => _openResubmitSheet(listing),
-        ),
+        child: ListingOptionsSheet(listing: listing),
       ),
     );
+    if (!mounted || action == null) return;
+    switch (action) {
+      case ListingOptionsAction.edit:
+        await _openEdit(listing);
+      case ListingOptionsAction.pause:
+        await ref
+            .read(myListingsNotifierProvider.notifier)
+            .pauseListing(listing.id);
+      case ListingOptionsAction.resume:
+        await ref
+            .read(myListingsNotifierProvider.notifier)
+            .resumeListing(listing.id);
+      case ListingOptionsAction.stats:
+        await showAnimatedBottomSheet<void>(
+          context: context,
+          builder: (_) => Material(
+            color: context.elevatedSurfaceColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            clipBehavior: Clip.antiAlias,
+            child: ListingStatsSheet(listing: listing),
+          ),
+        );
+      case ListingOptionsAction.delete:
+        await _confirmDelete(listing);
+      case ListingOptionsAction.resubmit:
+        await _openResubmitSheet(listing);
+    }
   }
 
   @override
@@ -226,6 +205,9 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       myListingsNotifierProvider.select((s) => s.isLoading),
     );
     final error = ref.watch(myListingsNotifierProvider.select((s) => s.error));
+    // Zero stats and tabs above a first-load failure would read as data; the
+    // error state below carries the message.
+    final firstLoadFailed = listings.isEmpty && error != null;
     final stats = ref.watch(
       myListingsNotifierProvider.select((s) {
         final all = s.listings;
@@ -241,7 +223,11 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       prev,
       next,
     ) {
-      if (next != null && next.isNotEmpty && next != prev) {
+      // With nothing on screen the error state shows it, with Retry.
+      if (next != null &&
+          next.isNotEmpty &&
+          next != prev &&
+          ref.read(myListingsNotifierProvider).listings.isNotEmpty) {
         AppSnackbar.error(context, next);
       }
     });
@@ -250,105 +236,130 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       isTarget: (location) => location == AppRoutes.listingMy,
       onReentry: (ref) =>
           ref.read(myListingsNotifierProvider.notifier).fetchListings(),
-      child: Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        backgroundColor: context.surfaceColor,
-        surfaceTintColor: AppColors.transparent,
-        title: Text(context.l10n.myListings),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.search),
-            onPressed: _openSearch,
-          ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: ValueListenableBuilder<bool>(
-        valueListenable: _fabVisible,
-        builder: (context, fabVisible, _) {
-          return AnimatedSlide(
-            duration: const Duration(milliseconds: 220),
-            offset: fabVisible ? Offset.zero : const Offset(0, 2),
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: fabVisible ? 1 : 0,
-              child: FloatingActionButton.extended(
-                onPressed: () => context.go(AppRoutes.listingAdd),
-                icon: const Icon(LucideIcons.plus),
-                label: Text(context.l10n.newListing),
-              ),
-            ),
-          );
-        },
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              0,
-              AppSpacing.lg,
-              AppSpacing.md,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Consumer(
-                  builder: (context, ref, _) {
-                    final wallet = ref
-                        .watch(vendorCommissionWalletProvider)
-                        .valueOrNull;
-                    if (wallet == null) return const SizedBox.shrink();
-                    return VendorCommissionAlertBanner(wallet: wallet);
-                  },
-                ),
-                ListingStatsBanner(
-                  totalCount: stats.totalCount,
-                  activeCount: stats.activeCount,
-                  soldCount: stats.soldCount,
-                ),
-              ],
-            ),
-          ),
-          ListingFilterTabs(
-            selected: selectedFilter,
-            onFilterSelected: ref
-                .read(myListingsNotifierProvider.notifier)
-                .applyFilter,
-          ),
-          const Gap(AppSpacing.md),
-          ListingSortBar(
-            sort: selectedSort,
-            viewMode: viewMode,
-            onSortChanged: ref
-                .read(myListingsNotifierProvider.notifier)
-                .applySort,
-            onViewModeChanged: ref
-                .read(myListingsNotifierProvider.notifier)
-                .setViewMode,
-          ),
-          Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (n) {
-                _onScrollNotification(n);
-                return false;
+      child: Material(
+        type: MaterialType.transparency,
+        child: OrbitBackground(
+          child: Scaffold(
+            // The sky paints behind; the Scaffold only hosts the FAB.
+            backgroundColor: Colors.transparent,
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            floatingActionButton: ValueListenableBuilder<bool>(
+              valueListenable: _fabVisible,
+              builder: (context, fabVisible, _) {
+                return AnimatedSlide(
+                  duration: const Duration(milliseconds: 220),
+                  offset: fabVisible ? Offset.zero : const Offset(0, 2),
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: fabVisible ? 1 : 0,
+                    child: _NewListingPill(
+                      label: context.l10n.newListing,
+                      onPressed: () => context.go(AppRoutes.listingAdd),
+                    ),
+                  ),
+                );
               },
-              child: _buildBody(
-                isLoading: isLoading,
-                listings: listings,
-                filtered: filtered,
-                selectedFilter: selectedFilter,
-                viewMode: viewMode,
-                error: error,
+            ),
+            body: SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.xl,
+                      AppSpacing.lg,
+                      AppSpacing.xl,
+                      AppSpacing.lg,
+                    ),
+                    child: SizedBox(
+                      height: 44,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              context.l10n.myListings,
+                              style: AppTypography.headlineSmall.copyWith(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          _GlassIconButton(
+                            icon: LucideIcons.search,
+                            onPressed: _openSearch,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.xl,
+                      0,
+                      AppSpacing.xl,
+                      AppSpacing.lg,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final wallet = ref
+                                .watch(vendorCommissionWalletProvider)
+                                .valueOrNull;
+                            if (wallet == null) return const SizedBox.shrink();
+                            return VendorCommissionAlertBanner(wallet: wallet);
+                          },
+                        ),
+                        if (!firstLoadFailed)
+                        ListingStatsBanner(
+                          totalCount: stats.totalCount,
+                          activeCount: stats.activeCount,
+                          soldCount: stats.soldCount,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!firstLoadFailed)
+                  ListingFilterTabs(
+                    selected: selectedFilter,
+                    onFilterSelected: ref
+                        .read(myListingsNotifierProvider.notifier)
+                        .applyFilter,
+                  ),
+                  if (!firstLoadFailed)
+                  ListingSortBar(
+                    sort: selectedSort,
+                    viewMode: viewMode,
+                    onSortChanged: ref
+                        .read(myListingsNotifierProvider.notifier)
+                        .applySort,
+                    onViewModeChanged: ref
+                        .read(myListingsNotifierProvider.notifier)
+                        .setViewMode,
+                  ),
+                  Expanded(
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (n) {
+                        _onScrollNotification(n);
+                        return false;
+                      },
+                      child: _buildBody(
+                        isLoading: isLoading,
+                        listings: listings,
+                        filtered: filtered,
+                        selectedFilter: selectedFilter,
+                        viewMode: viewMode,
+                        error: error,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
       ),
     );
   }
@@ -363,6 +374,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   }) {
     if (isLoading && listings.isEmpty) {
       return RefreshIndicator(
+        color: context.linkColor,
         onRefresh: () =>
             ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView(
@@ -373,28 +385,16 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     }
 
     if (listings.isEmpty && error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.x2l),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(error, textAlign: TextAlign.center),
-              const Gap(AppSpacing.lg),
-              FilledButton(
-                onPressed: () => ref
-                    .read(myListingsNotifierProvider.notifier)
-                    .fetchListings(),
-                child: Text(context.l10n.retry),
-              ),
-            ],
-          ),
-        ),
+      return ErrorStateWidget(
+        message: error,
+        onRetry: () =>
+            ref.read(myListingsNotifierProvider.notifier).fetchListings(),
       );
     }
 
     if (filtered.isEmpty) {
       return RefreshIndicator(
+        color: context.linkColor,
         onRefresh: () =>
             ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView(
@@ -414,16 +414,17 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
 
     if (viewMode == ViewMode.list) {
       return RefreshIndicator(
+        color: context.linkColor,
         onRefresh: () =>
             ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(),
           cacheExtent: 700,
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            AppSpacing.xl,
             AppSpacing.md,
-            AppSpacing.lg,
-            88,
+            AppSpacing.xl,
+            _fabClearance,
           ),
           itemCount: filtered.length,
           separatorBuilder: (_, __) => const Gap(AppSpacing.md),
@@ -442,16 +443,17 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     }
 
     return RefreshIndicator(
+      color: context.linkColor,
       onRefresh: () =>
           ref.read(myListingsNotifierProvider.notifier).refreshListings(),
       child: GridView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         cacheExtent: 700,
-        padding: const EdgeInsets.fromLTRB(
+        padding: const EdgeInsetsDirectional.fromSTEB(
           AppSpacing.lg,
           AppSpacing.md,
           AppSpacing.lg,
-          88,
+          _fabClearance,
         ),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -470,6 +472,147 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Owns search text as a plain field so we never dispose a
+/// [TextEditingController] while [showAnimatedDialog]'s exit animation
+/// still holds the [TextField] (that race asserts `_dependents.isEmpty`
+/// on [OfflineBannerHost]'s Stack).
+class _ListingSearchDialog extends StatefulWidget {
+  const _ListingSearchDialog({
+    required this.initialQuery,
+    required this.onClear,
+    required this.onSubmit,
+  });
+
+  final String initialQuery;
+  final VoidCallback onClear;
+  final ValueChanged<String> onSubmit;
+
+  @override
+  State<_ListingSearchDialog> createState() => _ListingSearchDialogState();
+}
+
+class _ListingSearchDialogState extends State<_ListingSearchDialog> {
+  late String _query = widget.initialQuery;
+
+  void _pop() => Navigator.of(context).pop();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.myListingsSearchTitle),
+      content: TextFormField(
+        initialValue: widget.initialQuery,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: context.l10n.myListingsSearchHint,
+        ),
+        onChanged: (v) => _query = v,
+        onFieldSubmitted: (_) {
+          widget.onSubmit(_query);
+          _pop();
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            widget.onClear();
+            _pop();
+          },
+          child: Text(context.l10n.myListingsSearchClear),
+        ),
+        FilledButton(
+          onPressed: () {
+            widget.onSubmit(_query);
+            _pop();
+          },
+          child: Text(context.l10n.myListingsSearchSubmit),
+        ),
+      ],
+    );
+  }
+}
+
+/// Frosted circular header action (same look as the orders screen).
+class _GlassIconButton extends StatelessWidget {
+  const _GlassIconButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: context.glassColor,
+      shape: CircleBorder(side: BorderSide(color: context.borderColor)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: SizedBox.square(
+          dimension: 44,
+          child: Icon(icon, size: 22, color: context.textPrimary),
+        ),
+      ),
+    );
+  }
+}
+
+/// "New Listing" action: the brand-gradient pill, with a plus.
+class _NewListingPill extends StatelessWidget {
+  const _NewListingPill({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final gradient = context.brandGradient;
+    final onBrand = context.onBrandColor;
+    return Semantics(
+      button: true,
+      label: label,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: gradient),
+          borderRadius: BorderRadius.circular(27),
+          boxShadow: [
+            BoxShadow(
+              color: gradient.first.withValues(alpha: 0.35),
+              blurRadius: 24,
+            ),
+          ],
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(27),
+            onTap: onPressed,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.lg,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(LucideIcons.plus, size: 20, color: onBrand),
+                  const Gap(AppSpacing.sm),
+                  Text(
+                    label,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: onBrand,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -9,7 +9,6 @@ import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/mock/mock_config.dart';
-import '../../domain/entities/auth_token_pair.dart';
 import '../../domain/entities/consumer_register_params.dart';
 import '../../domain/entities/login_params.dart';
 import '../../domain/entities/social_auth_result.dart';
@@ -20,6 +19,7 @@ import '../datasources/auth_remote_datasource.dart';
 import '../datasources/social_auth_datasource.dart';
 import '../../../../core/utils/jwt_payload.dart';
 import '../models/user_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
@@ -27,10 +27,10 @@ class AuthRepositoryImpl implements AuthRepository {
     required SocialAuthDatasource social,
     required FlutterSecureStorage secureStorage,
     FirebaseAuth? firebaseAuth,
-  })  : _remote = remote,
-        _social = social,
-        _secureStorage = secureStorage,
-        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
+  }) : _remote = remote,
+       _social = social,
+       _secureStorage = secureStorage,
+       _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   final AuthRemoteDataSource _remote;
   final SocialAuthDatasource _social;
@@ -67,7 +67,7 @@ class AuthRepositoryImpl implements AuthRepository {
       }
       return Right(model.toEntity());
     } catch (e) {
-      return Left(Failure.cache(e.toString()));
+      return Left(Failure.cache(userErrorMessage(e)));
     }
   }
 
@@ -86,7 +86,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -102,7 +102,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -132,21 +132,17 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
   @override
   Future<Either<Failure, UserEntity>> loginWithGoogle({
     required String idToken,
-    required UserRole role,
   }) async {
     try {
       final model = await _resolveFullUser(
-        await _remote.loginWithGoogle(
-          idToken: idToken,
-          asVendor: role == UserRole.vendor,
-        ),
+        await _remote.loginWithGoogle(idToken: idToken),
       );
       await _persistUser(model);
       return Right(model.toEntity());
@@ -159,7 +155,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -179,7 +175,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -188,7 +184,9 @@ class AuthRepositoryImpl implements AuthRepository {
     ConsumerRegisterParams params,
   ) async {
     try {
-      final model = await _resolveFullUser(await _remote.registerConsumer(params));
+      final model = await _resolveFullUser(
+        await _remote.registerConsumer(params),
+      );
       await _persistUser(model);
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -198,7 +196,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -207,7 +205,9 @@ class AuthRepositoryImpl implements AuthRepository {
     VendorRegisterParams params,
   ) async {
     try {
-      final model = await _resolveFullUser(await _remote.registerVendor(params));
+      final model = await _resolveFullUser(
+        await _remote.registerVendor(params),
+      );
       await _persistUser(model);
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -217,7 +217,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -241,7 +241,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -255,7 +255,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -279,32 +279,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, AuthTokenPair>> refreshToken(String token) async {
-    try {
-      final result = await _remote.refreshToken(token);
-      final pair = AuthTokenPair(
-        token: result.token,
-        refreshToken: result.refreshToken,
-      );
-      await _secureStorage.write(key: _tokenKey, value: pair.token);
-      await _secureStorage.write(
-        key: PrefsKeys.authRefreshToken,
-        value: pair.refreshToken,
-      );
-      return Right(pair);
-    } on UnauthorizedException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -318,7 +293,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -335,7 +310,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -351,7 +326,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -371,7 +346,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -397,7 +372,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _secureStorage.delete(key: PrefsKeys.socialAuthCredentials);
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.cache(e.toString()));
+      return Left(Failure.cache(userErrorMessage(e)));
     }
   }
 
@@ -423,59 +398,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.socialAuth(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, SocialAuthResult>> signInWithApple() async {
-    try {
-      final result = await _social.signInWithApple();
-      await _persistSocialCredentials(result);
-      final model = await _exchangeSocialToken(result);
-      if (model == null) return Right(result);
-      await _persistUser(model);
-      return Right(result.copyWith(isNewUser: model.isNewUser));
-    } on SocialAuthCancelledException catch (e) {
-      return Left(Failure.socialAuthCancelled(e.message));
-    } on SocialAuthException catch (e) {
-      return Left(Failure.socialAuth(e.message));
-    } on AuthException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.socialAuth(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, SocialAuthResult>> signInWithFacebook() async {
-    try {
-      final result = await _social.signInWithFacebook();
-      await _persistSocialCredentials(result);
-      final model = await _exchangeSocialToken(result);
-      if (model == null) return Right(result);
-      await _persistUser(model);
-      return Right(result.copyWith(isNewUser: model.isNewUser));
-    } on SocialAuthCancelledException catch (e) {
-      return Left(Failure.socialAuthCancelled(e.message));
-    } on SocialAuthException catch (e) {
-      return Left(Failure.socialAuth(e.message));
-    } on AuthException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.socialAuth(e.toString()));
+      return Left(Failure.socialAuth(userErrorMessage(e)));
     }
   }
 
@@ -487,7 +410,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on SocialAuthException catch (e) {
       return Left(Failure.socialAuth(e.message));
     } catch (e) {
-      return Left(Failure.socialAuth(e.toString()));
+      return Left(Failure.socialAuth(userErrorMessage(e)));
     }
   }
 
@@ -536,11 +459,16 @@ class AuthRepositoryImpl implements AuthRepository {
         storeCityId: user.storeCityId,
         storeGovernmentId: user.storeGovernmentId,
         storeId: user.storeId,
+        isEmailVerificationRequired: user.isEmailVerificationRequired,
+        isPhoneVerificationRequired: user.isPhoneVerificationRequired,
+        isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
+        hasPassword: user.hasPassword,
       );
       await _persistUser(model);
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.cache(e.toString()));
+      return Left(Failure.cache(userErrorMessage(e)));
     }
   }
 
@@ -613,26 +541,5 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       if (kDebugMode) debugPrint('Failed to save social credentials: $e');
     }
-  }
-
-  /// Null while the backend social route is not deployed (404) — the social
-  /// sign-in then proceeds as a local-only session: the notifier persists the
-  /// Firebase-derived user via authProvider.setUser, and Firebase's own
-  /// isNewUser flag drives role selection.
-  Future<UserModel?> _exchangeSocialToken(SocialAuthResult result) async {
-    final firebaseIdToken = await _requireFirebaseIdToken();
-    return _remote.loginWithSocialToken(
-      provider: result.provider.name,
-      idToken: firebaseIdToken,
-    );
-  }
-
-  Future<String> _requireFirebaseIdToken() async {
-    if (MockConfig.useMock) return 'mock-firebase-id-token';
-    final token = await _firebaseAuth.currentUser?.getIdToken();
-    if (token == null || token.isEmpty) {
-      throw const AuthException('Firebase session missing after sign-in');
-    }
-    return token;
   }
 }

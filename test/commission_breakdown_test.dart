@@ -52,5 +52,39 @@ void main() {
       expect(find.textContaining('2.00'), findsOneWidget);
       expect(find.textContaining('%'), findsNothing);
     });
+      testWidgets('Arabic shows Arabic-Indic digits and keeps the piastres',
+        (tester) async {
+      final breakdown = CommissionBreakdown.forPrice(1000, feeEgp: 2.5);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('ar'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: CommissionBreakdownCard(
+              breakdown: breakdown,
+              currencyCode: 'EGP',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('٩٩٧٫٥٠'), findsOneWidget);
+      expect(find.textContaining('٢٫٥٠'), findsOneWidget);
+      expect(find.textContaining('997.50'), findsNothing);
+    });
+
+    test('register step counter takes formatted digits', () {
+      final ar = lookupAppLocalizations(const Locale('ar'));
+      expect(ar.stepOf('١', '٣'), contains('١'));
+      expect(ar.stepOf('١', '٣'), isNot(contains('1')));
+    });
   });
 }

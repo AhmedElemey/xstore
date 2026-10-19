@@ -100,19 +100,14 @@ class MyListingsNotifier extends _$MyListingsNotifier {
     );
   }
 
-  /// Resumes via the generic multipart update — no dedicated "activate"
-  /// endpoint is confirmed in the backend contract, unlike pause's
-  /// `/deactivate`. Passing `imagePaths: const []` is already the
-  /// strongest available mitigation: `_listingFormData` only attaches an
-  /// `imageFiles` part per path actually in the list, so an empty list
-  /// means the field is fully ABSENT from the multipart body, not present
-  /// with an empty value — there is no stronger "don't touch images"
-  /// signal this client can send in a multipart PUT. The remaining risk
-  /// is purely how the backend interprets an absent `imageFiles` part on
-  /// this shared write endpoint, which cannot be resolved without a live
-  /// probe or backend confirmation (the hosted backend was down all
-  /// session). Flagged in flutter-review SKILL.md — do not "fix" this by
-  /// guessing an unconfirmed `/activate` endpoint.
+  // TODO(backend): no endpoint to resume a paused listing (backend Q3) — the Resume entry is hidden.
+  /// Resumes a paused listing via the generic multipart update
+  /// (`PUT /api/listings`, status Active, existing image URLs kept).
+  ///
+  /// Live status-only writes do **not** unpause:
+  /// `/deactivate` 400s `"Only active listings can be deactivated."`
+  /// `/resubmit` 400s `"Only cancelled listings can be re-submitted."`
+  /// `/activate` 404s (no route). Do not call those for Resume.
   Future<void> resumeListing(String id) async {
     final listing = _listingById(id);
     if (listing == null || listing.status != ListingStatus.paused) {
@@ -142,17 +137,22 @@ class MyListingsNotifier extends _$MyListingsNotifier {
             location: listing.location,
             attributes: listing.attributes,
             imagePaths: const [],
+            keepImageUrls: listing.imageUrls,
             status: ListingStatus.active,
           ),
     );
   }
 
+  // TODO(backend): no endpoint to resubmit an admin-rejected listing (backend Q3) — the Resubmit entry is hidden.
   /// Sends a rejected listing back for admin review with a corrected
-  /// price. Returns `true` on success so the sheet can close/show a toast.
-  Future<bool> resubmitListing(String id, double newPrice) async {
+  /// price. Returns null on success, or the server's reason ('' when there
+  /// is none). The failure is returned instead of stored on `state.error`:
+  /// the resubmit sheet shows it inline, and the screen's error listener
+  /// would otherwise toast it a second time behind the sheet.
+  Future<String?> resubmitListing(String id, double newPrice) async {
     final listing = _listingById(id);
     if (listing == null || listing.status != ListingStatus.rejected) {
-      return false;
+      return '';
     }
 
     final beforeMutation = state;
@@ -172,14 +172,13 @@ class MyListingsNotifier extends _$MyListingsNotifier {
         .read(resubmitListingUseCaseProvider)
         .call(id: id, newPrice: newPrice);
 
-    if (_disposed) return false;
-    var success = false;
-    result.fold(
-      (f) => state = _withComputed(
-        beforeMutation.copyWith(error: f.toString()),
-      ),
+    if (_disposed) return '';
+    return result.fold(
+      (f) {
+        state = _withComputed(beforeMutation.copyWith(error: null));
+        return f.toString();
+      },
       (entity) {
-        success = true;
         final list = state.listings
             .map((e) => e.id == entity.id ? entity : e)
             .toList();
@@ -191,9 +190,9 @@ class MyListingsNotifier extends _$MyListingsNotifier {
             AnalyticsProps.priceEgp: newPrice,
           },
         );
+        return null;
       },
     );
-    return success;
   }
 
   ListingEntity? _listingById(String id) {
@@ -212,7 +211,7 @@ class MyListingsNotifier extends _$MyListingsNotifier {
   Future<void> _applyOptimisticStatusMutation({
     required ListingEntity listing,
     required ListingStatus nextStatus,
-    required Future<Either<Failure, ListingEntity>> Function() runMutation,
+    required Future<Either<Failure, Object>> Function() runMutation,
   }) async {
     final beforeMutation = state;
     final optimistic = listing.copyWith(status: nextStatus);
@@ -230,15 +229,20 @@ class MyListingsNotifier extends _$MyListingsNotifier {
       (f) => state = _withComputed(
         beforeMutation.copyWith(error: f.toString()),
       ),
-      (entity) {
+      (_) {
+        // Status-only endpoints often echo the pre-mutation listing (or
+        // omit status, which parses as draft). Keep the listing we already
+        // showed and pin nextStatus — never replace the row with the
+        // response body.
+        final shown = listing.copyWith(status: nextStatus);
         final list = state.listings
-            .map((e) => e.id == entity.id ? entity : e)
+            .map((e) => e.id == listing.id ? shown : e)
             .toList();
         state = _withComputed(state.copyWith(listings: list, error: null));
         ref.read(analyticsServiceProvider).track(
           AnalyticsEvents.listingStatusChanged,
           properties: {
-            AnalyticsProps.itemId: entity.id,
+            AnalyticsProps.itemId: listing.id,
             AnalyticsProps.status: nextStatus.name,
           },
         );

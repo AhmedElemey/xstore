@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/network/delivery_api_endpoints.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/entities/delivery_request.dart';
 import 'delivery_request_datasource.dart';
@@ -95,7 +96,7 @@ class DeliveryRequestRemoteDataSource implements DeliveryRequestDataSource {
           .map((e) => Map<String, dynamic>.from(e))
           .toList();
     } on DioException catch (e) {
-      throw ServerException(_errorMessage(e));
+      throw _mapError(e);
     }
   }
 
@@ -106,17 +107,21 @@ class DeliveryRequestRemoteDataSource implements DeliveryRequestDataSource {
     try {
       final response = await _dio.post<Map<String, dynamic>>(path, data: body);
       final data = response.data;
-      if (data == null) throw const ServerException('Empty response');
+      if (data == null) throw ServerException(genericErrorMessage());
       return data;
     } on DioException catch (e) {
-      throw ServerException(_errorMessage(e));
+      throw _mapError(e);
     }
   }
 
-  String _errorMessage(DioException e) {
+  /// The delivery backend's ProblemDetails `title` when it sent one, otherwise
+  /// the shared mapper (localized offline/generic text, never Dio's own text).
+  AppException _mapError(DioException e) {
     final body = e.response?.data;
-    if (body is Map && body['title'] is String) return body['title'] as String;
-    return e.message ?? 'Delivery request failed';
+    if (body is Map && body['title'] is String && body['title'] != '') {
+      return ServerException(body['title'] as String);
+    }
+    return mapDioException(e);
   }
 
   Map<String, dynamic> _addressToApiMap(OrderAddress a) => {

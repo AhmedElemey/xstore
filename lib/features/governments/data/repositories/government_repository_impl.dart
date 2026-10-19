@@ -7,6 +7,7 @@ import '../../domain/entities/government_entity.dart';
 import '../../domain/repositories/government_repository.dart';
 import '../datasources/government_remote_datasource.dart';
 import '../models/government_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class GovernmentRepositoryImpl implements GovernmentRepository {
   const GovernmentRepositoryImpl(this._remote);
@@ -19,8 +20,10 @@ class GovernmentRepositoryImpl implements GovernmentRepository {
     required int pageSize,
   }) async {
     try {
-      final result =
-          await _remote.getGovernments(page: page, pageSize: pageSize);
+      final result = await _remote.getGovernments(
+        page: page,
+        pageSize: pageSize,
+      );
       return Right(
         PaginatedResult(
           items: result.items.map((e) => e.toEntity()).toList(),
@@ -34,7 +37,7 @@ class GovernmentRepositoryImpl implements GovernmentRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

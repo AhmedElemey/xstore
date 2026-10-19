@@ -5,9 +5,8 @@ import '../../domain/entities/profile_entity.dart';
 class ProfileModel {
   const ProfileModel({
     required this.user,
-    this.ordersCount = 0,
     this.wishlistCount = 0,
-    this.savedAmountDzd = 0,
+    this.savedAmountDzd,
     this.storeViewCount = 0,
     this.storeSaveCount = 0,
     this.storeActiveListings = 0,
@@ -20,9 +19,8 @@ class ProfileModel {
   });
 
   final UserModel user;
-  final int ordersCount;
   final int wishlistCount;
-  final int savedAmountDzd;
+  final int? savedAmountDzd;
   final int storeViewCount;
   final int storeSaveCount;
   final int storeActiveListings;
@@ -34,18 +32,17 @@ class ProfileModel {
   final bool hasPassword;
 
   ProfileEntity toEntity() => ProfileEntity(
-        user: user.toEntity(),
-        ordersCount: ordersCount,
-        wishlistCount: wishlistCount,
-        savedAmountDzd: savedAmountDzd,
-        storeViewCount: storeViewCount,
-        storeSaveCount: storeSaveCount,
-        storeActiveListings: storeActiveListings,
-        responseRatePercent: responseRatePercent,
-        isEmailVerificationRequired: isEmailVerificationRequired,
-        isPhoneVerificationRequired: isPhoneVerificationRequired,
-        isEmailVerified: isEmailVerified,
-        isPhoneVerified: isPhoneVerified,
-        hasPassword: hasPassword,
-      );
+    user: user.toEntity(),
+    wishlistCount: wishlistCount,
+    savedAmountDzd: savedAmountDzd,
+    storeViewCount: storeViewCount,
+    storeSaveCount: storeSaveCount,
+    storeActiveListings: storeActiveListings,
+    responseRatePercent: responseRatePercent,
+    isEmailVerificationRequired: isEmailVerificationRequired,
+    isPhoneVerificationRequired: isPhoneVerificationRequired,
+    isEmailVerified: isEmailVerified,
+    isPhoneVerified: isPhoneVerified,
+    hasPassword: hasPassword,
+  );
 }

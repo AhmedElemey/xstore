@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/analytics/analytics_service.dart';
 import '../../core/analytics/event_names.dart';
@@ -35,6 +35,7 @@ bool requireLogin(BuildContext context, WidgetRef ref, {String? message}) {
   // sheet outcome only decides whether we navigate to login.
   showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     showDragHandle: true,
     builder: (_) => _LoginRequiredSheet(message: message),
   );

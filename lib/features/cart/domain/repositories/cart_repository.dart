@@ -33,13 +33,5 @@ abstract interface class CartRepository {
 
   Future<Either<Failure, CartEntity>> clearCart(String consumerId);
 
-  Future<Either<Failure, CouponEntity>> applyCoupon({
-    required String consumerId,
-    required String code,
-    required double eligibleSubtotal,
-  });
-
-  Future<Either<Failure, CartEntity>> removeCoupon(String consumerId);
-
   Future<Either<Failure, OrderEntity>> placeOrder(PlaceOrderParams params);
 }

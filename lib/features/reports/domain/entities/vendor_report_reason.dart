@@ -9,11 +9,9 @@ enum VendorReportReason {
 }
 
 extension VendorReportReasonWire on VendorReportReason {
-  /// Wire value proposed for the backend contract (PascalCase, matching
-  /// this backend's other enum conventions — see `orderStatusToWireName`).
-  /// NOT YET CONFIRMED: no vendor-report endpoint exists on the backend as
-  /// of 2026-09-15. See `VendorReportsRemoteDataSourceImpl` for the full
-  /// proposed contract.
+  /// PascalCase wire value (this backend's enum convention — see
+  /// `orderStatusToWireName`). "Fraud" and "Harassment" appear in the
+  /// Postman collection; the rest are unconfirmed.
   String get wireName => switch (this) {
     VendorReportReason.fraud => 'Fraud',
     VendorReportReason.poorProductQuality => 'PoorProductQuality',

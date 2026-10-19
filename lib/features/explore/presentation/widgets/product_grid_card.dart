@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/sold_out_overlay.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/search_result_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -28,8 +29,11 @@ class ProductGridCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: context.surfaceColor,
-      borderRadius: BorderRadius.circular(AppSpacing.md),
+      color: context.glassColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: context.borderColor),
+      ),
       clipBehavior: Clip.antiAlias,
       child: Semantics(
         button: true,
@@ -41,66 +45,86 @@ class ProductGridCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Positioned.fill(
-                      child: item.imageUrl != null
-                          ? Semantics(
-                              image: true,
-                              label:
-                                  '${item.name} · ${context.l10n.listingPhotoSectionTitle}',
-                              child: AppCachedNetworkImage(
-                                imageUrl: item.imageUrl!,
-                                fit: BoxFit.cover,
-                                memCacheWidth: 600,
-                                placeholder: (_, __) => ColoredBox(
-                                  color: context.textDisabled,
-                                ),
-                                errorWidget: (_, __, ___) => ColoredBox(
-                                  color: context.textDisabled,
-                                ),
-                              ),
-                            )
-                          : ColoredBox(color: context.textDisabled),
-                    ),
-                    Positioned(
-                      right: AppSpacing.sm,
-                      top: AppSpacing.sm,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.isDark
-                              ? AppColors.primary.withValues(alpha: 0.2)
-                              : AppColors.indigoTint50,
-                          borderRadius: BorderRadius.circular(AppSpacing.xs),
-                        ),
-                        child: Text(
-                          item.condition,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.spacing10,
+                    AppSpacing.spacing10,
+                    AppSpacing.spacing10,
+                    0,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppSpacing.lg),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Positioned.fill(
+                          child: SoldOutOverlay(
+                            soldOut: item.isSoldOut,
+                            child: item.imageUrl != null
+                                ? Semantics(
+                                    image: true,
+                                    label:
+                                        '${item.name} · ${context.l10n.listingPhotoSectionTitle}',
+                                    child: AppCachedNetworkImage(
+                                      imageUrl: item.imageUrl!,
+                                      fit: BoxFit.cover,
+                                      memCacheWidth: 600,
+                                      placeholder: (_, __) => ColoredBox(
+                                        color: context.textDisabled,
+                                      ),
+                                      errorWidget: (_, __, ___) => ColoredBox(
+                                        color: context.textDisabled,
+                                      ),
+                                    ),
+                                  )
+                                : ColoredBox(color: context.textDisabled),
                           ),
                         ),
-                      ),
+                        PositionedDirectional(
+                          end: AppSpacing.sm,
+                          top: AppSpacing.sm,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: context.glassColor,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.sm,
+                              ),
+                            ),
+                            child: Text(
+                              item.condition,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: context.linkColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.spacing10,
+                  AppSpacing.spacing10,
+                  AppSpacing.spacing10,
+                  AppSpacing.spacing10,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.name,
+                      context.isolate(item.name),
+                      textDirection: context.textDirectionOf(item.name),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const Gap(AppSpacing.xs),
@@ -108,8 +132,10 @@ class ProductGridCard extends StatelessWidget {
                       children: [
                         Text(
                           context.formatCurrency(item.price),
-                          style: AppTypography.labelLarge.copyWith(
-                            color: AppColors.primary,
+                          style: AppTypography.mono.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: context.amberColor,
                           ),
                         ),
                         if (item.compareAtPrice != null) ...[
@@ -139,19 +165,21 @@ class ProductGridCard extends StatelessWidget {
                           Icon(
                             LucideIcons.badgeCheck,
                             size: AppSpacing.lg,
-                            color: AppColors.primary,
+                            color: context.linkColor,
                           ),
                         ],
-                        const Gap(AppSpacing.sm),
-                        Icon(
-                          LucideIcons.star,
-                          size: AppSpacing.md,
-                          color: AppColors.warning,
-                        ),
-                        Text(
-                          ' ${item.rating.toStringAsFixed(1)} (${item.reviewCount})',
-                          style: AppTypography.bodySmall,
-                        ),
+                        if (item.reviewCount > 0) ...[
+                          const Gap(AppSpacing.sm),
+                          Icon(
+                            LucideIcons.star,
+                            size: AppSpacing.md,
+                            color: AppColors.warning,
+                          ),
+                          Text(
+                            ' ${context.formatDecimal(item.rating)} (${context.formatInt(item.reviewCount)})',
+                            style: AppTypography.bodySmall,
+                          ),
+                        ],
                       ],
                     ),
                     const Gap(AppSpacing.md),
@@ -165,11 +193,17 @@ class ProductGridCard extends StatelessWidget {
                           const Gap(AppSpacing.sm),
                           Expanded(
                             child: FilledButton(
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                onAddToCart();
-                              },
-                              child: Text(context.l10n.addToCart),
+                              onPressed: item.isSoldOut
+                                  ? null
+                                  : () {
+                                      HapticFeedback.lightImpact();
+                                      onAddToCart();
+                                    },
+                              child: Text(
+                                item.isSoldOut
+                                    ? context.l10n.soldOut
+                                    : context.l10n.addToCart,
+                              ),
                             ),
                           ),
                         ],

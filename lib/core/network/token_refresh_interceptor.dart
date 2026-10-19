@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../constants/prefs_keys.dart';
+import 'api_auth_headers.dart';
 import 'api_endpoints.dart';
 
 /// On a 401 from an authenticated request, refreshes the access token and
@@ -30,7 +31,7 @@ class TokenRefreshInterceptor extends Interceptor {
 
   static const _retriedKey = '_token_refresh_retried';
 
-  Future<String?>? _refreshing;
+  Future<_RefreshOutcome>? _refreshing;
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
@@ -46,15 +47,37 @@ class TokenRefreshInterceptor extends Interceptor {
       return handler.next(err);
     }
 
-    final newToken = await _refreshToken();
-    if (newToken == null) {
-      await _onRefreshFailed();
+    // A background (silent/standalone) request must not surface errors via
+    // its refresh call either, so the refresh POST inherits those flags.
+    final outcome = await _refreshToken(
+      Options(
+        extra: {
+          for (final key in const [
+            ApiAuthHeaders.silentErrorsKey,
+            ApiAuthHeaders.standaloneKey,
+          ])
+            if (options.extra[key] == true) key: true,
+        },
+      ),
+    );
+    if (outcome.token == null) {
+      // Only clear the session when the refresh was AUTHORITATIVELY rejected
+      // (no refresh token, or the endpoint said the token is bad). A
+      // transport error / 5xx / hung read is transient — keep the session so
+      // the next request can retry instead of force-logging the user out.
+      if (outcome.sessionInvalid) {
+        await _onRefreshFailed();
+      }
       return handler.next(err);
     }
 
     try {
       options.extra[_retriedKey] = true;
-      options.headers['X-Auth-Token'] = newToken;
+      options.headers['X-Auth-Token'] = outcome.token;
+      // Dio finalizes a FormData when sending it and throws if it's sent
+      // again, so the retry needs a fresh copy.
+      final body = options.data;
+      if (body is FormData) options.data = body.clone();
       final retried = await _dio.fetch(options);
       return handler.resolve(retried);
     } on DioException catch (e) {
@@ -63,34 +86,44 @@ class TokenRefreshInterceptor extends Interceptor {
   }
 
   /// Coalesces concurrent refresh attempts into a single in-flight call.
-  Future<String?> _refreshToken() {
-    return _refreshing ??= _performRefresh().whenComplete(() {
+  Future<_RefreshOutcome> _refreshToken(Options refreshOptions) {
+    return _refreshing ??= _performRefresh(refreshOptions).whenComplete(() {
       _refreshing = null;
     });
   }
 
-  Future<String?> _performRefresh() async {
+  Future<_RefreshOutcome> _performRefresh(Options refreshOptions) async {
     String? refreshToken;
     try {
       // Same hung-native-read guard as dio_provider.dart's onRequest — a
       // stuck secure-storage read here must not block every retried
-      // request forever.
+      // request forever. A failed read is transient, not proof the session
+      // is dead, so don't invalidate on it.
       refreshToken = await _secureStorage
           .read(key: PrefsKeys.authRefreshToken)
           .timeout(const Duration(seconds: 5));
     } catch (_) {
-      return null;
+      return const _RefreshOutcome.transient();
     }
-    if (refreshToken == null || refreshToken.isEmpty) return null;
+    // Nothing to refresh with — the 401 is terminal, sign the user out.
+    if (refreshToken == null || refreshToken.isEmpty) {
+      return const _RefreshOutcome.invalid();
+    }
 
     try {
+      // TODO(backend): confirm whether the `token` body field is the refresh token or the expired access token.
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.refreshToken,
         data: {'token': refreshToken},
+        options: refreshOptions,
       );
       final data = response.data;
       final newToken = data?['token'] as String?;
-      if (newToken == null || newToken.isEmpty) return null;
+      // 2xx but no usable token: treat as transient (malformed response),
+      // don't force a logout on a server that answered "OK".
+      if (newToken == null || newToken.isEmpty) {
+        return const _RefreshOutcome.transient();
+      }
 
       await _secureStorage.write(key: PrefsKeys.authToken, value: newToken);
       final newRefreshToken = data?['refreshToken'] as String?;
@@ -100,9 +133,34 @@ class TokenRefreshInterceptor extends Interceptor {
           value: newRefreshToken,
         );
       }
-      return newToken;
+      return _RefreshOutcome.refreshed(newToken);
+    } on DioException catch (e) {
+      // The refresh endpoint rejecting the refresh token (400/401) is
+      // authoritative: the session is dead. Anything else (5xx, timeout,
+      // no connectivity) is transient — keep the session.
+      final status = e.response?.statusCode;
+      if (status == 401 || status == 400) {
+        return const _RefreshOutcome.invalid();
+      }
+      return const _RefreshOutcome.transient();
     } catch (_) {
-      return null;
+      return const _RefreshOutcome.transient();
     }
   }
+}
+
+/// Result of a refresh attempt. [sessionInvalid] is true only when the
+/// session should be cleared (authoritative rejection), never for a
+/// transient network/server failure.
+class _RefreshOutcome {
+  const _RefreshOutcome.refreshed(this.token) : sessionInvalid = false;
+  const _RefreshOutcome.invalid()
+      : token = null,
+        sessionInvalid = true;
+  const _RefreshOutcome.transient()
+      : token = null,
+        sessionInvalid = false;
+
+  final String? token;
+  final bool sessionInvalid;
 }
