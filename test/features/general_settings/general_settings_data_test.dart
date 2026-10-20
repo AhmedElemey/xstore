@@ -145,6 +145,19 @@ void main() {
       skip: skip,
     );
 
+    test('a bare list body is the whole set in one request', () async {
+      final interceptor = _Scripted(
+        (_) => generalSettingsSampleBody['items']! as List,
+      );
+      final dio = Dio()..interceptors.add(interceptor);
+
+      final s = await GeneralSettingsRemoteDataSource(dio).fetchAll();
+
+      expect(interceptor.requests, hasLength(1));
+      expect(s.string('instapay_handle'), '01019816854');
+      expect(s.boolean('test'), isFalse);
+    }, skip: skip);
+
     test('an unexpected body is an error, not an empty set', () async {
       final dio = Dio()..interceptors.add(_Scripted((_) => 'oops'));
       await expectLater(
