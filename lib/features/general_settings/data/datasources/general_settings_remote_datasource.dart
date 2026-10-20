@@ -10,8 +10,9 @@ import '../../../../core/network/dio_error_mapper.dart';
 import '../../domain/entities/app_settings.dart';
 
 /// CONFIRMED live: `GET /api/general-settings?page=1&pageSize=20` (public)
-/// -> `{items: [{id, key, value, dataType, ...}], totalCount, page, pageSize,
-/// totalPages}`.
+/// -> a bare `[{id, key, value, dataType, ...}]` (since 2026-10-20). The
+/// earlier paged `{items, totalCount, page, pageSize, totalPages}` shape is
+/// still accepted.
 class GeneralSettingsRemoteDataSource {
   GeneralSettingsRemoteDataSource(this._dio);
 
@@ -41,6 +42,11 @@ class GeneralSettingsRemoteDataSource {
           cancelToken: cancelToken,
         );
         final body = response.data;
+        // Live since 2026-10-20: a bare list of every row, no paging.
+        if (body is List) {
+          items.addAll(body);
+          break;
+        }
         if (body is! Map || body['items'] is! List) {
           throw const FormatException('Unexpected general settings body');
         }
