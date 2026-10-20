@@ -1,0 +1,36 @@
+# TEMPORARY — renders wallet screenshots + runs checks, commits results back.
+name: tmp wallet screenshots
+on:
+  push:
+    branches: [tmp/wallet-screenshots]
+permissions:
+  contents: write
+env:
+  FLUTTER_VERSION: "3.35.6"
+jobs:
+  shots:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+      - run: bash .github/scripts/setup-flutter.sh "$FLUTTER_VERSION"
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - name: Checks
+        run: |
+          mkdir -p ci_out
+          flutter test test/zz_screenshots --update-goldens > ci_out/shots.txt 2>&1; echo "exit=$?" >> ci_out/shots.txt
+          flutter analyze > ci_out/analyze.txt 2>&1; echo "exit=$?" >> ci_out/analyze.txt
+          flutter test test/vendor_wallet_screen_live_flow_test.dart test/features/commission test/order_commission_breakdown_test.dart > ci_out/test_wallet.txt 2>&1; echo "exit=$?" >> ci_out/test_wallet.txt
+          flutter test > ci_out/test_all.txt 2>&1; echo "exit=$?" >> ci_out/test_all.txt
+          flutter test --dart-define=MOCK=true > ci_out/test_all_mock.txt 2>&1; echo "exit=$?" >> ci_out/test_all_mock.txt
+          git status --short > ci_out/git_status.txt
+          git diff > ci_out/codegen.diff
+      - name: Commit results
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m "ci results [skip ci]"
+          git push

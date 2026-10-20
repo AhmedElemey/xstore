@@ -40,6 +40,7 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/commission/presentation/screens/vendor_wallet_screen.dart';
 import 'package:xstore/shared/widgets/error_state_widget.dart';
+import 'package:xstore/shared/widgets/xstore_button.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
 /// technique as vendor_orders_screen_live_flow_test.dart's
@@ -95,17 +96,18 @@ UserEntity _vendor() => const UserEntity(
   role: UserRole.vendor,
 );
 
-Widget _harness(List<Override> overrides) => ProviderScope(
+Widget _harness(List<Override> overrides, {Locale? locale}) => ProviderScope(
   overrides: overrides,
-  child: const MaterialApp(
-    localizationsDelegates: [
+  child: MaterialApp(
+    locale: locale,
+    localizationsDelegates: const [
       AppLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: AppLocalizations.supportedLocales,
-    home: VendorWalletScreen(),
+    home: const VendorWalletScreen(),
   ),
 );
 
@@ -265,4 +267,114 @@ void main() {
       expect(find.text('Your platform fees are up to date.'), findsOneWidget);
     },
   );
+
+  group('outstanding balance (live envelope shape, 2026-10-20)', () {
+    Map<String, dynamic> envelope({
+      required double outstandingBalance,
+      bool exceedsWarn = false,
+    }) => {
+      'orders': <Map<String, dynamic>>[],
+      'totalCount': 3,
+      'pendingCount': 0,
+      'confirmedCount': 0,
+      'totalRevenue': 292.0,
+      'outstandingBalance': outstandingBalance,
+      'warnThresholdEgp': 1000.0,
+      'pauseThresholdEgp': 5000.0,
+      'exceedsWarnThreshold': exceedsWarn,
+      'exceedsPauseThreshold': false,
+      'commissionValueOnOrder': 10.0,
+    };
+
+    Future<void> pump(
+      WidgetTester tester,
+      Map<String, dynamic> body, {
+      Locale? locale,
+    }) async {
+      final dio = _fakeDio({'GET ${ApiEndpoints.vendorOrders}': (_) => body});
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ], locale: locale),
+      );
+      await _settle(tester);
+    }
+
+    VoidCallback? payOnPressed(WidgetTester tester) =>
+        tester.widget<XstoreButton>(find.byType(XstoreButton)).onPressed;
+
+    testWidgets(
+      'nothing owed shows 0, good standing, and disables Pay',
+      skip: MockConfig.useMock,
+      (tester) async {
+        await pump(tester, envelope(outstandingBalance: 0));
+
+        expect(find.text('Platform fees owed'), findsOneWidget);
+        expect(find.text('0 LE'), findsOneWidget);
+        expect(find.text('Your platform fees are up to date.'), findsOneWidget);
+        expect(find.textContaining('before the warning limit'), findsNothing);
+        expect(payOnPressed(tester), isNull);
+      },
+    );
+
+    testWidgets(
+      'a balance below warn shows the amount, limits, and orders left',
+      skip: MockConfig.useMock,
+      (tester) async {
+        await pump(tester, envelope(outstandingBalance: 350));
+
+        expect(find.text('350 LE'), findsOneWidget);
+        expect(find.text('Warning at 1,000 LE'), findsOneWidget);
+        expect(find.text('Pause at 5,000 LE'), findsOneWidget);
+        expect(
+          find.text('About 65 more orders before the warning limit'),
+          findsOneWidget,
+        );
+        final bar = tester.widget<LinearProgressIndicator>(
+          find.byType(LinearProgressIndicator),
+        );
+        expect(bar.value, closeTo(0.07, 0.001));
+        expect(find.text('Your platform fees are up to date.'), findsNothing);
+        expect(payOnPressed(tester), isNotNull);
+      },
+    );
+
+    testWidgets(
+      'past warn: banner explains it, card shows the amount without the hint',
+      skip: MockConfig.useMock,
+      (tester) async {
+        await pump(
+          tester,
+          envelope(outstandingBalance: 1200, exceedsWarn: true),
+        );
+
+        expect(find.text('Pay your platform fees soon'), findsOneWidget);
+        expect(find.text('1,200 LE'), findsOneWidget);
+        expect(find.textContaining('before the warning limit'), findsNothing);
+        expect(find.text('Your platform fees are up to date.'), findsNothing);
+        expect(payOnPressed(tester), isNotNull);
+      },
+    );
+
+    testWidgets(
+      'Arabic at 320x640 lays out without overflow',
+      skip: MockConfig.useMock,
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await pump(
+          tester,
+          envelope(outstandingBalance: 350),
+          locale: const Locale('ar'),
+        );
+
+        expect(tester.takeException(), isNull);
+        expect(find.text('رسوم المنصة المستحقة'), findsOneWidget);
+        expect(find.textContaining('قبل حد التنبيه'), findsOneWidget);
+      },
+    );
+  });
 }

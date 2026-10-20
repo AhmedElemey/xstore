@@ -6,17 +6,20 @@ class VendorCommissionWallet {
     required this.exceedsPauseThreshold,
     required this.warnThresholdEgp,
     required this.pauseThresholdEgp,
+    this.outstandingBalanceEgp,
   });
 
-  /// Server-authoritative — the vendor's own owed-balance amount
-  /// (`VendorCommissionWallet.OutstandingEgp`) is admin-only and never
-  /// sent to the vendor app, so these flags (not a computed comparison)
-  /// are the source of truth for whether the vendor has crossed a
-  /// threshold.
+  /// Server-authoritative warn/pause state — always use these flags, never
+  /// compare [outstandingBalanceEgp] against the thresholds client-side.
   final bool exceedsWarnThreshold;
   final bool exceedsPauseThreshold;
   final double warnThresholdEgp;
   final double pauseThresholdEgp;
+
+  /// Owed platform fees (EGP) from the `GET /api/vendor/orders` envelope.
+  /// Null when the backend omits it (older deployment, or no vendor
+  /// session) — the wallet screen then hides the balance card.
+  final double? outstandingBalanceEgp;
 
   VendorCommissionAlertLevel get alertLevel {
     if (exceedsPauseThreshold) {

@@ -9,6 +9,7 @@ import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/mock/mock_orders.dart';
 import '../../../../core/mock/mock_users.dart';
+import '../../../commission/domain/commission_constants.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../../listing/data/models/listing_model.dart';
 import '../models/order_item_model.dart';
@@ -503,11 +504,11 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 
   /// GET /vendor/orders envelope: `{orders, totalCount, pendingCount,
-  /// confirmedCount, totalRevenue, warnThresholdEgp, pauseThresholdEgp,
-  /// exceedsWarnThreshold, exceedsPauseThreshold, commissionValueOnOrder}`
-  /// — CONFIRMED via live probe (2026-08-14). Shared by [getVendorOrders]
-  /// and [getVendorOrderStats] so the stats-carrying fields aren't fetched
-  /// twice.
+  /// confirmedCount, totalRevenue, outstandingBalance, warnThresholdEgp,
+  /// pauseThresholdEgp, exceedsWarnThreshold, exceedsPauseThreshold,
+  /// commissionValueOnOrder}` — CONFIRMED via live probe (2026-10-20).
+  /// Shared by [getVendorOrders] and [getVendorOrderStats] so the stats-carrying
+  /// fields aren't fetched twice.
   Future<Map<String, dynamic>> _fetchVendorOrdersEnvelope({
     String? status,
     int page = 1,
@@ -637,6 +638,14 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       final revenue = mine
           .where((e) => e.status == OrderStatus.delivered)
           .fold<double>(0, (a, b) => a + b.total);
+      // Mock only: flat fee per confirmed/delivered order.
+      final feeBearing = mine
+          .where(
+            (e) =>
+                e.status == OrderStatus.confirmed ||
+                e.status == OrderStatus.delivered,
+          )
+          .length;
       return MockConfig.simulate(
         OrderStatsEntity(
           pendingCount: pending,
@@ -644,6 +653,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
           monthCount: monthCount,
           totalCount: mine.length,
           totalRevenue: revenue,
+          outstandingBalance: feeBearing * kStarterCommissionFeeEgp,
         ),
       );
     }
@@ -663,13 +673,12 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         monthCount: 0,
         totalCount: _envelopeInt(envelope, 'totalCount') ?? 0,
         totalRevenue: _envelopeDouble(envelope, 'totalRevenue') ?? 0,
-        // CONFIRMED against backend source (GetVendorOrdersQueryHandler,
-        // 2026-08-15): commissionValueOnOrder/warnThresholdEgp/
-        // pauseThresholdEgp come from the admin-configured SystemSetting
-        // row; exceedsWarnThreshold/exceedsPauseThreshold come from the
-        // vendor's own VendorCommissionWallet row (its raw OutstandingEgp
-        // is admin-only, never sent to the vendor app — these booleans are
-        // the only wallet signal a vendor session can read).
+        // CONFIRMED against live response (2026-10-20):
+        // commissionValueOnOrder/warnThresholdEgp/pauseThresholdEgp come from
+        // the admin-configured SystemSetting row; exceedsWarnThreshold/
+        // exceedsPauseThreshold and outstandingBalance come from the
+        // vendor's own VendorCommissionWallet row. The flags stay the source
+        // of truth for warn/pause; the balance is display-only.
         commissionValueOnOrder:
             _envelopeDouble(envelope, 'commissionValueOnOrder'),
         warnThresholdEgp: _envelopeDouble(envelope, 'warnThresholdEgp'),
@@ -678,6 +687,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
             _envelopeBool(envelope, 'exceedsWarnThreshold'),
         exceedsPauseThreshold:
             _envelopeBool(envelope, 'exceedsPauseThreshold'),
+        // Null when an older backend omits it — the UI then hides the card.
+        outstandingBalance: _envelopeDouble(envelope, 'outstandingBalance'),
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) return _emptyVendorStats;

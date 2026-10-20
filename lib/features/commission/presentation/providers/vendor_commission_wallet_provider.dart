@@ -4,6 +4,7 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/entities/vendor_commission_wallet.dart';
+import '../../domain/commission_constants.dart';
 import 'commission_config_provider.dart';
 
 part 'vendor_commission_wallet_provider.g.dart';
@@ -37,5 +38,6 @@ Future<VendorCommissionWallet> vendorCommissionWallet(
     warnThresholdEgp: snapshot.warnThresholdEgp ?? kCommissionWarnThresholdEgp,
     pauseThresholdEgp:
         snapshot.pauseThresholdEgp ?? kCommissionPauseThresholdEgp,
+    outstandingBalanceEgp: snapshot.outstandingBalance,
   );
 }

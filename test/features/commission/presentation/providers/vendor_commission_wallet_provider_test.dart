@@ -8,8 +8,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:xstore/core/error/failures.dart';
 import 'package:xstore/core/mock/mock_users.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/commission/domain/commission_constants.dart';
 import 'package:xstore/features/commission/domain/entities/vendor_commission_wallet.dart';
-import 'package:xstore/features/commission/presentation/providers/commission_config_provider.dart';
 import 'package:xstore/features/commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import 'package:xstore/features/orders/domain/entities/order_entity.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_dependencies.dart';
@@ -41,6 +41,7 @@ void main() {
       expect(wallet.exceedsPauseThreshold, isFalse);
       expect(wallet.warnThresholdEgp, kCommissionWarnThresholdEgp);
       expect(wallet.pauseThresholdEgp, kCommissionPauseThresholdEgp);
+      expect(wallet.outstandingBalanceEgp, isNull);
       expect(wallet.alertLevel, VendorCommissionAlertLevel.none);
     });
 
@@ -57,6 +58,7 @@ void main() {
 
       expect(wallet.warnThresholdEgp, kCommissionWarnThresholdEgp);
       expect(wallet.pauseThresholdEgp, kCommissionPauseThresholdEgp);
+      expect(wallet.outstandingBalanceEgp, isNull);
       expect(wallet.alertLevel, VendorCommissionAlertLevel.none);
     });
 
@@ -70,6 +72,7 @@ void main() {
               pauseThresholdEgp: 300,
               exceedsWarnThreshold: true,
               exceedsPauseThreshold: true,
+              outstandingBalance: 250.0,
             ),
           ),
         ),
@@ -81,6 +84,7 @@ void main() {
       expect(wallet.pauseThresholdEgp, 300);
       expect(wallet.exceedsWarnThreshold, isTrue);
       expect(wallet.exceedsPauseThreshold, isTrue);
+      expect(wallet.outstandingBalanceEgp, 250.0);
       // Paused takes precedence over warn regardless of both flags being set.
       expect(wallet.alertLevel, VendorCommissionAlertLevel.paused);
     });
@@ -101,7 +105,30 @@ void main() {
 
       expect(wallet.warnThresholdEgp, kCommissionWarnThresholdEgp);
       expect(wallet.pauseThresholdEgp, kCommissionPauseThresholdEgp);
+      expect(wallet.outstandingBalanceEgp, isNull);
       expect(wallet.alertLevel, VendorCommissionAlertLevel.warn);
+    });
+
+    test('maps outstanding balance from the backend snapshot', () async {
+      final container = _containerFor(
+        mockVendorUser,
+        repo: StubOrdersRepository(
+          getVendorStatsResult: ({required vendorId}) => const Right(
+            OrderStatsEntity(
+              warnThresholdEgp: 100,
+              pauseThresholdEgp: 200,
+              exceedsWarnThreshold: false,
+              exceedsPauseThreshold: false,
+              outstandingBalance: 75.5,
+            ),
+          ),
+        ),
+      );
+
+      final wallet = await container.read(vendorCommissionWalletProvider.future);
+
+      expect(wallet.outstandingBalanceEgp, 75.5);
+      expect(wallet.alertLevel, VendorCommissionAlertLevel.none);
     });
   });
 }
