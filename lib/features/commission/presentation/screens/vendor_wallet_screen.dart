@@ -34,6 +34,7 @@ class VendorWalletScreen extends ConsumerWidget {
     final stats = snapshot.valueOrNull;
     final wallet = ref.watch(vendorCommissionWalletProvider).valueOrNull;
     final feePerOrder = ref.watch(commissionFeeEgpForCategoryProvider(null));
+    final balance = wallet?.outstandingBalanceEgp;
 
     return RouteReentryRefresh(
       isTarget: (location) => location == AppRoutes.vendorWallet,
@@ -97,7 +98,13 @@ class VendorWalletScreen extends ConsumerWidget {
                             children: [
                               if (wallet != null)
                                 VendorCommissionAlertBanner(wallet: wallet),
-                              if (wallet != null &&
+                              if (wallet != null && balance != null)
+                                _BalanceCard(
+                                  wallet: wallet,
+                                  balance: balance,
+                                  feePerOrder: feePerOrder,
+                                )
+                              else if (wallet != null &&
                                   wallet.alertLevel ==
                                       VendorCommissionAlertLevel.none)
                                 const _GoodStandingCard(),
@@ -138,8 +145,13 @@ class VendorWalletScreen extends ConsumerWidget {
                               const SizedBox(height: AppSpacing.lg),
                               XstoreButton(
                                 label: context.l10n.walletPayFees,
-                                onPressed: () =>
-                                    context.push(AppRoutes.commissionPayment),
+                                // Nothing owed → nothing to pay. Unknown
+                                // (null) stays enabled.
+                                onPressed: balance == 0
+                                    ? null
+                                    : () => context.push(
+                                        AppRoutes.commissionPayment,
+                                      ),
                               ),
                             ],
                           ),
@@ -221,6 +233,185 @@ class _GoodStandingCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Owed platform fees with a bar from 0 to the pause limit and a tick at
+/// the warn limit. Warn/pause state always comes from the server flags
+/// ([VendorCommissionWallet.alertLevel]), never from comparing amounts.
+class _BalanceCard extends StatelessWidget {
+  const _BalanceCard({
+    required this.wallet,
+    required this.balance,
+    required this.feePerOrder,
+  });
+
+  final VendorCommissionWallet wallet;
+  final double balance;
+  final double feePerOrder;
+
+  @override
+  Widget build(BuildContext context) {
+    final level = wallet.alertLevel;
+    final accent = switch (level) {
+      VendorCommissionAlertLevel.none => AppColors.success,
+      VendorCommissionAlertLevel.warn => AppColors.warning,
+      VendorCommissionAlertLevel.paused => AppColors.error,
+    };
+    final warn = wallet.warnThresholdEgp;
+    final pause = wallet.pauseThresholdEgp;
+    final ordersUntilWarn = feePerOrder > 0
+        ? ((warn - balance) / feePerOrder).ceil()
+        : 0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: accent.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.commissionWalletOutstandingTitle,
+            style: AppTypography.labelSmall.copyWith(color: context.labelColor),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              context.formatCurrency(balance),
+              maxLines: 1,
+              style: AppTypography.mono.copyWith(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: accent,
+              ),
+            ),
+          ),
+          if (pause > 0) ...[
+            const SizedBox(height: AppSpacing.md),
+            _LimitBar(
+              value: balance / pause,
+              warnAt: warn / pause,
+              color: accent,
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.l10n.commissionWalletWarnAt(
+                      context.formatCurrency(warn),
+                    ),
+                    style: AppTypography.labelSmall.copyWith(
+                      color: context.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    context.l10n.commissionWalletPauseAt(
+                      context.formatCurrency(pause),
+                    ),
+                    textAlign: TextAlign.end,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: context.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          // Warn/pause vendors already get the banner's explanation above.
+          if (level == VendorCommissionAlertLevel.none) ...[
+            const SizedBox(height: AppSpacing.md),
+            if (balance == 0)
+              Row(
+                children: [
+                  const Icon(
+                    LucideIcons.checkCircle2,
+                    color: AppColors.success,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      context.l10n.walletGoodStanding,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: context.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else if (ordersUntilWarn > 0)
+              Text(
+                context.l10n.commissionWalletOrdersUntilWarn(
+                  ordersUntilWarn,
+                  context.formatInt(ordersUntilWarn),
+                ),
+                style: AppTypography.bodySmall.copyWith(
+                  color: context.textSecondary,
+                ),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Progress bar with a thin tick marking the warn limit. Both values are
+/// fractions of the pause limit; mirrors automatically in RTL.
+class _LimitBar extends StatelessWidget {
+  const _LimitBar({
+    required this.value,
+    required this.warnAt,
+    required this.color,
+  });
+
+  final double value;
+  final double warnAt;
+  final Color color;
+
+  static const double _height = 8;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        return SizedBox(
+          height: _height,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: LinearProgressIndicator(
+                  value: value.clamp(0.0, 1.0),
+                  minHeight: _height,
+                  color: color,
+                  backgroundColor: context.borderColor,
+                  borderRadius: BorderRadius.circular(_height / 2),
+                ),
+              ),
+              if (warnAt > 0 && warnAt < 1)
+                PositionedDirectional(
+                  start: (width * warnAt - 1).clamp(0.0, width - 2),
+                  top: 0,
+                  bottom: 0,
+                  child: Container(width: 2, color: context.textSecondary),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

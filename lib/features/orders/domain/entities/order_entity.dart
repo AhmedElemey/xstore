@@ -140,6 +140,9 @@ class OrderStatsEntity with _$OrderStatsEntity {
     double? pauseThresholdEgp,
     @Default(false) bool exceedsWarnThreshold,
     @Default(false) bool exceedsPauseThreshold,
+    // Vendor's owed commission (EGP) — CONFIRMED on the live envelope
+    // 2026-10-20. Null when the backend omits it.
+    double? outstandingBalance,
   }) = _OrderStatsEntity;
 }
 

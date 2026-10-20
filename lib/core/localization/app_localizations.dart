@@ -782,6 +782,30 @@ abstract class AppLocalizations {
   /// **'New listings are paused until you pay off your platform fees.'**
   String get commissionWalletBlockedSubmit;
 
+  /// No description provided for @commissionWalletOutstandingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform fees owed'**
+  String get commissionWalletOutstandingTitle;
+
+  /// No description provided for @commissionWalletWarnAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning at {amount}'**
+  String commissionWalletWarnAt(String amount);
+
+  /// No description provided for @commissionWalletPauseAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause at {amount}'**
+  String commissionWalletPauseAt(String amount);
+
+  /// No description provided for @commissionWalletOrdersUntilWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{About 1 more order before the warning limit} other{About {countText} more orders before the warning limit}}'**
+  String commissionWalletOrdersUntilWarn(int count, String countText);
+
   /// No description provided for @listingCompareAtTitle.
   ///
   /// In en, this message translates to:

@@ -4,22 +4,9 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/presentation/providers/orders_dependencies.dart';
+import '../../domain/commission_constants.dart';
 
 part 'commission_config_provider.g.dart';
-
-/// Fallback flat commission fee (EGP per order), used while
-/// [vendorCommissionSnapshot] is loading, failed, the session has no
-/// vendor identity, or the backend echoes 0 (SystemSetting seed is 0
-/// until an admin PUTs `/api/admin/system-settings`). Mock mode included
-/// — mock has no real backend truth. A positive admin-configured value
-/// from [vendorCommissionSnapshot] wins.
-const double kStarterCommissionFeeEgp = 2.0;
-
-/// Fallback weekly vendor owed-balance thresholds (EGP) — see
-/// [kStarterCommissionFeeEgp] for when these apply instead of the real,
-/// admin-configured values.
-const double kCommissionWarnThresholdEgp = 100.0;
-const double kCommissionPauseThresholdEgp = 200.0;
 
 /// The vendor's commission fee + wallet-alert flags.
 ///

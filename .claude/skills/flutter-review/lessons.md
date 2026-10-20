@@ -315,7 +315,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** "Comment out for phase N" changes.
 
 ### 2026-08-15 — Check a backend endpoint's role before wiring it
-- **Rule:** Grep the backend controller's `[Authorize(Roles = ...)]` before wiring an endpoint from a Postman body. System settings and vendor wallets are admin-only; vendors only get the echo in `GET /api/vendor/orders` (`commissionValueOnOrder`, `warnThresholdEgp`, `pauseThresholdEgp`, `exceedsWarnThreshold`, `exceedsPauseThreshold` — never the outstanding amount). When a role only gets a derived boolean, don't show a client-computed version of the raw figure — it can't re-sync after an admin settlement.
+- **Rule:** Grep the backend controller's `[Authorize(Roles = ...)]` before wiring an endpoint from a Postman body. System settings and vendor wallets are admin-only; vendors only get the echo in `GET /api/vendor/orders` (`commissionValueOnOrder`, `warnThresholdEgp`, `pauseThresholdEgp`, `exceedsWarnThreshold`, `exceedsPauseThreshold`, and since 2026-10-20 `outstandingBalance`). Show the server's balance as-is (null → hide the card) and keep warn/pause driven by the `exceeds*` flags; never compute a balance or threshold state client-side — it can't re-sync after an admin settlement.
 - **Where it applies:** `commission_config_provider.dart`, `vendor_commission_wallet_provider.dart`, `vendor_commission_alert_banner.dart`, any "wire this admin endpoint" ask.
 
 ### 2026-08-15 — pickMultiImage(limit:) is not a cap
@@ -1199,3 +1199,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-19 — Verify a merge kept both sides before pushing it
 - **Rule:** After merging `origin/main` (or `dev`) locally, run `git diff --stat HEAD^2 HEAD` — the merge must contain the incoming commits' changes. A merge whose tree equals your local parent ("keep mine" conflict resolution) silently reverts everything upstream; never push one.
 - **Where it applies:** any local `git pull`/merge on shared branches (`main`, `dev`).
+
+### 2026-10-20 — Narrow-screen widget tests resize the test view
+- **Rule:** To test a small phone, set `tester.view.physicalSize`/`devicePixelRatio` and `addTearDown(tester.view.reset)`. Wrapping `MaterialApp` in `MediaQuery`/`Directionality` does nothing — `MaterialApp` builds its own from the view (still 800x600). Use `locale: Locale('ar')` for RTL.
+- **Where it applies:** Overflow/RTL widget tests, `test/*_live_flow_test.dart`.

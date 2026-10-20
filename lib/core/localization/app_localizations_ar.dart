@@ -364,6 +364,32 @@ class AppLocalizationsAr extends AppLocalizations {
       'الإعلانات الجديدة متوقفة حتى تدفع رسوم المنصة المستحقة.';
 
   @override
+  String get commissionWalletOutstandingTitle => 'رسوم المنصة المستحقة';
+
+  @override
+  String commissionWalletWarnAt(String amount) {
+    return 'تنبيه عند $amount';
+  }
+
+  @override
+  String commissionWalletPauseAt(String amount) {
+    return 'إيقاف عند $amount';
+  }
+
+  @override
+  String commissionWalletOrdersUntilWarn(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'متبقي حوالي $countText طلب قبل حد التنبيه',
+      few: 'متبقي حوالي $countText طلبات قبل حد التنبيه',
+      two: 'متبقي حوالي طلبين قبل حد التنبيه',
+      one: 'متبقي حوالي طلب واحد قبل حد التنبيه',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get listingCompareAtTitle => 'سعر قبل الخصم (اختياري)';
 
   @override
