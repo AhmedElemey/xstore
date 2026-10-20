@@ -7,7 +7,7 @@ part of 'commission_config_provider.dart';
 // **************************************************************************
 
 String _$vendorCommissionSnapshotHash() =>
-    r'92d2187fa1746041ac162aabd2729351e4c6b5a3';
+    r'a7ef73165f354f5d5668630352a2e243c5c9475f';
 
 /// The vendor's commission fee + wallet-alert flags.
 ///

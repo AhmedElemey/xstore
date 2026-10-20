@@ -6,7 +6,7 @@ part of 'courier_cash_wallet_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$courierCashWalletHash() => r'ef7b2e89fa87a24d6a71be26cf5287a3c3d321ba';
+String _$courierCashWalletHash() => r'3fd88f6c221424a621bba4bc8c5e572881a0f010';
 
 /// See also [courierCashWallet].
 @ProviderFor(courierCashWallet)

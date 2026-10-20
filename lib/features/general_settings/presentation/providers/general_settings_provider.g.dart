@@ -6,7 +6,7 @@ part of 'general_settings_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$generalSettingsHash() => r'bd9684497a84d5dba6072f87037e9e27c7d7e97c';
+String _$generalSettingsHash() => r'4309fab65e0a01d52352430527fec574a8e09e2a';
 
 /// App-wide General Settings, cached in SharedPreferences.
 ///

@@ -1,0 +1,747 @@
+diff --git a/lib/core/localization/app_localizations.dart b/lib/core/localization/app_localizations.dart
+index acc9afc..59f19df 100644
+--- a/lib/core/localization/app_localizations.dart
++++ b/lib/core/localization/app_localizations.dart
+@@ -782,6 +782,30 @@ abstract class AppLocalizations {
+   /// **'New listings are paused until you pay off your platform fees.'**
+   String get commissionWalletBlockedSubmit;
+ 
++  /// No description provided for @commissionWalletOutstandingTitle.
++  ///
++  /// In en, this message translates to:
++  /// **'Platform fees owed'**
++  String get commissionWalletOutstandingTitle;
++
++  /// No description provided for @commissionWalletWarnAt.
++  ///
++  /// In en, this message translates to:
++  /// **'Warning at {amount}'**
++  String commissionWalletWarnAt(String amount);
++
++  /// No description provided for @commissionWalletPauseAt.
++  ///
++  /// In en, this message translates to:
++  /// **'Pause at {amount}'**
++  String commissionWalletPauseAt(String amount);
++
++  /// No description provided for @commissionWalletOrdersUntilWarn.
++  ///
++  /// In en, this message translates to:
++  /// **'{count, plural, =1{About 1 more order before the warning limit} other{About {countText} more orders before the warning limit}}'**
++  String commissionWalletOrdersUntilWarn(int count, String countText);
++
+   /// No description provided for @listingCompareAtTitle.
+   ///
+   /// In en, this message translates to:
+diff --git a/lib/core/localization/app_localizations_ar.dart b/lib/core/localization/app_localizations_ar.dart
+index 2b946b6..210950c 100644
+--- a/lib/core/localization/app_localizations_ar.dart
++++ b/lib/core/localization/app_localizations_ar.dart
+@@ -363,6 +363,32 @@ class AppLocalizationsAr extends AppLocalizations {
+   String get commissionWalletBlockedSubmit =>
+       'الإعلانات الجديدة متوقفة حتى تدفع رسوم المنصة المستحقة.';
+ 
++  @override
++  String get commissionWalletOutstandingTitle => 'رسوم المنصة المستحقة';
++
++  @override
++  String commissionWalletWarnAt(String amount) {
++    return 'تنبيه عند $amount';
++  }
++
++  @override
++  String commissionWalletPauseAt(String amount) {
++    return 'إيقاف عند $amount';
++  }
++
++  @override
++  String commissionWalletOrdersUntilWarn(int count, String countText) {
++    String _temp0 = intl.Intl.pluralLogic(
++      count,
++      locale: localeName,
++      other: 'متبقي حوالي $countText طلب قبل حد التنبيه',
++      few: 'متبقي حوالي $countText طلبات قبل حد التنبيه',
++      two: 'متبقي حوالي طلبين قبل حد التنبيه',
++      one: 'متبقي حوالي طلب واحد قبل حد التنبيه',
++    );
++    return '$_temp0';
++  }
++
+   @override
+   String get listingCompareAtTitle => 'سعر قبل الخصم (اختياري)';
+ 
+diff --git a/lib/core/localization/app_localizations_en.dart b/lib/core/localization/app_localizations_en.dart
+index 867130a..5f1ebfd 100644
+--- a/lib/core/localization/app_localizations_en.dart
++++ b/lib/core/localization/app_localizations_en.dart
+@@ -362,6 +362,30 @@ class AppLocalizationsEn extends AppLocalizations {
+   String get commissionWalletBlockedSubmit =>
+       'New listings are paused until you pay off your platform fees.';
+ 
++  @override
++  String get commissionWalletOutstandingTitle => 'Platform fees owed';
++
++  @override
++  String commissionWalletWarnAt(String amount) {
++    return 'Warning at $amount';
++  }
++
++  @override
++  String commissionWalletPauseAt(String amount) {
++    return 'Pause at $amount';
++  }
++
++  @override
++  String commissionWalletOrdersUntilWarn(int count, String countText) {
++    String _temp0 = intl.Intl.pluralLogic(
++      count,
++      locale: localeName,
++      other: 'About $countText more orders before the warning limit',
++      one: 'About 1 more order before the warning limit',
++    );
++    return '$_temp0';
++  }
++
+   @override
+   String get listingCompareAtTitle => 'Compare-at price (optional)';
+ 
+diff --git a/lib/core/network/dio_provider.g.dart b/lib/core/network/dio_provider.g.dart
+index b3f0ba3..1046b37 100644
+--- a/lib/core/network/dio_provider.g.dart
++++ b/lib/core/network/dio_provider.g.dart
+@@ -6,7 +6,7 @@ part of 'dio_provider.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$dioHash() => r'c6b6fc20697d53cbccbd98717c1a04918762dd77';
++String _$dioHash() => r'4c5de3f415adf68fda83985d2ab0a8be2309d1df';
+ 
+ /// See also [dio].
+ @ProviderFor(dio)
+diff --git a/lib/core/router/app_router.g.dart b/lib/core/router/app_router.g.dart
+index af433a0..554044e 100644
+--- a/lib/core/router/app_router.g.dart
++++ b/lib/core/router/app_router.g.dart
+@@ -6,7 +6,7 @@ part of 'app_router.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$goRouterHash() => r'f0b1f1936bd5fd0b99f934adc0799232d6507982';
++String _$goRouterHash() => r'b13f35e05c6bb0b3eff0e860f544a2a3a2ed2115';
+ 
+ /// See also [goRouter].
+ @ProviderFor(goRouter)
+diff --git a/lib/features/addresses/presentation/providers/address_book_provider.g.dart b/lib/features/addresses/presentation/providers/address_book_provider.g.dart
+index 1872d01..df47da3 100644
+--- a/lib/features/addresses/presentation/providers/address_book_provider.g.dart
++++ b/lib/features/addresses/presentation/providers/address_book_provider.g.dart
+@@ -6,9 +6,19 @@ part of 'address_book_provider.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$addressBookHash() => r'3f2b9c6d1a8e4f0257b6c9d3a1e7f4028c5b6a91';
++String _$addressBookHash() => r'935b17889acbc6d52519f744e87ccdf035987b33';
+ 
+-/// See also [AddressBook].
++/// Single source of truth for a consumer's saved delivery addresses,
++/// shared by the Profile "My Addresses" screen and checkout's address step
++/// (`checkout_provider.dart`) so an edit made from either place is
++/// immediately visible from the other without waiting for a fresh app
++/// launch. No backend address book exists yet (order placement only ever
++/// takes GPS coordinates), so this stays local, persisted to
++/// SharedPreferences per signed-in consumer — the exact mechanism checkout
++/// used before this provider existed, kept under the same storage key so
++/// addresses saved before this feature shipped are not lost.
++///
++/// Copied from [AddressBook].
+ @ProviderFor(AddressBook)
+ final addressBookProvider =
+     NotifierProvider<AddressBook, List<OrderAddress>>.internal(
+diff --git a/lib/features/auth/presentation/providers/auth_provider.g.dart b/lib/features/auth/presentation/providers/auth_provider.g.dart
+index 002493a..0c696ab 100644
+--- a/lib/features/auth/presentation/providers/auth_provider.g.dart
++++ b/lib/features/auth/presentation/providers/auth_provider.g.dart
+@@ -344,7 +344,7 @@ final checkGoogleUserUseCaseProvider =
+ 
+ typedef CheckGoogleUserUseCaseRef
+     = AutoDisposeProviderRef<CheckGoogleUserUseCase>;
+-String _$authHash() => r'3b5def3be6e133efcd18ee76eec8b01156a229cc';
++String _$authHash() => r'bbd96edd005f56682a5de53b324e52b746cb784e';
+ 
+ /// See also [Auth].
+ @ProviderFor(Auth)
+diff --git a/lib/features/auth/presentation/providers/language_sync_provider.g.dart b/lib/features/auth/presentation/providers/language_sync_provider.g.dart
+index 93e89ec..052013c 100644
+--- a/lib/features/auth/presentation/providers/language_sync_provider.g.dart
++++ b/lib/features/auth/presentation/providers/language_sync_provider.g.dart
+@@ -6,7 +6,7 @@ part of 'language_sync_provider.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$languageSyncHash() => r'6f712c62472363b08b5279bdc118afd25f5ec76b';
++String _$languageSyncHash() => r'ce0ed737606b7c11e21116d1d3d49ea12cbfbd9a';
+ 
+ /// Keeps the server's `preferredLanguage` in step with the app language
+ /// (`PUT /api/auth/language`). Fire-and-forget: the UI switches instantly and
+@@ -17,8 +17,14 @@ String _$languageSyncHash() => r'6f712c62472363b08b5279bdc118afd25f5ec76b';
+ /// - After an explicit login (auth goes signed-out -> signed-in, which is
+ ///   what `Auth.adoptSession` does; a cold session restore is a different
+ ///   transition) the current language is sent once.
+-/// - A failed send sets [PrefsKeys.pendingLanguageSync]; the next launch
+-///   retries once when a session is restored. No retry loop within a session.
++/// - [PrefsKeys.pendingLanguageSync] is set before sending (write-ahead) and
++///   cleared only on success, so a failure, or the app being killed during
++///   the debounce or the request, is retried once on the next launch when a
++///   session is restored. No retry loop within a session. The flag is only
++///   cleared by the latest change: an older request succeeding while a newer
++///   change is still debouncing or in flight leaves it set.
++/// - Storage is best-effort: a failing SharedPreferences read/write is
++///   swallowed (debug log) and never stops the request being sent.
+ ///
+ /// keepAlive: app-lifetime listener, started from `XstoreApp`.
+ ///
+diff --git a/lib/features/commission/presentation/providers/commission_config_provider.g.dart b/lib/features/commission/presentation/providers/commission_config_provider.g.dart
+index da25b42..f6c6057 100644
+--- a/lib/features/commission/presentation/providers/commission_config_provider.g.dart
++++ b/lib/features/commission/presentation/providers/commission_config_provider.g.dart
+@@ -7,7 +7,7 @@ part of 'commission_config_provider.dart';
+ // **************************************************************************
+ 
+ String _$vendorCommissionSnapshotHash() =>
+-    r'92d2187fa1746041ac162aabd2729351e4c6b5a3';
++    r'a7ef73165f354f5d5668630352a2e243c5c9475f';
+ 
+ /// The vendor's commission fee + wallet-alert flags.
+ ///
+diff --git a/lib/features/commission/presentation/providers/commission_payment_providers.g.dart b/lib/features/commission/presentation/providers/commission_payment_providers.g.dart
+index 75605f9..dd05599 100644
+--- a/lib/features/commission/presentation/providers/commission_payment_providers.g.dart
++++ b/lib/features/commission/presentation/providers/commission_payment_providers.g.dart
+@@ -13,17 +13,17 @@ String _$commissionPaymentRepositoryHash() =>
+ @ProviderFor(commissionPaymentRepository)
+ final commissionPaymentRepositoryProvider =
+     Provider<CommissionPaymentRepository>.internal(
+-      commissionPaymentRepository,
+-      name: r'commissionPaymentRepositoryProvider',
+-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+-          ? null
+-          : _$commissionPaymentRepositoryHash,
+-      dependencies: null,
+-      allTransitiveDependencies: null,
+-    );
++  commissionPaymentRepository,
++  name: r'commissionPaymentRepositoryProvider',
++  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
++      ? null
++      : _$commissionPaymentRepositoryHash,
++  dependencies: null,
++  allTransitiveDependencies: null,
++);
+ 
+-typedef CommissionPaymentRepositoryRef =
+-    ProviderRef<CommissionPaymentRepository>;
++typedef CommissionPaymentRepositoryRef
++    = ProviderRef<CommissionPaymentRepository>;
+ String _$commissionPayToAccountsHash() =>
+     r'260ff4ec91e7fabc65efe25adc9b03b126d49f79';
+ 
+@@ -34,20 +34,18 @@ String _$commissionPayToAccountsHash() =>
+ ///
+ /// Copied from [commissionPayToAccounts].
+ @ProviderFor(commissionPayToAccounts)
+-final commissionPayToAccountsProvider =
+-    AutoDisposeProvider<
+-      AsyncValue<Map<CommissionPaymentMethod, String>>
+-    >.internal(
+-      commissionPayToAccounts,
+-      name: r'commissionPayToAccountsProvider',
+-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+-          ? null
+-          : _$commissionPayToAccountsHash,
+-      dependencies: null,
+-      allTransitiveDependencies: null,
+-    );
++final commissionPayToAccountsProvider = AutoDisposeProvider<
++    AsyncValue<Map<CommissionPaymentMethod, String>>>.internal(
++  commissionPayToAccounts,
++  name: r'commissionPayToAccountsProvider',
++  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
++      ? null
++      : _$commissionPayToAccountsHash,
++  dependencies: null,
++  allTransitiveDependencies: null,
++);
+ 
+-typedef CommissionPayToAccountsRef =
+-    AutoDisposeProviderRef<AsyncValue<Map<CommissionPaymentMethod, String>>>;
++typedef CommissionPayToAccountsRef
++    = AutoDisposeProviderRef<AsyncValue<Map<CommissionPaymentMethod, String>>>;
+ // ignore_for_file: type=lint
+ // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+diff --git a/lib/features/commission/presentation/providers/vendor_commission_wallet_provider.g.dart b/lib/features/commission/presentation/providers/vendor_commission_wallet_provider.g.dart
+index 0c1c096..c9b28b2 100644
+--- a/lib/features/commission/presentation/providers/vendor_commission_wallet_provider.g.dart
++++ b/lib/features/commission/presentation/providers/vendor_commission_wallet_provider.g.dart
+@@ -7,7 +7,7 @@ part of 'vendor_commission_wallet_provider.dart';
+ // **************************************************************************
+ 
+ String _$vendorCommissionWalletHash() =>
+-    r'48517a673a07f93c93b55e4e3fb0b9e2c5c3f167';
++    r'01d85afeb7efdc83852d51a4a6bf19e110f2a505';
+ 
+ /// See also [vendorCommissionWallet].
+ @ProviderFor(vendorCommissionWallet)
+diff --git a/lib/features/delivery/data/delivery_dio_provider.g.dart b/lib/features/delivery/data/delivery_dio_provider.g.dart
+index b4836fb..ab412cb 100644
+--- a/lib/features/delivery/data/delivery_dio_provider.g.dart
++++ b/lib/features/delivery/data/delivery_dio_provider.g.dart
+@@ -6,7 +6,7 @@ part of 'delivery_dio_provider.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$deliveryDioHash() => r'dc0b5ed66fc08a5b8969d692b72199799b54f2d8';
++String _$deliveryDioHash() => r'c64e6bd38c20260c4845a8672dac2d4c22fe3eef';
+ 
+ /// Dio client for the standalone delivery-backend service. Separate from
+ /// [dioProvider]: different host, and `Authorization: Bearer <token>` auth
+diff --git a/lib/features/delivery/presentation/providers/courier_cash_wallet_provider.g.dart b/lib/features/delivery/presentation/providers/courier_cash_wallet_provider.g.dart
+index a8b2d06..0a4bd02 100644
+--- a/lib/features/delivery/presentation/providers/courier_cash_wallet_provider.g.dart
++++ b/lib/features/delivery/presentation/providers/courier_cash_wallet_provider.g.dart
+@@ -6,7 +6,7 @@ part of 'courier_cash_wallet_provider.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$courierCashWalletHash() => r'ef7b2e89fa87a24d6a71be26cf5287a3c3d321ba';
++String _$courierCashWalletHash() => r'3fd88f6c221424a621bba4bc8c5e572881a0f010';
+ 
+ /// See also [courierCashWallet].
+ @ProviderFor(courierCashWallet)
+diff --git a/lib/features/explore/presentation/explore_provider.g.dart b/lib/features/explore/presentation/explore_provider.g.dart
+index ba5e077..6023af5 100644
+--- a/lib/features/explore/presentation/explore_provider.g.dart
++++ b/lib/features/explore/presentation/explore_provider.g.dart
+@@ -6,7 +6,7 @@ part of 'explore_provider.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$exploreHash() => r'46955d668e9238486155f81f5ba998818e0367c3';
++String _$exploreHash() => r'83e73babda4868f5c479b1c3cd32fcfefba8b216';
+ 
+ /// See also [Explore].
+ @ProviderFor(Explore)
+diff --git a/lib/features/general_settings/presentation/providers/general_settings_provider.g.dart b/lib/features/general_settings/presentation/providers/general_settings_provider.g.dart
+index b06a9b9..bc410d2 100644
+--- a/lib/features/general_settings/presentation/providers/general_settings_provider.g.dart
++++ b/lib/features/general_settings/presentation/providers/general_settings_provider.g.dart
+@@ -6,7 +6,7 @@ part of 'general_settings_provider.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$generalSettingsHash() => r'bd9684497a84d5dba6072f87037e9e27c7d7e97c';
++String _$generalSettingsHash() => r'4309fab65e0a01d52352430527fec574a8e09e2a';
+ 
+ /// App-wide General Settings, cached in SharedPreferences.
+ ///
+diff --git a/lib/features/listing/presentation/providers/listing_form_state.freezed.dart b/lib/features/listing/presentation/providers/listing_form_state.freezed.dart
+index f6fedcf..bd8e9d6 100644
+--- a/lib/features/listing/presentation/providers/listing_form_state.freezed.dart
++++ b/lib/features/listing/presentation/providers/listing_form_state.freezed.dart
+@@ -186,9 +186,9 @@ mixin _$ListingFormState {
+   String get editingListingId => throw _privateConstructorUsedError;
+ 
+   /// The listing's current status when editing. Resent unchanged on
+-  /// update except for drafts, which publish as [ListingStatus.active]
+-  /// — Update on a draft is the publish action, not a status-preserving
+-  /// edit.
++  /// update except for drafts, which publish as [ListingStatus.pending]
++  /// — Update on a draft is the submit-for-review action, not a
++  /// status-preserving edit. Active is set by admin approve.
+   ListingStatus? get editingStatus => throw _privateConstructorUsedError;
+ 
+   @JsonKey(ignore: true)
+@@ -621,9 +621,9 @@ class _$ListingFormStateImpl implements _ListingFormState {
+   final String editingListingId;
+ 
+   /// The listing's current status when editing. Resent unchanged on
+-  /// update except for drafts, which publish as [ListingStatus.active]
+-  /// — Update on a draft is the publish action, not a status-preserving
+-  /// edit.
++  /// update except for drafts, which publish as [ListingStatus.pending]
++  /// — Update on a draft is the submit-for-review action, not a
++  /// status-preserving edit. Active is set by admin approve.
+   @override
+   final ListingStatus? editingStatus;
+ 
+@@ -786,9 +786,9 @@ abstract class _ListingFormState implements ListingFormState {
+   @override
+ 
+   /// The listing's current status when editing. Resent unchanged on
+-  /// update except for drafts, which publish as [ListingStatus.active]
+-  /// — Update on a draft is the publish action, not a status-preserving
+-  /// edit.
++  /// update except for drafts, which publish as [ListingStatus.pending]
++  /// — Update on a draft is the submit-for-review action, not a
++  /// status-preserving edit. Active is set by admin approve.
+   ListingStatus? get editingStatus;
+   @override
+   @JsonKey(ignore: true)
+diff --git a/lib/features/listing/presentation/providers/my_listings_notifier.g.dart b/lib/features/listing/presentation/providers/my_listings_notifier.g.dart
+index e918ceb..5b360b1 100644
+--- a/lib/features/listing/presentation/providers/my_listings_notifier.g.dart
++++ b/lib/features/listing/presentation/providers/my_listings_notifier.g.dart
+@@ -7,7 +7,7 @@ part of 'my_listings_notifier.dart';
+ // **************************************************************************
+ 
+ String _$myListingsNotifierHash() =>
+-    r'a2906e3d0e6343ec66470f405ffcf825019aecf0';
++    r'63e6c3bd16b70943fb01f5482ee80cbb0a381ae3';
+ 
+ /// Vendor “My Listings” screen: fetch, filter, sort, optimistic updates.
+ ///
+diff --git a/lib/features/notifications/presentation/providers/fcm_push_handling_provider.g.dart b/lib/features/notifications/presentation/providers/fcm_push_handling_provider.g.dart
+index 2131e3c..75b8f2e 100644
+--- a/lib/features/notifications/presentation/providers/fcm_push_handling_provider.g.dart
++++ b/lib/features/notifications/presentation/providers/fcm_push_handling_provider.g.dart
+@@ -6,7 +6,7 @@ part of 'fcm_push_handling_provider.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$fcmPushHandlingHash() => r'f37f8029e28e0391a5cb394ef79eeb89feb85ebd';
++String _$fcmPushHandlingHash() => r'83c83743fe4376778c1088915f380c7b57c10220';
+ 
+ /// Foreground display, tap routing, and inbox refresh for FCM.
+ ///
+diff --git a/lib/features/orders/domain/entities/order_entity.freezed.dart b/lib/features/orders/domain/entities/order_entity.freezed.dart
+index 837b34e..5e35dc8 100644
+--- a/lib/features/orders/domain/entities/order_entity.freezed.dart
++++ b/lib/features/orders/domain/entities/order_entity.freezed.dart
+@@ -576,7 +576,10 @@ mixin _$OrderStatsEntity {
+   double? get warnThresholdEgp => throw _privateConstructorUsedError;
+   double? get pauseThresholdEgp => throw _privateConstructorUsedError;
+   bool get exceedsWarnThreshold => throw _privateConstructorUsedError;
+-  bool get exceedsPauseThreshold => throw _privateConstructorUsedError;
++  bool get exceedsPauseThreshold =>
++      throw _privateConstructorUsedError; // Vendor's owed commission (EGP) — CONFIRMED on the live envelope
++// 2026-10-20. Null when the backend omits it.
++  double? get outstandingBalance => throw _privateConstructorUsedError;
+ 
+   @JsonKey(ignore: true)
+   $OrderStatsEntityCopyWith<OrderStatsEntity> get copyWith =>
+@@ -599,7 +602,8 @@ abstract class $OrderStatsEntityCopyWith<$Res> {
+       double? warnThresholdEgp,
+       double? pauseThresholdEgp,
+       bool exceedsWarnThreshold,
+-      bool exceedsPauseThreshold});
++      bool exceedsPauseThreshold,
++      double? outstandingBalance});
+ }
+ 
+ /// @nodoc
+@@ -625,6 +629,7 @@ class _$OrderStatsEntityCopyWithImpl<$Res, $Val extends OrderStatsEntity>
+     Object? pauseThresholdEgp = freezed,
+     Object? exceedsWarnThreshold = null,
+     Object? exceedsPauseThreshold = null,
++    Object? outstandingBalance = freezed,
+   }) {
+     return _then(_value.copyWith(
+       pendingCount: null == pendingCount
+@@ -667,6 +672,10 @@ class _$OrderStatsEntityCopyWithImpl<$Res, $Val extends OrderStatsEntity>
+           ? _value.exceedsPauseThreshold
+           : exceedsPauseThreshold // ignore: cast_nullable_to_non_nullable
+               as bool,
++      outstandingBalance: freezed == outstandingBalance
++          ? _value.outstandingBalance
++          : outstandingBalance // ignore: cast_nullable_to_non_nullable
++              as double?,
+     ) as $Val);
+   }
+ }
+@@ -689,7 +698,8 @@ abstract class _$$OrderStatsEntityImplCopyWith<$Res>
+       double? warnThresholdEgp,
+       double? pauseThresholdEgp,
+       bool exceedsWarnThreshold,
+-      bool exceedsPauseThreshold});
++      bool exceedsPauseThreshold,
++      double? outstandingBalance});
+ }
+ 
+ /// @nodoc
+@@ -713,6 +723,7 @@ class __$$OrderStatsEntityImplCopyWithImpl<$Res>
+     Object? pauseThresholdEgp = freezed,
+     Object? exceedsWarnThreshold = null,
+     Object? exceedsPauseThreshold = null,
++    Object? outstandingBalance = freezed,
+   }) {
+     return _then(_$OrderStatsEntityImpl(
+       pendingCount: null == pendingCount
+@@ -755,6 +766,10 @@ class __$$OrderStatsEntityImplCopyWithImpl<$Res>
+           ? _value.exceedsPauseThreshold
+           : exceedsPauseThreshold // ignore: cast_nullable_to_non_nullable
+               as bool,
++      outstandingBalance: freezed == outstandingBalance
++          ? _value.outstandingBalance
++          : outstandingBalance // ignore: cast_nullable_to_non_nullable
++              as double?,
+     ));
+   }
+ }
+@@ -772,7 +787,8 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
+       this.warnThresholdEgp,
+       this.pauseThresholdEgp,
+       this.exceedsWarnThreshold = false,
+-      this.exceedsPauseThreshold = false});
++      this.exceedsPauseThreshold = false,
++      this.outstandingBalance});
+ 
+   @override
+   @JsonKey()
+@@ -807,10 +823,14 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
+   @override
+   @JsonKey()
+   final bool exceedsPauseThreshold;
++// Vendor's owed commission (EGP) — CONFIRMED on the live envelope
++// 2026-10-20. Null when the backend omits it.
++  @override
++  final double? outstandingBalance;
+ 
+   @override
+   String toString() {
+-    return 'OrderStatsEntity(pendingCount: $pendingCount, activeCount: $activeCount, monthCount: $monthCount, totalCount: $totalCount, totalRevenue: $totalRevenue, commissionValueOnOrder: $commissionValueOnOrder, warnThresholdEgp: $warnThresholdEgp, pauseThresholdEgp: $pauseThresholdEgp, exceedsWarnThreshold: $exceedsWarnThreshold, exceedsPauseThreshold: $exceedsPauseThreshold)';
++    return 'OrderStatsEntity(pendingCount: $pendingCount, activeCount: $activeCount, monthCount: $monthCount, totalCount: $totalCount, totalRevenue: $totalRevenue, commissionValueOnOrder: $commissionValueOnOrder, warnThresholdEgp: $warnThresholdEgp, pauseThresholdEgp: $pauseThresholdEgp, exceedsWarnThreshold: $exceedsWarnThreshold, exceedsPauseThreshold: $exceedsPauseThreshold, outstandingBalance: $outstandingBalance)';
+   }
+ 
+   @override
+@@ -837,7 +857,9 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
+             (identical(other.exceedsWarnThreshold, exceedsWarnThreshold) ||
+                 other.exceedsWarnThreshold == exceedsWarnThreshold) &&
+             (identical(other.exceedsPauseThreshold, exceedsPauseThreshold) ||
+-                other.exceedsPauseThreshold == exceedsPauseThreshold));
++                other.exceedsPauseThreshold == exceedsPauseThreshold) &&
++            (identical(other.outstandingBalance, outstandingBalance) ||
++                other.outstandingBalance == outstandingBalance));
+   }
+ 
+   @override
+@@ -852,7 +874,8 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
+       warnThresholdEgp,
+       pauseThresholdEgp,
+       exceedsWarnThreshold,
+-      exceedsPauseThreshold);
++      exceedsPauseThreshold,
++      outstandingBalance);
+ 
+   @JsonKey(ignore: true)
+   @override
+@@ -873,7 +896,8 @@ abstract class _OrderStatsEntity implements OrderStatsEntity {
+       final double? warnThresholdEgp,
+       final double? pauseThresholdEgp,
+       final bool exceedsWarnThreshold,
+-      final bool exceedsPauseThreshold}) = _$OrderStatsEntityImpl;
++      final bool exceedsPauseThreshold,
++      final double? outstandingBalance}) = _$OrderStatsEntityImpl;
+ 
+   @override
+   int get pendingCount;
+@@ -900,6 +924,9 @@ abstract class _OrderStatsEntity implements OrderStatsEntity {
+   bool get exceedsWarnThreshold;
+   @override
+   bool get exceedsPauseThreshold;
++  @override // Vendor's owed commission (EGP) — CONFIRMED on the live envelope
++// 2026-10-20. Null when the backend omits it.
++  double? get outstandingBalance;
+   @override
+   @JsonKey(ignore: true)
+   _$$OrderStatsEntityImplCopyWith<_$OrderStatsEntityImpl> get copyWith =>
+diff --git a/lib/features/orders/presentation/providers/order_detail_provider.g.dart b/lib/features/orders/presentation/providers/order_detail_provider.g.dart
+index 46f9c7f..1ccd9f8 100644
+--- a/lib/features/orders/presentation/providers/order_detail_provider.g.dart
++++ b/lib/features/orders/presentation/providers/order_detail_provider.g.dart
+@@ -7,7 +7,7 @@ part of 'order_detail_provider.dart';
+ // **************************************************************************
+ 
+ String _$orderDetailNotifierHash() =>
+-    r'9c3618067678a54f3fc2033cb85fc9a469536613';
++    r'd44c5de203c43650c9ebfd50d4bd726ce55d77f6';
+ 
+ /// Copied from Dart SDK
+ class _SystemHash {
+diff --git a/lib/features/product/presentation/providers/product_detail_notifier.g.dart b/lib/features/product/presentation/providers/product_detail_notifier.g.dart
+index 1a697cb..e47f83f 100644
+--- a/lib/features/product/presentation/providers/product_detail_notifier.g.dart
++++ b/lib/features/product/presentation/providers/product_detail_notifier.g.dart
+@@ -6,7 +6,7 @@ part of 'product_detail_notifier.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$productDetailHash() => r'221b3ce21d338429a4e5a0af1a98d8a616e2fdac';
++String _$productDetailHash() => r'8d4a76491eb21f2fd0ee4ae3cfaf9ceb3ea9ac01';
+ 
+ /// Copied from Dart SDK
+ class _SystemHash {
+diff --git a/lib/features/product/presentation/providers/product_reviews_notifier.g.dart b/lib/features/product/presentation/providers/product_reviews_notifier.g.dart
+index 03c748c..374655e 100644
+--- a/lib/features/product/presentation/providers/product_reviews_notifier.g.dart
++++ b/lib/features/product/presentation/providers/product_reviews_notifier.g.dart
+@@ -7,7 +7,7 @@ part of 'product_reviews_notifier.dart';
+ // **************************************************************************
+ 
+ String _$productReviewsNotifierHash() =>
+-    r'40b943d2829e8a2575fa42731fc20487b51eb13f';
++    r'c36ae3b05f20609e3b586f5007b34053f4e6f638';
+ 
+ /// Copied from Dart SDK
+ class _SystemHash {
+diff --git a/lib/features/profile/presentation/providers/profile_provider.g.dart b/lib/features/profile/presentation/providers/profile_provider.g.dart
+index 5148e5a..a793b79 100644
+--- a/lib/features/profile/presentation/providers/profile_provider.g.dart
++++ b/lib/features/profile/presentation/providers/profile_provider.g.dart
+@@ -6,7 +6,7 @@ part of 'profile_provider.dart';
+ // RiverpodGenerator
+ // **************************************************************************
+ 
+-String _$profileNotifierHash() => r'1d02f363c80e0f8d112647530f524032eaedf16c';
++String _$profileNotifierHash() => r'6c647430354a2efaed5e99242989ea18d4f77931';
+ 
+ /// See also [ProfileNotifier].
+ @ProviderFor(ProfileNotifier)
+diff --git a/lib/features/reports/presentation/providers/vendor_reports_dependencies.g.dart b/lib/features/reports/presentation/providers/vendor_reports_dependencies.g.dart
+index 41bdcbf..75234db 100644
+--- a/lib/features/reports/presentation/providers/vendor_reports_dependencies.g.dart
++++ b/lib/features/reports/presentation/providers/vendor_reports_dependencies.g.dart
+@@ -7,7 +7,7 @@ part of 'vendor_reports_dependencies.dart';
+ // **************************************************************************
+ 
+ String _$vendorReportsRemoteDataSourceHash() =>
+-    r'a1c3e5f708b9d2c4e6f8a0b2c4d6e8f0a2c4e6f8';
++    r'7b235867a8a6efc53c71f748a4e65df92c2fd240';
+ 
+ /// See also [vendorReportsRemoteDataSource].
+ @ProviderFor(vendorReportsRemoteDataSource)
+@@ -25,7 +25,7 @@ final vendorReportsRemoteDataSourceProvider =
+ typedef VendorReportsRemoteDataSourceRef
+     = ProviderRef<VendorReportsRemoteDataSource>;
+ String _$vendorReportsRepositoryHash() =>
+-    r'b2d4f6a809c1e3d5f7a9b1c3d5e7f9a1c3e5f7a9';
++    r'c870fec4d46625f6ad3406c5d2929600ca1d0061';
+ 
+ /// See also [vendorReportsRepository].
+ @ProviderFor(vendorReportsRepository)
+@@ -42,7 +42,7 @@ final vendorReportsRepositoryProvider =
+ 
+ typedef VendorReportsRepositoryRef = ProviderRef<VendorReportsRepository>;
+ String _$submitVendorReportUseCaseHash() =>
+-    r'c3e5a7b910d2f4a6b8c0d2e4f6a8b0c2d4f6a8b0';
++    r'f6dd534cc5c27dc6b80fc95e4eb488ff7af9bcbc';
+ 
+ /// See also [submitVendorReportUseCase].
+ @ProviderFor(submitVendorReportUseCase)
+diff --git a/lib/features/store/presentation/providers/store_hours_provider.g.dart b/lib/features/store/presentation/providers/store_hours_provider.g.dart
+index 8b1090f..c8ad5ce 100644
+--- a/lib/features/store/presentation/providers/store_hours_provider.g.dart
++++ b/lib/features/store/presentation/providers/store_hours_provider.g.dart
+@@ -94,7 +94,7 @@ final toggleStoreStatusUseCaseProvider =
+ typedef ToggleStoreStatusUseCaseRef
+     = AutoDisposeProviderRef<ToggleStoreStatusUseCase>;
+ String _$storeHoursNotifierHash() =>
+-    r'96894dbe7e825a4df78dccd409373da6f8aa50b2';
++    r'1ec61c761e09383866dd1eae73302b4b518f1e48';
+ 
+ /// See also [StoreHoursNotifier].
+ @ProviderFor(StoreHoursNotifier)
+diff --git a/pubspec.lock b/pubspec.lock
+index 60627cc..7608ccb 100644
+--- a/pubspec.lock
++++ b/pubspec.lock
+@@ -189,10 +189,10 @@ packages:
+     dependency: transitive
+     description:
+       name: characters
+-      sha256: faf38497bda5ead2a8c7615f4f7939df04333478bf32e4173fcb06d428b5716b
++      sha256: f71061c654a3380576a52b451dd5532377954cf9dbd272a78fc8479606670803
+       url: "https://pub.dev"
+     source: hosted
+-    version: "1.4.1"
++    version: "1.4.0"
+   checked_yaml:
+     dependency: transitive
+     description:
+@@ -1056,10 +1056,10 @@ packages:
+     dependency: "direct main"
+     description:
+       name: intl
+-      sha256: "1ca20c894b1717686a2319b8548763d812bc0aabdac580420a44c5178c57a867"
++      sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
+       url: "https://pub.dev"
+     source: hosted
+-    version: "0.20.3"
++    version: "0.20.2"
+   io:
+     dependency: transitive
+     description:
+@@ -1144,26 +1144,26 @@ packages:
+     dependency: transitive
+     description:
+       name: matcher
+-      sha256: "31bd099b47c10cd1aeb55146a2d46ce0277630ecef3f7dae54ad7873f36696cd"
++      sha256: dc58c723c3c24bf8d3e2d3ad3f2f9d7bd9cf43ec6feaa64181775e60190153f2
+       url: "https://pub.dev"
+     source: hosted
+-    version: "0.12.20"
++    version: "0.12.17"
+   material_color_utilities:
+     dependency: transitive
+     description:
+       name: material_color_utilities
+-      sha256: "9c337007e82b1889149c82ed242ed1cb24a66044e30979c44912381e9be4c48b"
++      sha256: f7142bb1154231d7ea5f96bc7bde4bda2a0945d2806bb11670e30b850d56bdec
+       url: "https://pub.dev"
+     source: hosted
+-    version: "0.13.0"
++    version: "0.11.1"
+   meta:
+     dependency: transitive
+     description:
+       name: meta
+-      sha256: "307249ce4ff29d58a18e97f6345f539382eb9c9c29ecda628900f31de0443dd9"
++      sha256: e3641ec5d63ebf0d9b41bd43201a66e3fc79a65db5f61fc181f04cd27aab950c
+       url: "https://pub.dev"
+     source: hosted
+-    version: "1.19.0"
++    version: "1.16.0"
+   mime:
+     dependency: transitive
+     description:
+@@ -1605,10 +1605,10 @@ packages:
+     dependency: transitive
+     description:
+       name: test_api
+-      sha256: "2a122cbe059f8b610d3a5415f42e255b6c17b1f21eee1d960f31080237fb4f11"
++      sha256: "522f00f556e73044315fa4585ec3270f1808a4b186c936e612cab0b565ff1e00"
+       url: "https://pub.dev"
+     source: hosted
+-    version: "0.7.12"
++    version: "0.7.6"
+   timezone:
+     dependency: transitive
+     description:
+@@ -1741,10 +1741,10 @@ packages:
+     dependency: transitive
+     description:
+       name: vector_math
+-      sha256: "92b9910f66ed1057fd4da7b040ae7c74cafacf885bdc81be496928d5049b032d"
++      sha256: d530bd74fea330e6e364cda7a85019c434070188383e1cd8d9777ee586914c5b
+       url: "https://pub.dev"
+     source: hosted
+-    version: "2.4.3"
++    version: "2.2.0"
+   vm_service:
+     dependency: transitive
+     description:
+@@ -1826,5 +1826,5 @@ packages:
+     source: hosted
+     version: "3.1.3"
+ sdks:
+-  dart: ">=3.11.0-0 <4.0.0"
++  dart: ">=3.9.2 <4.0.0"
+   flutter: ">=3.35.0"

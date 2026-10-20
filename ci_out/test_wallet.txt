@@ -1,0 +1,48 @@
+
+✅ /home/runner/work/xstore/xstore/test/features/commission/pay_to_accounts_test.dart: the live settings map all four methods
+✅ /home/runner/work/xstore/xstore/test/features/commission/pay_to_accounts_test.dart: blank or missing handles are not configured
+✅ /home/runner/work/xstore/xstore/test/vendor_wallet_screen_live_flow_test.dart: vendor in good standing sees their live revenue, order count, and fee
+✅ /home/runner/work/xstore/xstore/test/vendor_wallet_screen_live_flow_test.dart: vendor past the warn threshold sees the live alert banner instead of good standing
+✅ /home/runner/work/xstore/xstore/test/vendor_wallet_screen_live_flow_test.dart: a failed load shows the error state with Retry, not zero totals
+✅ /home/runner/work/xstore/xstore/test/vendor_wallet_screen_live_flow_test.dart: a vendor with no revenue yet still sees fees up to date
+✅ /home/runner/work/xstore/xstore/test/vendor_wallet_screen_live_flow_test.dart: outstanding balance (live envelope shape, 2026-10-20) nothing owed shows 0, good standing, and disables Pay
+✅ /home/runner/work/xstore/xstore/test/vendor_wallet_screen_live_flow_test.dart: outstanding balance (live envelope shape, 2026-10-20) a balance below warn shows the amount, limits, and orders left
+✅ /home/runner/work/xstore/xstore/test/vendor_wallet_screen_live_flow_test.dart: outstanding balance (live envelope shape, 2026-10-20) past warn: banner explains it, card shows the amount without the hint
+✅ /home/runner/work/xstore/xstore/test/vendor_wallet_screen_live_flow_test.dart: outstanding balance (live envelope shape, 2026-10-20) Arabic at 320x640 lays out without overflow
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_screen_test.dart: shows the configured account for the chosen method
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/vendor_commission_wallet_provider_test.dart: vendorCommissionWalletProvider is the empty wallet with default thresholds for a signed-out session
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/vendor_commission_wallet_provider_test.dart: vendorCommissionWalletProvider falls back to default thresholds when the snapshot fetch fails
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/vendor_commission_wallet_provider_test.dart: vendorCommissionWalletProvider maps the backend exceeds-threshold flags and thresholds through
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/vendor_commission_wallet_provider_test.dart: vendorCommissionWalletProvider falls back to default thresholds when the backend sends the flags but omits the threshold numbers
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/vendor_commission_wallet_provider_test.dart: vendorCommissionWalletProvider maps outstanding balance from the backend snapshot
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_screen_test.dart: tells the vendor to contact support when no account is set
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_screen_test.dart: a failed load shows Retry, not "contact support"
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_screen_test.dart: submit stays disabled until a valid amount and a receipt
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/commission_config_provider_test.dart: vendorCommissionSnapshotProvider is null for a signed-out session
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/commission_config_provider_test.dart: vendorCommissionSnapshotProvider is null for a non-vendor (consumer) session
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/commission_config_provider_test.dart: vendorCommissionSnapshotProvider returns the fetched stats for a vendor session
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/commission_config_provider_test.dart: vendorCommissionSnapshotProvider surfaces the failure when the stats fetch fails
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/commission_config_provider_test.dart: commissionFeeEgpForCategoryProvider falls back to the starter fee when the snapshot is null
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/commission_config_provider_test.dart: commissionFeeEgpForCategoryProvider uses the backend commission value once the snapshot loads
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/providers/commission_config_provider_test.dart: commissionFeeEgpForCategoryProvider falls back to the starter fee when the backend echoes 0
+✅ /home/runner/work/xstore/xstore/test/features/commission/data/commission_payment_remote_datasource_test.dart: CommissionPaymentRemoteDataSource submitPayment posts method, amount and the receipt as multipart
+✅ /home/runner/work/xstore/xstore/test/features/commission/data/commission_payment_remote_datasource_test.dart: CommissionPaymentRemoteDataSource submitPayment fails without a request when the receipt file is gone
+✅ /home/runner/work/xstore/xstore/test/features/commission/data/commission_payment_remote_datasource_test.dart: CommissionPaymentRemoteDataSource submitPayment throws on a 2xx isSuccess:false envelope
+✅ /home/runner/work/xstore/xstore/test/features/commission/data/commission_payment_remote_datasource_test.dart: every method round-trips through its wire name
+✅ /home/runner/work/xstore/xstore/test/features/commission/data/commission_payment_remote_datasource_test.dart: fromWire accepts any casing and the C# enum codes
+✅ /home/runner/work/xstore/xstore/test/features/commission/data/commission_payment_remote_datasource_test.dart: payment routes are vendor-only
+✅ /home/runner/work/xstore/xstore/test/order_commission_breakdown_test.dart: commissionStatusForOrder maps order status to commission status
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_submit_test.dart: rejects a receipt whose extension the backend does not take
+✅ /home/runner/work/xstore/xstore/test/order_commission_breakdown_test.dart: OrderPriceBreakdown buyer view never shows the platform fee
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_submit_test.dart: rejects a receipt over 5 MB
+✅ /home/runner/work/xstore/xstore/test/order_commission_breakdown_test.dart: OrderPriceBreakdown vendor view shows earnings, fee, and due status
+✅ /home/runner/work/xstore/xstore/test/order_commission_breakdown_test.dart: OrderPriceBreakdown vendor view shows voided status for cancelled orders
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_submit_test.dart: accepts a png and ignores a second pick while one is running
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_submit_test.dart: shows an icon when the preview file cannot be decoded
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_submit_test.dart: submit success refetches the wallet and opens it
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_submit_test.dart: deletes only our compressed copy after a successful submit
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_submit_test.dart: a receipt evicted before submit shows the localized message
+✅ /home/runner/work/xstore/xstore/test/features/commission/presentation/commission_payment_receipt_submit_test.dart: back is blocked while submitting and works afterwards
+
+🎉 44 tests passed.
+exit=0

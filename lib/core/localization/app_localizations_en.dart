@@ -363,6 +363,30 @@ class AppLocalizationsEn extends AppLocalizations {
       'New listings are paused until you pay off your platform fees.';
 
   @override
+  String get commissionWalletOutstandingTitle => 'Platform fees owed';
+
+  @override
+  String commissionWalletWarnAt(String amount) {
+    return 'Warning at $amount';
+  }
+
+  @override
+  String commissionWalletPauseAt(String amount) {
+    return 'Pause at $amount';
+  }
+
+  @override
+  String commissionWalletOrdersUntilWarn(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'About $countText more orders before the warning limit',
+      one: 'About 1 more order before the warning limit',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get listingCompareAtTitle => 'Compare-at price (optional)';
 
   @override

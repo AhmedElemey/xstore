@@ -6,7 +6,7 @@ part of 'fcm_push_handling_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$fcmPushHandlingHash() => r'f37f8029e28e0391a5cb394ef79eeb89feb85ebd';
+String _$fcmPushHandlingHash() => r'83c83743fe4376778c1088915f380c7b57c10220';
 
 /// Foreground display, tap routing, and inbox refresh for FCM.
 ///

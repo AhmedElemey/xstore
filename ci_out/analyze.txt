@@ -1,0 +1,7 @@
+Analyzing xstore...                                             
+
+warning • Unused import: 'package:share_plus/share_plus.dart' • lib/features/orders/presentation/screens/order_detail_screen.dart:4:8 • unused_import
+warning • Unused import: '../widgets/order_status_badge.dart' • lib/features/orders/presentation/screens/order_detail_screen.dart:13:8 • unused_import
+
+2 issues found. (ran in 60.9s)
+exit=1

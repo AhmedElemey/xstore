@@ -6,7 +6,7 @@ part of 'delivery_dio_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$deliveryDioHash() => r'dc0b5ed66fc08a5b8969d692b72199799b54f2d8';
+String _$deliveryDioHash() => r'c64e6bd38c20260c4845a8672dac2d4c22fe3eef';
 
 /// Dio client for the standalone delivery-backend service. Separate from
 /// [dioProvider]: different host, and `Authorization: Bearer <token>` auth

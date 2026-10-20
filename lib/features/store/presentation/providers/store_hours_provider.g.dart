@@ -94,7 +94,7 @@ final toggleStoreStatusUseCaseProvider =
 typedef ToggleStoreStatusUseCaseRef
     = AutoDisposeProviderRef<ToggleStoreStatusUseCase>;
 String _$storeHoursNotifierHash() =>
-    r'96894dbe7e825a4df78dccd409373da6f8aa50b2';
+    r'1ec61c761e09383866dd1eae73302b4b518f1e48';
 
 /// See also [StoreHoursNotifier].
 @ProviderFor(StoreHoursNotifier)

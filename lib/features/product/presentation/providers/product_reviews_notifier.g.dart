@@ -7,7 +7,7 @@ part of 'product_reviews_notifier.dart';
 // **************************************************************************
 
 String _$productReviewsNotifierHash() =>
-    r'40b943d2829e8a2575fa42731fc20487b51eb13f';
+    r'c36ae3b05f20609e3b586f5007b34053f4e6f638';
 
 /// Copied from Dart SDK
 class _SystemHash {

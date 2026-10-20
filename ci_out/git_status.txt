@@ -1,0 +1,29 @@
+ M lib/core/localization/app_localizations.dart
+ M lib/core/localization/app_localizations_ar.dart
+ M lib/core/localization/app_localizations_en.dart
+ M lib/core/network/dio_provider.g.dart
+ M lib/core/router/app_router.g.dart
+ M lib/features/addresses/presentation/providers/address_book_provider.g.dart
+ M lib/features/auth/presentation/providers/auth_provider.g.dart
+ M lib/features/auth/presentation/providers/language_sync_provider.g.dart
+ M lib/features/commission/presentation/providers/commission_config_provider.g.dart
+ M lib/features/commission/presentation/providers/commission_payment_providers.g.dart
+ M lib/features/commission/presentation/providers/vendor_commission_wallet_provider.g.dart
+ M lib/features/delivery/data/delivery_dio_provider.g.dart
+ M lib/features/delivery/presentation/providers/courier_cash_wallet_provider.g.dart
+ M lib/features/explore/presentation/explore_provider.g.dart
+ M lib/features/general_settings/presentation/providers/general_settings_provider.g.dart
+ M lib/features/listing/presentation/providers/listing_form_state.freezed.dart
+ M lib/features/listing/presentation/providers/my_listings_notifier.g.dart
+ M lib/features/notifications/presentation/providers/fcm_push_handling_provider.g.dart
+ M lib/features/orders/domain/entities/order_entity.freezed.dart
+ M lib/features/orders/presentation/providers/order_detail_provider.g.dart
+ M lib/features/product/presentation/providers/product_detail_notifier.g.dart
+ M lib/features/product/presentation/providers/product_reviews_notifier.g.dart
+ M lib/features/profile/presentation/providers/profile_provider.g.dart
+ M lib/features/reports/presentation/providers/vendor_reports_dependencies.g.dart
+ M lib/features/store/presentation/providers/store_hours_provider.g.dart
+ M pubspec.lock
+?? ci_out/
+?? test/zz_screenshots/failures/
+?? test/zz_screenshots/shots/

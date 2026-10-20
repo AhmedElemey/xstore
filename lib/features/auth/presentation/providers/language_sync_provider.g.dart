@@ -6,7 +6,7 @@ part of 'language_sync_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$languageSyncHash() => r'6f712c62472363b08b5279bdc118afd25f5ec76b';
+String _$languageSyncHash() => r'ce0ed737606b7c11e21116d1d3d49ea12cbfbd9a';
 
 /// Keeps the server's `preferredLanguage` in step with the app language
 /// (`PUT /api/auth/language`). Fire-and-forget: the UI switches instantly and
@@ -17,8 +17,14 @@ String _$languageSyncHash() => r'6f712c62472363b08b5279bdc118afd25f5ec76b';
 /// - After an explicit login (auth goes signed-out -> signed-in, which is
 ///   what `Auth.adoptSession` does; a cold session restore is a different
 ///   transition) the current language is sent once.
-/// - A failed send sets [PrefsKeys.pendingLanguageSync]; the next launch
-///   retries once when a session is restored. No retry loop within a session.
+/// - [PrefsKeys.pendingLanguageSync] is set before sending (write-ahead) and
+///   cleared only on success, so a failure, or the app being killed during
+///   the debounce or the request, is retried once on the next launch when a
+///   session is restored. No retry loop within a session. The flag is only
+///   cleared by the latest change: an older request succeeding while a newer
+///   change is still debouncing or in flight leaves it set.
+/// - Storage is best-effort: a failing SharedPreferences read/write is
+///   swallowed (debug log) and never stops the request being sent.
 ///
 /// keepAlive: app-lifetime listener, started from `XstoreApp`.
 ///

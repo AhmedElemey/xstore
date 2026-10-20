@@ -576,7 +576,10 @@ mixin _$OrderStatsEntity {
   double? get warnThresholdEgp => throw _privateConstructorUsedError;
   double? get pauseThresholdEgp => throw _privateConstructorUsedError;
   bool get exceedsWarnThreshold => throw _privateConstructorUsedError;
-  bool get exceedsPauseThreshold => throw _privateConstructorUsedError;
+  bool get exceedsPauseThreshold =>
+      throw _privateConstructorUsedError; // Vendor's owed commission (EGP) — CONFIRMED on the live envelope
+// 2026-10-20. Null when the backend omits it.
+  double? get outstandingBalance => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $OrderStatsEntityCopyWith<OrderStatsEntity> get copyWith =>
@@ -599,7 +602,8 @@ abstract class $OrderStatsEntityCopyWith<$Res> {
       double? warnThresholdEgp,
       double? pauseThresholdEgp,
       bool exceedsWarnThreshold,
-      bool exceedsPauseThreshold});
+      bool exceedsPauseThreshold,
+      double? outstandingBalance});
 }
 
 /// @nodoc
@@ -625,6 +629,7 @@ class _$OrderStatsEntityCopyWithImpl<$Res, $Val extends OrderStatsEntity>
     Object? pauseThresholdEgp = freezed,
     Object? exceedsWarnThreshold = null,
     Object? exceedsPauseThreshold = null,
+    Object? outstandingBalance = freezed,
   }) {
     return _then(_value.copyWith(
       pendingCount: null == pendingCount
@@ -667,6 +672,10 @@ class _$OrderStatsEntityCopyWithImpl<$Res, $Val extends OrderStatsEntity>
           ? _value.exceedsPauseThreshold
           : exceedsPauseThreshold // ignore: cast_nullable_to_non_nullable
               as bool,
+      outstandingBalance: freezed == outstandingBalance
+          ? _value.outstandingBalance
+          : outstandingBalance // ignore: cast_nullable_to_non_nullable
+              as double?,
     ) as $Val);
   }
 }
@@ -689,7 +698,8 @@ abstract class _$$OrderStatsEntityImplCopyWith<$Res>
       double? warnThresholdEgp,
       double? pauseThresholdEgp,
       bool exceedsWarnThreshold,
-      bool exceedsPauseThreshold});
+      bool exceedsPauseThreshold,
+      double? outstandingBalance});
 }
 
 /// @nodoc
@@ -713,6 +723,7 @@ class __$$OrderStatsEntityImplCopyWithImpl<$Res>
     Object? pauseThresholdEgp = freezed,
     Object? exceedsWarnThreshold = null,
     Object? exceedsPauseThreshold = null,
+    Object? outstandingBalance = freezed,
   }) {
     return _then(_$OrderStatsEntityImpl(
       pendingCount: null == pendingCount
@@ -755,6 +766,10 @@ class __$$OrderStatsEntityImplCopyWithImpl<$Res>
           ? _value.exceedsPauseThreshold
           : exceedsPauseThreshold // ignore: cast_nullable_to_non_nullable
               as bool,
+      outstandingBalance: freezed == outstandingBalance
+          ? _value.outstandingBalance
+          : outstandingBalance // ignore: cast_nullable_to_non_nullable
+              as double?,
     ));
   }
 }
@@ -772,7 +787,8 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
       this.warnThresholdEgp,
       this.pauseThresholdEgp,
       this.exceedsWarnThreshold = false,
-      this.exceedsPauseThreshold = false});
+      this.exceedsPauseThreshold = false,
+      this.outstandingBalance});
 
   @override
   @JsonKey()
@@ -807,10 +823,14 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
   @override
   @JsonKey()
   final bool exceedsPauseThreshold;
+// Vendor's owed commission (EGP) — CONFIRMED on the live envelope
+// 2026-10-20. Null when the backend omits it.
+  @override
+  final double? outstandingBalance;
 
   @override
   String toString() {
-    return 'OrderStatsEntity(pendingCount: $pendingCount, activeCount: $activeCount, monthCount: $monthCount, totalCount: $totalCount, totalRevenue: $totalRevenue, commissionValueOnOrder: $commissionValueOnOrder, warnThresholdEgp: $warnThresholdEgp, pauseThresholdEgp: $pauseThresholdEgp, exceedsWarnThreshold: $exceedsWarnThreshold, exceedsPauseThreshold: $exceedsPauseThreshold)';
+    return 'OrderStatsEntity(pendingCount: $pendingCount, activeCount: $activeCount, monthCount: $monthCount, totalCount: $totalCount, totalRevenue: $totalRevenue, commissionValueOnOrder: $commissionValueOnOrder, warnThresholdEgp: $warnThresholdEgp, pauseThresholdEgp: $pauseThresholdEgp, exceedsWarnThreshold: $exceedsWarnThreshold, exceedsPauseThreshold: $exceedsPauseThreshold, outstandingBalance: $outstandingBalance)';
   }
 
   @override
@@ -837,7 +857,9 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
             (identical(other.exceedsWarnThreshold, exceedsWarnThreshold) ||
                 other.exceedsWarnThreshold == exceedsWarnThreshold) &&
             (identical(other.exceedsPauseThreshold, exceedsPauseThreshold) ||
-                other.exceedsPauseThreshold == exceedsPauseThreshold));
+                other.exceedsPauseThreshold == exceedsPauseThreshold) &&
+            (identical(other.outstandingBalance, outstandingBalance) ||
+                other.outstandingBalance == outstandingBalance));
   }
 
   @override
@@ -852,7 +874,8 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
       warnThresholdEgp,
       pauseThresholdEgp,
       exceedsWarnThreshold,
-      exceedsPauseThreshold);
+      exceedsPauseThreshold,
+      outstandingBalance);
 
   @JsonKey(ignore: true)
   @override
@@ -873,7 +896,8 @@ abstract class _OrderStatsEntity implements OrderStatsEntity {
       final double? warnThresholdEgp,
       final double? pauseThresholdEgp,
       final bool exceedsWarnThreshold,
-      final bool exceedsPauseThreshold}) = _$OrderStatsEntityImpl;
+      final bool exceedsPauseThreshold,
+      final double? outstandingBalance}) = _$OrderStatsEntityImpl;
 
   @override
   int get pendingCount;
@@ -900,6 +924,9 @@ abstract class _OrderStatsEntity implements OrderStatsEntity {
   bool get exceedsWarnThreshold;
   @override
   bool get exceedsPauseThreshold;
+  @override // Vendor's owed commission (EGP) — CONFIRMED on the live envelope
+// 2026-10-20. Null when the backend omits it.
+  double? get outstandingBalance;
   @override
   @JsonKey(ignore: true)
   _$$OrderStatsEntityImplCopyWith<_$OrderStatsEntityImpl> get copyWith =>

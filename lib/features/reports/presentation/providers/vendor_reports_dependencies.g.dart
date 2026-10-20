@@ -7,7 +7,7 @@ part of 'vendor_reports_dependencies.dart';
 // **************************************************************************
 
 String _$vendorReportsRemoteDataSourceHash() =>
-    r'a1c3e5f708b9d2c4e6f8a0b2c4d6e8f0a2c4e6f8';
+    r'7b235867a8a6efc53c71f748a4e65df92c2fd240';
 
 /// See also [vendorReportsRemoteDataSource].
 @ProviderFor(vendorReportsRemoteDataSource)
@@ -25,7 +25,7 @@ final vendorReportsRemoteDataSourceProvider =
 typedef VendorReportsRemoteDataSourceRef
     = ProviderRef<VendorReportsRemoteDataSource>;
 String _$vendorReportsRepositoryHash() =>
-    r'b2d4f6a809c1e3d5f7a9b1c3d5e7f9a1c3e5f7a9';
+    r'c870fec4d46625f6ad3406c5d2929600ca1d0061';
 
 /// See also [vendorReportsRepository].
 @ProviderFor(vendorReportsRepository)
@@ -42,7 +42,7 @@ final vendorReportsRepositoryProvider =
 
 typedef VendorReportsRepositoryRef = ProviderRef<VendorReportsRepository>;
 String _$submitVendorReportUseCaseHash() =>
-    r'c3e5a7b910d2f4a6b8c0d2e4f6a8b0c2d4f6a8b0';
+    r'f6dd534cc5c27dc6b80fc95e4eb488ff7af9bcbc';
 
 /// See also [submitVendorReportUseCase].
 @ProviderFor(submitVendorReportUseCase)

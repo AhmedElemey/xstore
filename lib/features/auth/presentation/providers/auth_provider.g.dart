@@ -344,7 +344,7 @@ final checkGoogleUserUseCaseProvider =
 
 typedef CheckGoogleUserUseCaseRef
     = AutoDisposeProviderRef<CheckGoogleUserUseCase>;
-String _$authHash() => r'3b5def3be6e133efcd18ee76eec8b01156a229cc';
+String _$authHash() => r'bbd96edd005f56682a5de53b324e52b746cb784e';
 
 /// See also [Auth].
 @ProviderFor(Auth)

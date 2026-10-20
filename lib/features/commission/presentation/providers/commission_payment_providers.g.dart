@@ -13,17 +13,17 @@ String _$commissionPaymentRepositoryHash() =>
 @ProviderFor(commissionPaymentRepository)
 final commissionPaymentRepositoryProvider =
     Provider<CommissionPaymentRepository>.internal(
-      commissionPaymentRepository,
-      name: r'commissionPaymentRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$commissionPaymentRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  commissionPaymentRepository,
+  name: r'commissionPaymentRepositoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$commissionPaymentRepositoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-typedef CommissionPaymentRepositoryRef =
-    ProviderRef<CommissionPaymentRepository>;
+typedef CommissionPaymentRepositoryRef
+    = ProviderRef<CommissionPaymentRepository>;
 String _$commissionPayToAccountsHash() =>
     r'260ff4ec91e7fabc65efe25adc9b03b126d49f79';
 
@@ -34,20 +34,18 @@ String _$commissionPayToAccountsHash() =>
 ///
 /// Copied from [commissionPayToAccounts].
 @ProviderFor(commissionPayToAccounts)
-final commissionPayToAccountsProvider =
-    AutoDisposeProvider<
-      AsyncValue<Map<CommissionPaymentMethod, String>>
-    >.internal(
-      commissionPayToAccounts,
-      name: r'commissionPayToAccountsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$commissionPayToAccountsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+final commissionPayToAccountsProvider = AutoDisposeProvider<
+    AsyncValue<Map<CommissionPaymentMethod, String>>>.internal(
+  commissionPayToAccounts,
+  name: r'commissionPayToAccountsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$commissionPayToAccountsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-typedef CommissionPayToAccountsRef =
-    AutoDisposeProviderRef<AsyncValue<Map<CommissionPaymentMethod, String>>>;
+typedef CommissionPayToAccountsRef
+    = AutoDisposeProviderRef<AsyncValue<Map<CommissionPaymentMethod, String>>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

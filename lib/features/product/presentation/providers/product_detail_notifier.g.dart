@@ -6,7 +6,7 @@ part of 'product_detail_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$productDetailHash() => r'221b3ce21d338429a4e5a0af1a98d8a616e2fdac';
+String _$productDetailHash() => r'8d4a76491eb21f2fd0ee4ae3cfaf9ceb3ea9ac01';
 
 /// Copied from Dart SDK
 class _SystemHash {
