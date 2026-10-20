@@ -135,11 +135,12 @@ class ProductGridCard extends StatelessWidget {
                           style: AppTypography.mono.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
+                            
                             color: context.amberColor,
                           ),
                         ),
                         if (item.compareAtPrice != null) ...[
-                          const Gap(AppSpacing.sm),
+                          const Gap(AppSpacing.xs),
                           Text(
                             context.formatCurrency(item.compareAtPrice!),
                             style: AppTypography.bodySmall.copyWith(
@@ -149,7 +150,7 @@ class ProductGridCard extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const Gap(AppSpacing.xs),
+                    // const Gap(AppSpacing.xs),
                     Row(
                       children: [
                         Expanded(
@@ -184,6 +185,7 @@ class ProductGridCard extends StatelessWidget {
                     ),
                     const Gap(AppSpacing.md),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         WishHeartButton(
                           listingId: item.id,
@@ -191,21 +193,25 @@ class ProductGridCard extends StatelessWidget {
                         ),
                         if (showAddToCart) ...[
                           const Gap(AppSpacing.sm),
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: item.isSoldOut
-                                  ? null
-                                  : () {
-                                      HapticFeedback.lightImpact();
-                                      onAddToCart();
-                                    },
-                              child: Text(
-                                item.isSoldOut
-                                    ? context.l10n.soldOut
-                                    : context.l10n.addToCart,
-                              ),
-                            ),
-                          ),
+                          item.isSoldOut
+                              ? FilledButton(
+                                  onPressed: item.isSoldOut
+                                      ? null
+                                      : () {
+                                          HapticFeedback.lightImpact();
+                                          onAddToCart();
+                                        },
+                                  child: Text(context.l10n.soldOut),
+                                )
+                              : GestureDetector(
+                                  onTap: item.isSoldOut
+                                      ? null
+                                      : () {
+                                          HapticFeedback.lightImpact();
+                                          onAddToCart();
+                                        },
+                                  child: Icon(LucideIcons.shoppingCart),
+                                ),
                         ],
                       ],
                     ),

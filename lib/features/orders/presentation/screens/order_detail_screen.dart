@@ -179,26 +179,26 @@ class _Header extends StatelessWidget {
                 ],
               ),
             ),
-            Material(
-              color: context.glassColor,
-              shape: CircleBorder(side: BorderSide(color: context.borderColor)),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: () {
-                  Share.share(
-                    '${context.l10n.ordersShareSummary}\n${context.l10n.orderHashPrefix}${o.formattedOrderId}\n${orderStatusLabel(context, o.status)}\n${context.formatCurrency(o.total)}',
-                  );
-                },
-                child: SizedBox.square(
-                  dimension: 44,
-                  child: Icon(
-                    Icons.ios_share_rounded,
-                    size: 20,
-                    color: context.textPrimary,
-                  ),
-                ),
-              ),
-            ),
+            // Material(
+            //   color: context.glassColor,
+            //   shape: CircleBorder(side: BorderSide(color: context.borderColor)),
+            //   clipBehavior: Clip.antiAlias,
+            //   child: InkWell(
+            //     onTap: () {
+            //       Share.share(
+            //         '${context.l10n.ordersShareSummary}\n${context.l10n.orderHashPrefix}${o.formattedOrderId}\n${orderStatusLabel(context, o.status)}\n${context.formatCurrency(o.total)}',
+            //       );
+            //     },
+            //     child: SizedBox.square(
+            //       dimension: 44,
+            //       child: Icon(
+            //         Icons.ios_share_rounded,
+            //         size: 20,
+            //         color: context.textPrimary,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ],
       ),
