@@ -19,6 +19,7 @@ jobs:
       - run: dart run build_runner build --delete-conflicting-outputs
       - name: Checks
         run: |
+          set +e
           mkdir -p ci_out
           flutter test test/zz_screenshots --update-goldens > ci_out/shots.txt 2>&1; echo "exit=$?" >> ci_out/shots.txt
           flutter analyze > ci_out/analyze.txt 2>&1; echo "exit=$?" >> ci_out/analyze.txt
@@ -28,6 +29,7 @@ jobs:
           git status --short > ci_out/git_status.txt
           git diff > ci_out/codegen.diff
       - name: Commit results
+        if: always()
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
