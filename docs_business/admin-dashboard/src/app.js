@@ -27,6 +27,10 @@ const col=s=>AV[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%AV.length];
 const ini=s=>s.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const avatar=(s,r=9)=>`<span class="ua" style="background:${col(s)};border-radius:${r=='50'?'50%':r+'px'}">${ini(s)}</span>`;
 const EGP=n=>'EGP '+n.toLocaleString('en-US');
+/* Escapes free-text/PII fields before they're concatenated into innerHTML.
+   Harmless today since all data is hard-coded, but required once these views
+   are wired to real vendor/customer/order data from a backend. */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- data (grounded in xStore) ---------- */
 const CATS=[['Electronics','📱',4,842,true],['Fashion','👕',4,1290,true],['Home & Garden','🛋️',4,610,true],['Beauty','✨',3,455,true],['Sports','🏋️',3,288,true],['Toys','🧸',3,176,true],['Automotive','🚗',3,203,true],['Food & Drinks','🥤',3,134,false],['Books','📚',3,97,true],['Other','📦',1,58,true]];
@@ -155,8 +159,8 @@ function overview(){
  const rev=[62,58,71,69,84,78,96,102,94,115,108,124];
  const max=Math.max(...rev),pts=rev.map((v,i)=>`${20+i*(560/11)},${180-(v/max)*150}`).join(' ');
  const area=`20,180 ${pts} 580,180`;
- const pend=PENDING.slice(0,4).map((p,i)=>`<div class="list-row" style="cursor:pointer" onclick="go('moderation')">${avatar(p.v)}<div style="flex:1"><b>${p.t}</b><small class="muted">${p.v} · ${p.cat}</small></div><span class="badge-s b-amber">Pending</span></div>`).join('');
- const ords=ORDERS.slice(0,5).map((o,i)=>`<div class="list-row" style="cursor:pointer" onclick="go('orders')"><div style="flex:1"><b>${o.id}</b><small class="muted">${o.buyer}</small></div><span class="money">${EGP(orderTotal(o))}</span><span class="badge-s ${OSTAT[o.status][0]}" style="margin-left:12px">${OSTAT[o.status][1]}</span></div>`).join('');
+ const pend=PENDING.slice(0,4).map((p,i)=>`<div class="list-row" style="cursor:pointer" onclick="go('moderation')">${avatar(p.v)}<div style="flex:1"><b>${esc(p.t)}</b><small class="muted">${esc(p.v)} · ${esc(p.cat)}</small></div><span class="badge-s b-amber">Pending</span></div>`).join('');
+ const ords=ORDERS.slice(0,5).map((o,i)=>`<div class="list-row" style="cursor:pointer" onclick="go('orders')"><div style="flex:1"><b>${esc(o.id)}</b><small class="muted">${esc(o.buyer)}</small></div><span class="money">${EGP(orderTotal(o))}</span><span class="badge-s ${OSTAT[o.status][0]}" style="margin-left:12px">${OSTAT[o.status][1]}</span></div>`).join('');
  return `
  <div class="page-head"><div><h2>Marketplace Overview</h2><p>Last 30 days · All vendors · EGP · Cash on Delivery</p></div>
    <div style="display:flex;gap:10px"><button class="btn btn-g">Export</button><button class="btn btn-p" onclick="openAnnouncementForm()">+ New announcement</button></div></div>
@@ -208,12 +212,12 @@ function productDrawer(i){
  const cmp=p.cmp?` <span style="text-decoration:line-through;color:var(--text-3);font-size:15px;font-weight:500">${EGP(p.cmp)}</span> <span class="badge-s b-red">-${Math.round((1-p.price/p.cmp)*100)}%</span>`:'';
  openDrawer('Review product',
    `<div style="display:flex;gap:8px;overflow:auto;margin-bottom:16px">${imgs}</div>
-    <h3 style="font-size:17px;margin-bottom:6px">${p.t}</h3>
+    <h3 style="font-size:17px;margin-bottom:6px">${esc(p.t)}</h3>
     <div style="font-size:22px;font-weight:800;color:var(--primary)">${EGP(p.price)}${cmp}</div>
-    <div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-amber">Pending approval</span><span class="badge-s b-grey">${p.cond}</span><span class="badge-s b-indigo">Stock: ${p.stock}</span></div>
-    <p class="muted" style="font-size:13px;line-height:1.6;margin-bottom:16px">${p.desc}</p>
+    <div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-amber">Pending approval</span><span class="badge-s b-grey">${esc(p.cond)}</span><span class="badge-s b-indigo">Stock: ${p.stock}</span></div>
+    <p class="muted" style="font-size:13px;line-height:1.6;margin-bottom:16px">${esc(p.desc)}</p>
     <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin-bottom:4px">Product details</h3>
-    ${kv('Vendor (business)',p.v+(p.vok?' · ✓ verified':' · unverified'))}${kv('Category',p.cat+' › '+p.sub)}${kv('Brand',p.brand)}${kv('Condition',p.cond)}${kv('Location',p.loc)}${kv('Shipping',p.ship?EGP(p.ship):'Free')}${kv('Submitted',p.submitted)}
+    ${kv('Vendor (business)',esc(p.v)+(p.vok?' · ✓ verified':' · unverified'))}${kv('Category',esc(p.cat)+' › '+esc(p.sub))}${kv('Brand',esc(p.brand))}${kv('Condition',esc(p.cond))}${kv('Location',esc(p.loc))}${kv('Shipping',p.ship?EGP(p.ship):'Free')}${kv('Submitted',esc(p.submitted))}
     <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin:16px 0 4px">Specifications</h3>${specs}`,
    `<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="decide(${i},'approve');closeDrawer()">Approve</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="decide(${i},'changes');closeDrawer()">Request changes</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="decide(${i},'reject');closeDrawer()">Reject</button>`);
 }
@@ -223,7 +227,7 @@ function vendors(){
    const act=v.status==='pending'?`<button class="btn btn-ok btn-sm" onclick="vdecide(${i},'approve')">Approve</button><button class="btn btn-no btn-sm" onclick="vdecide(${i},'reject')">Reject</button>`
      :v.status==='suspended'?`<button class="btn btn-g btn-sm" onclick="vdecide(${i},'reinstate')">Reinstate</button>`
      :`<button class="btn btn-g btn-sm" onclick="vdecide(${i},'suspend')">Suspend</button>`;
-   return `<tr data-status="${v.status}"><td><div class="u" style="cursor:pointer" onclick="openVendorProducts(${i})" title="View ${v.n}'s listings">${avatar(v.n)}<div><b>${v.n}</b><small>${v.owner} · ${v.city}</small></div></div></td>
+   return `<tr data-status="${v.status}"><td><div class="u" style="cursor:pointer" onclick="openVendorProducts(${i})" title="View ${esc(v.n)}'s listings">${avatar(v.n)}<div><b>${esc(v.n)}</b><small>${esc(v.owner)} · ${esc(v.city)}</small></div></div></td>
      <td><span class="badge-s b-indigo">🏢 Business</span></td>
      <td><span class="badge-s ${st}"><span class="dotb" style="background:currentColor"></span>${v.status[0].toUpperCase()+v.status.slice(1)}</span></td>
      <td><a style="cursor:pointer;color:var(--primary);font-weight:600" onclick="openVendorProducts(${i})">${v.products||'—'}</a></td><td class="money">${v.gmv?EGP(v.gmv):'—'}</td><td>${v.rating?'⭐ '+v.rating:'—'}</td>
@@ -245,13 +249,13 @@ function categories(){
 /* which orders can still be handed to a platform courier */
 const courierAssignable=o=>!o.courier&&['confirmed','processing'].indexOf(o.status)>-1;
 function deliveryCell(o,i){
- if(o.courier) return `<span class="badge-s b-indigo" title="Delivered by xStore">🚚 ${o.courier.split(' ')[0]}</span>`;
+ if(o.courier) return `<span class="badge-s b-indigo" title="Delivered by xStore">🚚 ${esc(o.courier.split(' ')[0])}</span>`;
  if(courierAssignable(o)) return `<button class="btn btn-g btn-sm" onclick="assignCourierDrawer(${i})">Assign</button>`;
  return '<span class="muted" style="font-size:12px">Vendor</span>';
 }
 function orders(){
- const rows=ORDERS.map((o,i)=>`<tr data-status="${o.status}"><td><b>${o.id}</b></td><td><div class="u">${avatar(o.buyer)}<b>${o.buyer}</b></div></td>
-   <td class="muted">${o.vendor}</td><td class="money">${EGP(orderTotal(o))}</td><td><span class="badge-s b-grey">COD</span></td>
+ const rows=ORDERS.map((o,i)=>`<tr data-status="${o.status}"><td><b>${esc(o.id)}</b></td><td><div class="u">${avatar(o.buyer)}<b>${esc(o.buyer)}</b></div></td>
+   <td class="muted">${esc(o.vendor)}</td><td class="money">${EGP(orderTotal(o))}</td><td><span class="badge-s b-grey">COD</span></td>
    <td>${deliveryCell(o,i)}</td>
    <td><span class="badge-s ${OSTAT[o.status][0]}">${OSTAT[o.status][1]}</span></td><td class="r"><button class="btn btn-g btn-sm" onclick="orderDrawer(${i})">View</button></td></tr>`).join('');
  return `<div class="page-head"><div><h2>Orders</h2><p>Every order across the marketplace · payment: Cash on Delivery · 🚚 = Delivered by xStore</p></div>
@@ -263,8 +267,8 @@ function orders(){
 }
 
 function disputes(){
- const rows=DISPUTES.map((d,i)=>`<tr data-status="${d.status}"><td><b>${d.id}</b></td><td><div class="u">${avatar(d.buyer)}<b>${d.buyer}</b></div></td>
-   <td class="muted">${d.vendor}</td><td>${d.reason}</td><td class="money">${EGP(d.val)}</td>
+ const rows=DISPUTES.map((d,i)=>`<tr data-status="${d.status}"><td><b>${esc(d.id)}</b></td><td><div class="u">${avatar(d.buyer)}<b>${esc(d.buyer)}</b></div></td>
+   <td class="muted">${esc(d.vendor)}</td><td>${esc(d.reason)}</td><td class="money">${EGP(d.val)}</td>
    <td><span class="badge-s ${d.status==='open'?'b-red':'b-amber'}">${d.status==='open'?'Open':'In review'}</span></td>
    <td class="r"><button class="btn btn-p btn-sm" onclick="disputeDrawer(${i})">Resolve</button></td></tr>`).join('');
  return `<div class="page-head"><div><h2>Disputes</h2><p>Buyer–vendor cases needing arbitration · order snapshots attached as evidence</p></div>
@@ -273,7 +277,7 @@ function disputes(){
 }
 
 function customers(){
- const rows=CUSTOMERS.map((c,i)=>`<tr data-status="active"><td><div class="u" style="cursor:pointer" onclick="userDrawer(${i})">${avatar(c.n,'50')}<div><b>${c.n}</b><small>role: consumer</small></div></div></td><td class="muted">${c.city}</td>
+ const rows=CUSTOMERS.map((c,i)=>`<tr data-status="active"><td><div class="u" style="cursor:pointer" onclick="userDrawer(${i})">${avatar(c.n,'50')}<div><b>${esc(c.n)}</b><small>role: consumer</small></div></div></td><td class="muted">${esc(c.city)}</td>
    <td><span class="badge-s b-blue">👤 Customer</span></td>
    <td>${c.orders}</td><td class="money">${EGP(c.spend)}</td><td><span class="badge-s b-green">Active</span></td>
    <td class="r"><button class="btn btn-g btn-sm" onclick="userDrawer(${i})">Profile</button></td></tr>`).join('');
@@ -297,8 +301,8 @@ function couriers(){
    const cashCell=due
      ?`<span class="money" style="color:#B4472E">${EGP(c.cash)}</span> <span class="badge-s b-red">Cap reached</span>`
      :`<span class="money">${EGP(c.cash)}</span>`;
-   return `<tr data-status="${c.status}"><td><div class="u" style="cursor:pointer" onclick="courierDrawer(${i})">${avatar(c.n,'50')}<div><b>${c.n}</b><small>${c.phone}</small></div></div></td>
-     <td class="muted">${c.zone}</td>
+   return `<tr data-status="${c.status}"><td><div class="u" style="cursor:pointer" onclick="courierDrawer(${i})">${avatar(c.n,'50')}<div><b>${esc(c.n)}</b><small>${esc(c.phone)}</small></div></div></td>
+     <td class="muted">${esc(c.zone)}</td>
      <td><span class="badge-s ${st[0]}"><span class="dotb" style="background:currentColor"></span>${st[1]}</span></td>
      <td>${c.today}</td><td>${c.delivered30} <small class="muted">/ ${c.failed30} failed</small></td>
      <td>${cashCell}</td>
@@ -325,11 +329,11 @@ function courierDrawer(i){
    ?`<div class="form-row" style="margin-top:10px"><label>Cash received from courier (EGP)</label><input id="hoAmt" inputmode="numeric" value="${c.cash}"></div>
      <div style="display:flex;gap:8px"><button class="btn btn-ok" style="flex:1;justify-content:center" onclick="recordHandover(${i})">Record handover</button></div>`
    :'<div style="padding:12px 14px;background:var(--success-bg);color:#2C6347;border-radius:11px;font-size:13px;font-weight:600;margin-top:10px">✓ No cash with this courier.</div>';
- openDrawer('Courier — '+c.n,
-   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+c.n+'</b><div class="muted" style="font-size:12.5px">Platform courier · role: courier</div></div></div>'
+ openDrawer('Courier — '+esc(c.n),
+   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+esc(c.n)+'</b><div class="muted" style="font-size:12.5px">Platform courier · role: courier</div></div></div>'
    +'<div style="margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-indigo">🚚 Courier</span><span class="badge-s '+st[0]+'">'+st[1]+'</span>'+(due?'<span class="badge-s b-red">Cash cap reached</span>':'')+'</div>'
    +secH('Profile')
-   +kv('Phone',c.phone)+kv('Zone',c.zone)+kv('Joined',c.joined)+kv('Tasks today',c.today)+kv('Delivered (30d)',c.delivered30)+kv('Failed (30d)',c.failed30)
+   +kv('Phone',esc(c.phone))+kv('Zone',esc(c.zone))+kv('Joined',esc(c.joined))+kv('Tasks today',c.today)+kv('Delivered (30d)',c.delivered30)+kv('Failed (30d)',c.failed30)
    +secH('Cash in hand')
    +kv('Holding now','<span style="color:'+(due?'#B4472E':'inherit')+'">'+EGP(c.cash)+'</span>')+kv('Handover cap',EGP(c.cap))
    +(due?'<div style="margin-top:10px;padding:10px 12px;background:var(--error-bg);color:#8A3A24;border-radius:9px;font-size:12.5px"><b>Cap reached</b> — no new COD orders until the cash is deposited.</div>':'')
@@ -402,11 +406,11 @@ function packages(){
  const transit=PKGS.filter(p=>p.status==='confirmed'||p.status==='pickedup').length;
  const done=PKGS.filter(p=>p.status==='delivered').length;
  const rows=PKGS.map((p,i)=>`<tr data-status="${p.status}">
-   <td><b style="cursor:pointer" onclick="pkgDrawer(${i})">${p.id}</b></td>
-   <td><div class="u" style="cursor:pointer" onclick="pkgDrawer(${i})">${avatar(p.customer,'50')}<div><b>${p.customer}</b><small>${p.phone}</small></div></div></td>
-   <td class="route"><b>${p.pickup.city} → ${p.drop.city}${pkgCross(p)?' <span class="badge-s b-amber" style="padding:1px 7px">cross-city</span>':''}</b><small>${p.pickup.street} → ${p.drop.street} (${p.drop.name})</small></td>
-   <td class="muted" style="max-width:200px;white-space:normal">${p.note}</td>
-   <td class="muted">${p.submitted}</td>
+   <td><b style="cursor:pointer" onclick="pkgDrawer(${i})">${esc(p.id)}</b></td>
+   <td><div class="u" style="cursor:pointer" onclick="pkgDrawer(${i})">${avatar(p.customer,'50')}<div><b>${esc(p.customer)}</b><small>${esc(p.phone)}</small></div></div></td>
+   <td class="route"><b>${esc(p.pickup.city)} → ${esc(p.drop.city)}${pkgCross(p)?' <span class="badge-s b-amber" style="padding:1px 7px">cross-city</span>':''}</b><small>${esc(p.pickup.street)} → ${esc(p.drop.street)} (${esc(p.drop.name)})</small></td>
+   <td class="muted" style="max-width:200px;white-space:normal">${esc(p.note)}</td>
+   <td class="muted">${esc(p.submitted)}</td>
    <td class="money">${p.price!=null?EGP(p.price):'—'}</td>
    <td><span class="badge-s ${PSTAT[p.status][0]}">${PSTAT[p.status][1]}</span></td>
    <td class="r">${pkgActions(p,i)}</td></tr>`).join('');
@@ -469,14 +473,14 @@ function pkgDrawer(i){
  const tl=p.status==='cancelled'
    ?'<div class="list-row"><span class="dotb" style="width:11px;height:11px;background:var(--error)"></span><span style="color:var(--error)">Cancelled'+(p.price!=null?' (was priced at '+EGP(p.price)+')':'')+'</span></div>'
    :steps.map((s,x)=>'<div class="list-row"><span class="dotb" style="width:11px;height:11px;background:'+(x<=cur?'var(--success)':'var(--line)')+'"></span><span style="'+(x<=cur?'':'color:var(--text-3)')+'">'+s+(s==='Picked up'&&x<=cur?' — '+EGP(p.price)+' cash collected':'')+'</span></div>').join('');
- openDrawer('Request '+p.id,
-   kv('Status',PSTAT[p.status][1])+kv('Customer',p.customer)+kv('Phone',p.phone)
+ openDrawer('Request '+esc(p.id),
+   kv('Status',PSTAT[p.status][1])+kv('Customer',esc(p.customer))+kv('Phone',esc(p.phone))
    +kv('Price',p.price!=null?EGP(p.price):'— not set yet')
    +kv('Payment','Cash to courier at pickup')
-   +(p.courier?kv('Courier','🚚 '+p.courier):'')
-   +secH('Pickup')+'<p class="muted" style="font-size:13px">'+p.pickup.street+', '+p.pickup.city+'</p>'
-   +secH('Drop-off')+'<p class="muted" style="font-size:13px">'+p.drop.street+', '+p.drop.city+' — '+p.drop.name+' ('+p.drop.phone+')</p>'
-   +secH('Package')+'<p class="muted" style="font-size:13px">'+p.note+'</p>'
+   +(p.courier?kv('Courier','🚚 '+esc(p.courier)):'')
+   +secH('Pickup')+'<p class="muted" style="font-size:13px">'+esc(p.pickup.street)+', '+esc(p.pickup.city)+'</p>'
+   +secH('Drop-off')+'<p class="muted" style="font-size:13px">'+esc(p.drop.street)+', '+esc(p.drop.city)+' — '+esc(p.drop.name)+' ('+esc(p.drop.phone)+')</p>'
+   +secH('Package')+'<p class="muted" style="font-size:13px">'+esc(p.note)+'</p>'
    +secH('Timeline')+tl,
    (p.status==='confirmed'?'<button class="btn btn-p" style="flex:1;justify-content:center" onclick="closeDrawer();assignPkgCourierDrawer('+i+')">'+(p.courier?'Reassign courier':'Assign courier')+'</button>':'')
    +((p.status==='submitted'||p.status==='priced')?'<button class="btn btn-no" style="flex:1;justify-content:center" onclick="closeDrawer();cancelPkg('+i+')">Cancel request</button>':'')
@@ -502,16 +506,16 @@ function content(){
  return `<div class="page-head"><div><h2>Content &amp; Banners</h2><p>Merchandise the app home feed and send push broadcasts</p></div><button class="btn btn-p" onclick="openBannerForm()">+ New banner</button></div>
    <div class="split"><div class="card"><div class="c-head"><h3>Home banners</h3></div><div class="c-body" style="display:flex;flex-direction:column;gap:12px">${rows}</div></div>
    <div class="card"><div class="c-head"><h3>Push broadcast</h3></div><div class="c-body">
-     <div class="form-row"><label>Title</label><input placeholder="Flash sale ends tonight!"></div>
-     <div class="form-row"><label>Audience</label><select><option>All buyers</option><option>Cairo / Giza</option><option>Lapsed buyers</option></select></div>
-     <div class="form-row"><label>Message</label><input placeholder="Up to 40% off electronics…"></div>
+     <div class="form-row"><label>Title</label><input id="pbTitle" placeholder="Flash sale ends tonight!"></div>
+     <div class="form-row"><label>Audience</label><select id="pbAud"><option>All buyers</option><option>Cairo / Giza</option><option>Lapsed buyers</option></select></div>
+     <div class="form-row"><label>Message</label><input id="pbMsg" placeholder="Up to 40% off electronics…"></div>
      <button class="btn btn-p" style="width:100%;justify-content:center" onclick="sendBroadcast()">Send push</button></div></div></div>`;
 }
 
 function analytics(){
  const funnel=[['Installs',100],['Sign-ups',58],['Added to cart',34],['Placed order',19],['Repeat order',12]];
  const fb=funnel.map(f=>`<div class="bar-row"><span class="muted">${f[0]}</span><div class="bar-track"><div class="bar-fill" style="width:${f[1]}%"></div></div><b class="r">${f[1]}%</b></div>`).join('');
- const top=VENDORS.filter(v=>v.gmv).sort((a,b)=>b.gmv-a.gmv).slice(0,5).map((v,i)=>`<div class="list-row"><b style="color:var(--text-3);width:18px">${i+1}</b>${avatar(v.n)}<div style="flex:1"><b>${v.n}</b><small class="muted">${v.city}</small></div><span class="money">${EGP(v.gmv)}</span></div>`).join('');
+ const top=VENDORS.filter(v=>v.gmv).sort((a,b)=>b.gmv-a.gmv).slice(0,5).map((v,i)=>`<div class="list-row"><b style="color:var(--text-3);width:18px">${i+1}</b>${avatar(v.n)}<div style="flex:1"><b>${esc(v.n)}</b><small class="muted">${esc(v.city)}</small></div><span class="money">${EGP(v.gmv)}</span></div>`).join('');
  return `<div class="page-head"><div><h2>Analytics</h2><p>Marketplace health · acquisition → retention</p></div>
    <div class="tabs"><span class="chip">7d</span><span class="chip active">30d</span><span class="chip">90d</span></div></div>
    <div class="grid g-4">${kpi('chart','EGP 1.24M','GMV','+14%','up','#2E5C6E')}${kpi('box','3,482','Orders','+9%','up','#C68A2E')}${kpi('users','2,910','New buyers','+11%','up','#3F7A5C')}${kpi('alert','12%','COD refusals','watch','down','#C68A2E')}</div>
@@ -567,7 +571,7 @@ const kv=(k,v)=>'<div class="kv"><span>'+k+'</span><b>'+v+'</b></div>';
 const secH=t=>'<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin:16px 0 4px">'+t+'</h3>';
 function orderDrawer(i){
  const o=ORDERS[i];
- const items=o.items.map(it=>kv(it[0]+' × '+it[1], EGP(it[1]*it[2]))).join('');
+ const items=o.items.map(it=>kv(esc(it[0])+' × '+it[1], EGP(it[1]*it[2]))).join('');
  const steps=['Pending','Confirmed','Processing','Shipped','Delivered'];
  const cur=steps.indexOf(OSTAT[o.status][1]);
  const tl=o.status==='cancelled'
@@ -576,10 +580,10 @@ function orderDrawer(i){
  const canCancel=['pending','confirmed','processing'].indexOf(o.status)>-1;
  const assignBtn=courierAssignable(o)
    ?'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer();assignCourierDrawer('+i+')">Assign courier</button>':'';
- openDrawer('Order '+o.id,
-   kv('Status',OSTAT[o.status][1])+kv('Buyer (customer)',o.buyer)+kv('Phone',o.phone)+kv('Vendor (business)',o.vendor)+kv('Payment','Cash on Delivery')
-   +kv('Delivery',o.courier?'🚚 Delivered by xStore — '+o.courier:'Vendor self-delivery')
-   +secH('Delivery address')+'<p class="muted" style="font-size:13px">'+o.addr+'</p>'
+ openDrawer('Order '+esc(o.id),
+   kv('Status',OSTAT[o.status][1])+kv('Buyer (customer)',esc(o.buyer))+kv('Phone',esc(o.phone))+kv('Vendor (business)',esc(o.vendor))+kv('Payment','Cash on Delivery')
+   +kv('Delivery',o.courier?'🚚 Delivered by xStore — '+esc(o.courier):'Vendor self-delivery')
+   +secH('Delivery address')+'<p class="muted" style="font-size:13px">'+esc(o.addr)+'</p>'
    +secH('Items')+items+kv('<b>Total</b>','<b>'+EGP(orderTotal(o))+'</b>')
    +secH('Fulfilment timeline')+tl,
    '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="toast(\'Message sent to vendor\');closeDrawer()">Contact vendor</button>'+assignBtn
@@ -587,19 +591,19 @@ function orderDrawer(i){
 }
 function userDrawer(i){
  const c=CUSTOMERS[i];
- openDrawer(c.n,
-   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+c.n+'</b><div class="muted" style="font-size:12.5px">Customer · role: consumer</div></div></div>'
+ openDrawer(esc(c.n),
+   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+esc(c.n)+'</b><div class="muted" style="font-size:12.5px">Customer · role: consumer</div></div></div>'
    +'<div style="margin-bottom:8px"><span class="badge-s b-blue">👤 Customer</span> <span class="badge-s b-green">Active</span></div>'
    +secH('Account')
-   +kv('City',c.city)+kv('Phone',c.phone)+kv('Joined',c.joined)+kv('Total orders',c.orders)+kv('Lifetime spend',EGP(c.spend))+kv('Avg order',EGP(Math.round(c.spend/c.orders))),
+   +kv('City',esc(c.city))+kv('Phone',esc(c.phone))+kv('Joined',esc(c.joined))+kv('Total orders',c.orders)+kv('Lifetime spend',EGP(c.spend))+kv('Avg order',EGP(Math.round(c.spend/c.orders))),
    '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="toast(\'Message sent to customer\');closeDrawer()">Message</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Customer suspended\');closeDrawer()">Suspend</button>');
 }
 function disputeDrawer(i){
  const d=DISPUTES[i];
- openDrawer('Dispute — '+d.id,
-   kv('Buyer',d.buyer)+kv('Vendor',d.vendor)+kv('Reason',d.reason)+kv('Order value',EGP(d.val))+kv('Status',d.status==='open'?'Open':'In review')
-   +secH('Case notes')+'<p class="muted" style="font-size:13px;line-height:1.6">'+d.note+'</p>'
-   +'<div style="margin-top:12px;padding:10px 12px;background:#EAF0F1;border-radius:9px;font-size:12.5px"><b>Suggested resolution:</b> '+d.sug+'</div>'
+ openDrawer('Dispute — '+esc(d.id),
+   kv('Buyer',esc(d.buyer))+kv('Vendor',esc(d.vendor))+kv('Reason',esc(d.reason))+kv('Order value',EGP(d.val))+kv('Status',d.status==='open'?'Open':'In review')
+   +secH('Case notes')+'<p class="muted" style="font-size:13px;line-height:1.6">'+esc(d.note)+'</p>'
+   +'<div style="margin-top:12px;padding:10px 12px;background:#EAF0F1;border-radius:9px;font-size:12.5px"><b>Suggested resolution:</b> '+esc(d.sug)+'</div>'
    +'<p class="muted" style="margin-top:12px;font-size:12px">Order snapshot attached as evidence.</p>',
    '<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="toast(\'Buyer refunded ✓\');closeDrawer()">Refund buyer</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Partial refund issued\');closeDrawer()">Partial</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Claim rejected\');closeDrawer()">Reject</button>');
 }
@@ -611,12 +615,12 @@ function vendorDrawer(i){
    :v.status==='suspended'
    ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'reinstate\')">Reinstate</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'
    :'<button class="btn btn-p" style="flex:1;justify-content:center" onclick="closeDrawer();openVendorProducts('+i+')">View listings</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'suspend\')">Suspend</button>';
- openDrawer('Vendor — '+v.n,
-   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(v.n)+'<div><b style="font-size:16px">'+v.n+'</b><div class="muted" style="font-size:12.5px">'+v.owner+' · '+v.city+'</div></div></div>'
+ openDrawer('Vendor — '+esc(v.n),
+   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(v.n)+'<div><b style="font-size:16px">'+esc(v.n)+'</b><div class="muted" style="font-size:12.5px">'+esc(v.owner)+' · '+esc(v.city)+'</div></div></div>'
    +'<div style="margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-indigo">🏢 Business</span><span class="badge-s '+sm[0]+'">'+sm[1]+'</span>'+(v.vok?'<span class="badge-s b-green">✓ verified</span>':'<span class="badge-s b-amber">unverified</span>')+'</div>'
    +secH('Business profile')
-   +kv('Owner',v.owner)+kv('Primary category',v.cat)+kv('Location',v.city)+kv('Joined',v.joined)+kv('Products',v.products||'—')+kv('GMV',v.gmv?EGP(v.gmv):'—')+kv('Rating',v.rating?'⭐ '+v.rating:'—')+kv('Wallet — owed to platform','<span style="color:'+(commLevel(vcomm(i))==='paused'?'#B4472E':commLevel(vcomm(i))==='warn'?'#C68A2E':'inherit')+'">'+EGP(vcomm(i).outstanding)+'</span>')
-   +secH('Contact')+kv('WhatsApp',v.wa)+kv('Email',v.email),
+   +kv('Owner',esc(v.owner))+kv('Primary category',esc(v.cat))+kv('Location',esc(v.city))+kv('Joined',esc(v.joined))+kv('Products',v.products||'—')+kv('GMV',v.gmv?EGP(v.gmv):'—')+kv('Rating',v.rating?'⭐ '+v.rating:'—')+kv('Wallet — owed to platform','<span style="color:'+(commLevel(vcomm(i))==='paused'?'#B4472E':commLevel(vcomm(i))==='warn'?'#C68A2E':'inherit')+'">'+EGP(vcomm(i).outstanding)+'</span>')
+   +secH('Contact')+kv('WhatsApp',esc(v.wa))+kv('Email',esc(v.email)),
    actions);
 }
 function vdecide(i,action){
@@ -644,8 +648,8 @@ function vendorProducts(i,tab){
   <div style="margin-bottom:14px"><a class="btn btn-g btn-sm" style="cursor:pointer" onclick="go('vendors')">← Back to vendors</a></div>
   <div class="page-head">
     <div style="display:flex;align-items:center;gap:14px">${avatar(v.n)}
-      <div><h2 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${v.n} <span class="badge-s ${sm[0]}">${sm[1]}</span>${v.vok?'<span class="badge-s b-green">✓ verified</span>':''}</h2>
-      <p>${v.owner} · ${v.city} · ${v.cat} · joined ${v.joined}</p></div></div>
+      <div><h2 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${esc(v.n)} <span class="badge-s ${sm[0]}">${sm[1]}</span>${v.vok?'<span class="badge-s b-green">✓ verified</span>':''}</h2>
+      <p>${esc(v.owner)} · ${esc(v.city)} · ${esc(v.cat)} · joined ${esc(v.joined)}</p></div></div>
     <button class="btn btn-p" onclick="vendorDrawer(${i})">Vendor details</button></div>
   <div class="tabs" style="margin-bottom:18px">
     <span class="chip ${tab==='listings'?'active':''}" onclick="event.stopPropagation();openVendorProducts(${i},'listings')">📦 Listings (${list.length})</span>
@@ -663,9 +667,9 @@ function vendorProducts(i,tab){
      ${kpi('shield',String(delivered),'Delivered','','up','#3F7A5C')}
      ${kpi('alert',String(vOrders.length-delivered),'In progress','','down','#C68A2E')}
      ${kpi('chart',ordVal?EGP(ordVal):'—','Order value','','up','#356F80')}</div>`;
-   const rows=vOrders.map(({o,idx})=>`<tr data-status="${o.status}"><td><b>${o.id}</b></td>
-     <td><div class="u">${avatar(o.buyer)}<b>${o.buyer}</b></div></td>
-     <td class="muted">${o.items.map(it=>it[0]+' ×'+it[1]).join(', ')}</td>
+   const rows=vOrders.map(({o,idx})=>`<tr data-status="${o.status}"><td><b>${esc(o.id)}</b></td>
+     <td><div class="u">${avatar(o.buyer)}<b>${esc(o.buyer)}</b></div></td>
+     <td class="muted">${o.items.map(it=>esc(it[0])+' ×'+it[1]).join(', ')}</td>
      <td class="money">${EGP(orderTotal(o))}</td><td><span class="badge-s b-grey">COD</span></td>
      <td><span class="badge-s ${OSTAT[o.status][0]}">${OSTAT[o.status][1]}</span></td>
      <td class="r"><button class="btn btn-g btn-sm" onclick="orderDrawer(${idx})">View</button></td></tr>`).join('');
@@ -685,7 +689,7 @@ function vendorProducts(i,tab){
    ${kpi('alert',String(pend),'Pending review','','down','#C68A2E')}
    ${kpi('chart',v.gmv?EGP(v.gmv):'—','GMV (30d)','','up','#356F80')}</div>`;
  const rows=list.map((p,pi)=>{const cmp=p.cmp?` <small style="text-decoration:line-through;color:var(--text-3)">${EGP(p.cmp)}</small>`:'';
-   return `<tr data-status="${p.status}"><td><div class="u" style="cursor:pointer" onclick="listingDrawer(${i},${pi})"><span class="ua" style="background:linear-gradient(135deg,#EAF0F1,#DAE6E9);font-size:18px">${p.emoji}</span><div><b>${p.t}</b><small>${p.sub}</small></div></div></td>
+   return `<tr data-status="${p.status}"><td><div class="u" style="cursor:pointer" onclick="listingDrawer(${i},${pi})"><span class="ua" style="background:linear-gradient(135deg,#EAF0F1,#DAE6E9);font-size:18px">${p.emoji}</span><div><b>${esc(p.t)}</b><small>${esc(p.sub)}</small></div></div></td>
      <td class="money">${EGP(p.price)}${cmp}</td>
      <td>${p.stock||'—'}</td>
      <td>${p.sold}</td>
@@ -778,13 +782,13 @@ function listingDrawer(vi,pi){
    :p.status==='live'
    ?'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Opening listing editor…\');closeDrawer()">Edit</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Listing hidden from store\');closeDrawer()">Unpublish</button>'
    :'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Restock reminder sent to vendor\');closeDrawer()">Nudge vendor</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>';
- openDrawer('Listing — '+p.t,
+ openDrawer('Listing — '+esc(p.t),
    '<div style="width:88px;height:88px;border-radius:14px;background:linear-gradient(135deg,#EAF0F1,#DAE6E9);display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:14px">'+p.emoji+'</div>'
-   +'<h3 style="font-size:17px;margin-bottom:6px">'+p.t+'</h3>'
+   +'<h3 style="font-size:17px;margin-bottom:6px">'+esc(p.t)+'</h3>'
    +'<div style="font-size:22px;font-weight:800;color:var(--primary)">'+EGP(p.price)+cmp+'</div>'
    +'<div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s '+st[0]+'">'+st[1]+'</span><span class="badge-s b-indigo">Stock: '+p.stock+'</span><span class="badge-s b-grey">'+p.sold+' sold</span></div>'
    +secH('Listing details')
-   +kv('Vendor (business)',v.n)+kv('Category',v.cat+' › '+p.sub)+kv('Price',EGP(p.price))+(p.cmp?kv('Compare-at',EGP(p.cmp)):'')+kv('In stock',p.stock)+kv('Sold (30d)',p.sold)+kv('Rating',p.rating?'⭐ '+p.rating:'—'),
+   +kv('Vendor (business)',esc(v.n))+kv('Category',esc(v.cat)+' › '+esc(p.sub))+kv('Price',EGP(p.price))+(p.cmp?kv('Compare-at',EGP(p.cmp)):'')+kv('In stock',p.stock)+kv('Sold (30d)',p.sold)+kv('Rating',p.rating?'⭐ '+p.rating:'—'),
    act);
 }
 
