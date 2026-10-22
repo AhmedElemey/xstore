@@ -192,18 +192,18 @@ class OrderCard extends ConsumerWidget {
                 child: Text(context.l10n.ordersLeaveReview),
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: FilledButton(
-                onPressed: () async {
-                  await notifier.reorder(order.id);
-                  if (context.mounted) {
-                    AppSnackbar.success(context, context.l10n.addedToCart);
-                  }
-                },
-                child: Text(context.l10n.ordersReorder),
-              ),
-            ),
+            // const SizedBox(width: AppSpacing.sm),
+            // Expanded(
+            //   child: FilledButton(
+            //     onPressed: () async {
+            //       await notifier.reorder(order.id);
+            //       if (context.mounted) {
+            //         AppSnackbar.success(context, context.l10n.addedToCart);
+            //       }
+            //     },
+            //     child: Text(context.l10n.ordersReorder),
+            //   ),
+            // ),
           ],
         );
       case OrderStatus.cancelled:

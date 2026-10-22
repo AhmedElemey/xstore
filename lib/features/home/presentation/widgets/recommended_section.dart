@@ -98,6 +98,15 @@ class _RecommendedList extends StatelessWidget {
         itemBuilder: (context, i) {
           final listing = items[i];
           final delay = AppAnimations.staggerDelayCapped(i);
+          final hasDiscount =
+              listing.compareAtPrice != null &&
+              listing.compareAtPrice! > listing.price + 0.009;
+          final discountPercent = hasDiscount
+              ? ((listing.compareAtPrice! - listing.price) /
+                        listing.compareAtPrice! *
+                        100)
+                    .roundToDouble()
+              : 0.0;
           return SizedBox(
             key: ValueKey<String>(listing.id),
             width: AppSpacing.x4l * 3 + AppSpacing.lg,
@@ -110,7 +119,7 @@ class _RecommendedList extends StatelessWidget {
                         imageUrl: listing.imageUrls.isNotEmpty
                             ? listing.imageUrls.first
                             : null,
-                        discountPercent: 0,
+                        discountPercent: discountPercent,
                         listingId: listing.id,
                         isSoldOut: isSoldOutListing(status: listing.status),
                         onTap: () =>
