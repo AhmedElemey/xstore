@@ -24,6 +24,10 @@ const col=s=>AV[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%AV.length];
 const ini=s=>s.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const avatar=(s,r=9)=>`<span class="ua" style="background:${col(s)};border-radius:${r=='50'?'50%':r+'px'}">${ini(s)}</span>`;
 const EGP=n=>'EGP '+n.toLocaleString('en-US');
+/* Escapes free-text/PII fields before they're concatenated into innerHTML.
+   Harmless today since all data is hard-coded, but required once these views
+   are wired to real vendor/customer/order data from a backend. */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- backend wiring (Listings & Users — see BACKEND_HANDOFF.md) ---------- */
 /* Real fetch() against the documented /admin endpoints. No backend exists yet, so a
@@ -196,12 +200,12 @@ function productDrawer(i){
  const cmp=p.cmp?` <span style="text-decoration:line-through;color:var(--text-3);font-size:15px;font-weight:500">${EGP(p.cmp)}</span> <span class="badge-s b-red">-${Math.round((1-p.price/p.cmp)*100)}%</span>`:'';
  openDrawer('Review product',
    `<div style="display:flex;gap:8px;overflow:auto;margin-bottom:16px">${imgs}</div>
-    <h3 style="font-size:17px;margin-bottom:6px">${p.t}</h3>
+    <h3 style="font-size:17px;margin-bottom:6px">${esc(p.t)}</h3>
     <div style="font-size:22px;font-weight:800;color:var(--primary)">${EGP(p.price)}${cmp}</div>
-    <div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-amber">Pending approval</span><span class="badge-s b-grey">${p.cond}</span><span class="badge-s b-indigo">Stock: ${p.stock}</span></div>
-    <p class="muted" style="font-size:13px;line-height:1.6;margin-bottom:16px">${p.desc}</p>
+    <div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-amber">Pending approval</span><span class="badge-s b-grey">${esc(p.cond)}</span><span class="badge-s b-indigo">Stock: ${p.stock}</span></div>
+    <p class="muted" style="font-size:13px;line-height:1.6;margin-bottom:16px">${esc(p.desc)}</p>
     <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin-bottom:4px">Product details</h3>
-    ${kv('Vendor (business)',p.v+(p.vok?' · ✓ verified':' · unverified'))}${kv('Category',p.cat+' › '+p.sub)}${kv('Brand',p.brand)}${kv('Condition',p.cond)}${kv('Location',p.loc)}${kv('Shipping',p.ship?EGP(p.ship):'Free')}${kv('Submitted',p.submitted)}
+    ${kv('Vendor (business)',esc(p.v)+(p.vok?' · ✓ verified':' · unverified'))}${kv('Category',esc(p.cat)+' › '+esc(p.sub))}${kv('Brand',esc(p.brand))}${kv('Condition',esc(p.cond))}${kv('Location',esc(p.loc))}${kv('Shipping',p.ship?EGP(p.ship):'Free')}${kv('Submitted',esc(p.submitted))}
     <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin:16px 0 4px">Specifications</h3>${specs}`,
    `<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="decide(${i},'approve');closeDrawer()">Approve</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="decide(${i},'changes');closeDrawer()">Request changes</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="decide(${i},'reject');closeDrawer()">Reject</button>`);
 }
@@ -211,7 +215,7 @@ function vendors(){
    const act=v.status==='pending'?`<button class="btn btn-ok btn-sm" onclick="vdecide(${i},'approve')">Approve</button><button class="btn btn-no btn-sm" onclick="vdecide(${i},'reject')">Reject</button>`
      :v.status==='suspended'?`<button class="btn btn-g btn-sm" onclick="vdecide(${i},'reinstate')">Reinstate</button>`
      :`<button class="btn btn-g btn-sm" onclick="vdecide(${i},'suspend')">Suspend</button>`;
-   return `<tr data-status="${v.status}"><td><div class="u" style="cursor:pointer" onclick="openVendorProducts(${i})" title="View ${v.n}'s listings">${avatar(v.n)}<div><b>${v.n}</b><small>${v.owner} · ${v.city}</small></div></div></td>
+   return `<tr data-status="${v.status}"><td><div class="u" style="cursor:pointer" onclick="openVendorProducts(${i})" title="View ${esc(v.n)}'s listings">${avatar(v.n)}<div><b>${esc(v.n)}</b><small>${esc(v.owner)} · ${esc(v.city)}</small></div></div></td>
      <td><span class="badge-s b-indigo">🏢 Business</span></td>
      <td><span class="badge-s ${st}"><span class="dotb" style="background:currentColor"></span>${v.status[0].toUpperCase()+v.status.slice(1)}</span></td>
      <td><a style="cursor:pointer;color:var(--primary);font-weight:600" onclick="openVendorProducts(${i})">${v.products||'—'}</a></td><td class="money">${v.gmv?EGP(v.gmv):'—'}</td><td>${v.rating?'⭐ '+v.rating:'—'}</td>
@@ -231,8 +235,8 @@ function categories(){
 }
 
 function orders(){
- const rows=ORDERS.map((o,i)=>`<tr data-status="${o.status}"><td><b>${o.id}</b></td><td><div class="u">${avatar(o.buyer)}<b>${o.buyer}</b></div></td>
-   <td class="muted">${o.vendor}</td><td class="money">${EGP(orderTotal(o))}</td><td><span class="badge-s b-grey">COD</span></td>
+ const rows=ORDERS.map((o,i)=>`<tr data-status="${o.status}"><td><b>${esc(o.id)}</b></td><td><div class="u">${avatar(o.buyer)}<b>${esc(o.buyer)}</b></div></td>
+   <td class="muted">${esc(o.vendor)}</td><td class="money">${EGP(orderTotal(o))}</td><td><span class="badge-s b-grey">COD</span></td>
    <td><span class="badge-s ${OSTAT[o.status][0]}">${OSTAT[o.status][1]}</span></td><td class="r"><button class="btn btn-g btn-sm" onclick="orderDrawer(${i})">View</button></td></tr>`).join('');
  return `<div class="page-head"><div><h2>Orders</h2><p>Every order across the marketplace · payment: Cash on Delivery</p></div>
    <div class="tabs" id="ordTabs"><span class="chip active">All</span><span class="chip">Pending</span><span class="chip">Processing</span><span class="chip">Shipped</span><span class="chip">Delivered</span><span class="chip">Cancelled</span></div></div>
@@ -243,8 +247,8 @@ function orders(){
 }
 
 function disputes(){
- const rows=DISPUTES.map((d,i)=>`<tr data-status="${d.status}"><td><b>${d.id}</b></td><td><div class="u">${avatar(d.buyer)}<b>${d.buyer}</b></div></td>
-   <td class="muted">${d.vendor}</td><td>${d.reason}</td><td class="money">${EGP(d.val)}</td>
+ const rows=DISPUTES.map((d,i)=>`<tr data-status="${d.status}"><td><b>${esc(d.id)}</b></td><td><div class="u">${avatar(d.buyer)}<b>${esc(d.buyer)}</b></div></td>
+   <td class="muted">${esc(d.vendor)}</td><td>${esc(d.reason)}</td><td class="money">${EGP(d.val)}</td>
    <td><span class="badge-s ${d.status==='open'?'b-red':'b-amber'}">${d.status==='open'?'Open':'In review'}</span></td>
    <td class="r"><button class="btn btn-p btn-sm" onclick="disputeDrawer(${i})">Resolve</button></td></tr>`).join('');
  return `<div class="page-head"><div><h2>Disputes</h2><p>Buyer–vendor cases needing arbitration · order snapshots attached as evidence</p></div>
@@ -254,7 +258,7 @@ function disputes(){
 
 function customers(){
  const rows=CUSTOMERS.map((c,i)=>{const susp=c.status==='suspended';
-  return `<tr data-status="${c.status}"><td><div class="u" style="cursor:pointer" onclick="userDrawer(${i})">${avatar(c.n,'50')}<div><b>${c.n}</b><small>role: consumer</small></div></div></td><td class="muted">${c.city}</td>
+  return `<tr data-status="${c.status}"><td><div class="u" style="cursor:pointer" onclick="userDrawer(${i})">${avatar(c.n,'50')}<div><b>${esc(c.n)}</b><small>role: consumer</small></div></div></td><td class="muted">${esc(c.city)}</td>
    <td><span class="badge-s b-blue">👤 Customer</span></td>
    <td>${c.orders}</td><td class="money">${EGP(c.spend)}</td><td><span class="badge-s ${susp?'b-red':'b-green'}">${susp?'Suspended':'Active'}</span></td>
    <td class="r"><button class="btn btn-g btn-sm" onclick="userDrawer(${i})">Profile</button></td></tr>`}).join('');
@@ -356,16 +360,16 @@ const kv=(k,v)=>'<div class="kv"><span>'+k+'</span><b>'+v+'</b></div>';
 const secH=t=>'<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin:16px 0 4px">'+t+'</h3>';
 function orderDrawer(i){
  const o=ORDERS[i];
- const items=o.items.map(it=>kv(it[0]+' × '+it[1], EGP(it[1]*it[2]))).join('');
+ const items=o.items.map(it=>kv(esc(it[0])+' × '+it[1], EGP(it[1]*it[2]))).join('');
  const steps=['Pending','Confirmed','Processing','Shipped','Delivered'];
  const cur=steps.indexOf(OSTAT[o.status][1]);
  const tl=o.status==='cancelled'
    ?'<div class="list-row"><span class="dotb" style="width:11px;height:11px;background:var(--error)"></span><span style="color:var(--error)">Cancelled</span></div>'
    :steps.map((s,x)=>'<div class="list-row"><span class="dotb" style="width:11px;height:11px;background:'+(x<=cur?'var(--success)':'var(--line)')+'"></span><span style="'+(x<=cur?'':'color:var(--text-3)')+'">'+s+'</span></div>').join('');
  const canCancel=['pending','confirmed','processing'].indexOf(o.status)>-1;
- openDrawer('Order '+o.id,
-   kv('Status',OSTAT[o.status][1])+kv('Buyer (customer)',o.buyer)+kv('Phone',o.phone)+kv('Vendor (business)',o.vendor)+kv('Payment','Cash on Delivery')
-   +secH('Delivery address')+'<p class="muted" style="font-size:13px">'+o.addr+'</p>'
+ openDrawer('Order '+esc(o.id),
+   kv('Status',OSTAT[o.status][1])+kv('Buyer (customer)',esc(o.buyer))+kv('Phone',esc(o.phone))+kv('Vendor (business)',esc(o.vendor))+kv('Payment','Cash on Delivery')
+   +secH('Delivery address')+'<p class="muted" style="font-size:13px">'+esc(o.addr)+'</p>'
    +secH('Items')+items+kv('<b>Total</b>','<b>'+EGP(orderTotal(o))+'</b>')
    +secH('Fulfilment timeline')+tl,
    '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="toast(\'Message sent to vendor\');closeDrawer()">Contact vendor</button>'
@@ -374,11 +378,11 @@ function orderDrawer(i){
 function userDrawer(i){
  const c=CUSTOMERS[i];
  const susp=c.status==='suspended';
- openDrawer(c.n,
-   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+c.n+'</b><div class="muted" style="font-size:12.5px">Customer · role: consumer</div></div></div>'
+ openDrawer(esc(c.n),
+   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+esc(c.n)+'</b><div class="muted" style="font-size:12.5px">Customer · role: consumer</div></div></div>'
    +'<div style="margin-bottom:8px"><span class="badge-s b-blue">👤 Customer</span> <span class="badge-s '+(susp?'b-red':'b-green')+'">'+(susp?'Suspended':'Active')+'</span></div>'
    +secH('Account')
-   +kv('City',c.city)+kv('Phone',c.phone)+kv('Joined',c.joined)+kv('Total orders',c.orders)+kv('Lifetime spend',EGP(c.spend))+kv('Avg order',EGP(Math.round(c.spend/c.orders))),
+   +kv('City',esc(c.city))+kv('Phone',esc(c.phone))+kv('Joined',esc(c.joined))+kv('Total orders',c.orders)+kv('Lifetime spend',EGP(c.spend))+kv('Avg order',EGP(Math.round(c.spend/c.orders))),
    '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="udecide('+i+',\'message\')">Message</button>'
    +(susp?'':'<button class="btn btn-no" style="flex:1;justify-content:center" onclick="udecide('+i+',\'suspend\')">Suspend</button>'));
 }
@@ -397,10 +401,10 @@ function udecide(i,action){
 }
 function disputeDrawer(i){
  const d=DISPUTES[i];
- openDrawer('Dispute — '+d.id,
-   kv('Buyer',d.buyer)+kv('Vendor',d.vendor)+kv('Reason',d.reason)+kv('Order value',EGP(d.val))+kv('Status',d.status==='open'?'Open':'In review')
-   +secH('Case notes')+'<p class="muted" style="font-size:13px;line-height:1.6">'+d.note+'</p>'
-   +'<div style="margin-top:12px;padding:10px 12px;background:#EAF0F1;border-radius:9px;font-size:12.5px"><b>Suggested resolution:</b> '+d.sug+'</div>'
+ openDrawer('Dispute — '+esc(d.id),
+   kv('Buyer',esc(d.buyer))+kv('Vendor',esc(d.vendor))+kv('Reason',esc(d.reason))+kv('Order value',EGP(d.val))+kv('Status',d.status==='open'?'Open':'In review')
+   +secH('Case notes')+'<p class="muted" style="font-size:13px;line-height:1.6">'+esc(d.note)+'</p>'
+   +'<div style="margin-top:12px;padding:10px 12px;background:#EAF0F1;border-radius:9px;font-size:12.5px"><b>Suggested resolution:</b> '+esc(d.sug)+'</div>'
    +'<p class="muted" style="margin-top:12px;font-size:12px">Order snapshot attached as evidence.</p>',
    '<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="toast(\'Buyer refunded ✓\');closeDrawer()">Refund buyer</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Partial refund issued\');closeDrawer()">Partial</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Claim rejected\');closeDrawer()">Reject</button>');
 }
@@ -412,12 +416,12 @@ function vendorDrawer(i){
    :v.status==='suspended'
    ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'reinstate\')">Reinstate</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'
    :'<button class="btn btn-p" style="flex:1;justify-content:center" onclick="closeDrawer();openVendorProducts('+i+')">View listings</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'suspend\')">Suspend</button>';
- openDrawer('Vendor — '+v.n,
-   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(v.n)+'<div><b style="font-size:16px">'+v.n+'</b><div class="muted" style="font-size:12.5px">'+v.owner+' · '+v.city+'</div></div></div>'
+ openDrawer('Vendor — '+esc(v.n),
+   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(v.n)+'<div><b style="font-size:16px">'+esc(v.n)+'</b><div class="muted" style="font-size:12.5px">'+esc(v.owner)+' · '+esc(v.city)+'</div></div></div>'
    +'<div style="margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-indigo">🏢 Business</span><span class="badge-s '+sm[0]+'">'+sm[1]+'</span>'+(v.vok?'<span class="badge-s b-green">✓ verified</span>':'<span class="badge-s b-amber">unverified</span>')+'</div>'
    +secH('Business profile')
-   +kv('Owner',v.owner)+kv('Primary category',v.cat)+kv('Location',v.city)+kv('Joined',v.joined)+kv('Products',v.products||'—')+kv('GMV',v.gmv?EGP(v.gmv):'—')+kv('Rating',v.rating?'⭐ '+v.rating:'—')+kv('Wallet — owed to platform','<span style="color:'+(commLevel(vcomm(i))==='paused'?'#B4472E':commLevel(vcomm(i))==='warn'?'#C68A2E':'inherit')+'">'+EGP(vcomm(i).outstanding)+'</span>')
-   +secH('Contact')+kv('WhatsApp',v.wa)+kv('Email',v.email),
+   +kv('Owner',esc(v.owner))+kv('Primary category',esc(v.cat))+kv('Location',esc(v.city))+kv('Joined',esc(v.joined))+kv('Products',v.products||'—')+kv('GMV',v.gmv?EGP(v.gmv):'—')+kv('Rating',v.rating?'⭐ '+v.rating:'—')+kv('Wallet — owed to platform','<span style="color:'+(commLevel(vcomm(i))==='paused'?'#B4472E':commLevel(vcomm(i))==='warn'?'#C68A2E':'inherit')+'">'+EGP(vcomm(i).outstanding)+'</span>')
+   +secH('Contact')+kv('WhatsApp',esc(v.wa))+kv('Email',esc(v.email)),
    actions);
 }
 function vdecide(i,action){
@@ -450,8 +454,8 @@ function vendorProducts(i,tab){
   <div style="margin-bottom:14px"><a class="btn btn-g btn-sm" style="cursor:pointer" onclick="go('vendors')">← Back to vendors</a></div>
   <div class="page-head">
     <div style="display:flex;align-items:center;gap:14px">${avatar(v.n)}
-      <div><h2 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${v.n} <span class="badge-s ${sm[0]}">${sm[1]}</span>${v.vok?'<span class="badge-s b-green">✓ verified</span>':''}</h2>
-      <p>${v.owner} · ${v.city} · ${v.cat} · joined ${v.joined}</p></div></div>
+      <div><h2 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${esc(v.n)} <span class="badge-s ${sm[0]}">${sm[1]}</span>${v.vok?'<span class="badge-s b-green">✓ verified</span>':''}</h2>
+      <p>${esc(v.owner)} · ${esc(v.city)} · ${esc(v.cat)} · joined ${esc(v.joined)}</p></div></div>
     <button class="btn btn-p" onclick="vendorDrawer(${i})">Vendor details</button></div>
   <div class="tabs" style="margin-bottom:18px">
     <span class="chip ${tab==='listings'?'active':''}" onclick="event.stopPropagation();openVendorProducts(${i},'listings')">📦 Listings (${list.length})</span>
@@ -586,13 +590,13 @@ function listingDrawer(vi,pi){
    :p.status==='out'
    ?'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="ldecide('+vi+','+pi+',\'nudge-restock\')">Nudge vendor</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'
    :'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>';
- openDrawer('Listing — '+p.t,
+ openDrawer('Listing — '+esc(p.t),
    '<div style="width:88px;height:88px;border-radius:14px;background:linear-gradient(135deg,#EAF0F1,#DAE6E9);display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:14px">'+p.emoji+'</div>'
-   +'<h3 style="font-size:17px;margin-bottom:6px">'+p.t+'</h3>'
+   +'<h3 style="font-size:17px;margin-bottom:6px">'+esc(p.t)+'</h3>'
    +'<div style="font-size:22px;font-weight:800;color:var(--primary)">'+EGP(p.price)+cmp+'</div>'
    +'<div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s '+st[0]+'">'+st[1]+'</span><span class="badge-s b-indigo">Stock: '+p.stock+'</span><span class="badge-s b-grey">'+p.sold+' sold</span></div>'
    +secH('Listing details')
-   +kv('Vendor (business)',v.n)+kv('Category',v.cat+' › '+p.sub)+kv('Price',EGP(p.price))+(p.cmp?kv('Compare-at',EGP(p.cmp)):'')+kv('In stock',p.stock)+kv('Sold (30d)',p.sold)+kv('Rating',p.rating?'⭐ '+p.rating:'—'),
+   +kv('Vendor (business)',esc(v.n))+kv('Category',esc(v.cat)+' › '+esc(p.sub))+kv('Price',EGP(p.price))+(p.cmp?kv('Compare-at',EGP(p.cmp)):'')+kv('In stock',p.stock)+kv('Sold (30d)',p.sold)+kv('Rating',p.rating?'⭐ '+p.rating:'—'),
    act);
 }
 function ldecide(vi,pi,action){
