@@ -23,7 +23,11 @@ String? routeFromDeepLinkUri(Uri uri) {
   final segments = uri.pathSegments;
   if (segments.length != 2 || segments[1].isEmpty) return null;
 
-  final id = segments[1];
+  // pathSegments decodes percent-escapes per segment, so an id containing
+  // an encoded '/' (e.g. "evil%2Fsegment") would otherwise be spliced into
+  // the rebuilt path as a literal extra segment. Re-encode before reuse,
+  // same as the category branch already does.
+  final id = Uri.encodeComponent(segments[1]);
   switch (segments[0]) {
     case 'product':
       return '${AppRoutes.product}/$id';
@@ -32,7 +36,7 @@ String? routeFromDeepLinkUri(Uri uri) {
     case 'order':
       return AppRoutes.orderPath(id);
     case 'category':
-      return '${AppRoutes.explore}?category=${Uri.encodeComponent(id)}';
+      return '${AppRoutes.explore}?category=$id';
     default:
       return null;
   }

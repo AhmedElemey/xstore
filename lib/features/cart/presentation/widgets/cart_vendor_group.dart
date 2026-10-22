@@ -25,6 +25,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
     final selectedIds = ref.watch(
       cartProvider.select((c) => c.selectedItemIds),
     );
+    final isUpdating = ref.watch(cartProvider.select((c) => c.isUpdating));
     final store = group.vendorStoreName.trim().isNotEmpty
         ? group.vendorStoreName.trim()
         : group.vendorName.trim();
@@ -81,6 +82,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
                     notifier,
                     group.items[i],
                     selectedIds,
+                    isUpdating,
                   ),
                 ),
               ),
@@ -96,6 +98,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
     Cart notifier,
     CartItemEntity item,
     Set<String> selectedIds,
+    bool isUpdating,
   ) {
     return Dismissible(
       key: ValueKey<String>('dismiss_${item.id}'),
@@ -157,6 +160,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
         onSaveForLater: () => notifier.saveForLater(item.id),
         onOpenProduct: () =>
             context.push('${AppRoutes.product}/${item.listingId}'),
+        quantityLocked: isUpdating,
       ),
     );
   }

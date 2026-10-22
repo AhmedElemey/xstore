@@ -230,7 +230,11 @@ class Notifications extends _$Notifications {
     r.fold(
       (f) => state = state.copyWith(isLoadingMore: false, error: f.toString()),
       (page) {
-        final merged = [...state.notifications, ...page.items];
+        final existingIds = state.notifications.map((e) => e.id).toSet();
+        final merged = [
+          ...state.notifications,
+          ...page.items.where((e) => existingIds.add(e.id)),
+        ];
         state = state.copyWith(
           isLoadingMore: false,
           notifications: merged,

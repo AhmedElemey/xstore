@@ -62,12 +62,18 @@ class ProductReviewsNotifier extends _$ProductReviewsNotifier {
     result.fold(
       (failure) => state =
           state.copyWith(isLoadingMore: false, error: failure.toString()),
-      (page) => state = state.copyWith(
-        isLoadingMore: false,
-        reviews: [...state.reviews, ...page.items],
-        page: next,
-        hasMore: page.items.length >= _pageSize,
-      ),
+      (page) {
+        final existingIds = state.reviews.map((e) => e.id).toSet();
+        state = state.copyWith(
+          isLoadingMore: false,
+          reviews: [
+            ...state.reviews,
+            ...page.items.where((e) => existingIds.add(e.id)),
+          ],
+          page: next,
+          hasMore: page.items.length >= _pageSize,
+        );
+      },
     );
   }
 
