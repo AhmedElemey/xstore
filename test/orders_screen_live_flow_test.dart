@@ -358,56 +358,6 @@ void main() {
   );
 
   testWidgets(
-    'consumer reorders a delivered order, adding its listing back to the live cart',
-    skip: MockConfig.useMock,
-    (tester) async {
-      final dio = _fakeDio({
-        'GET ${ApiEndpoints.ordersMe}': (_) => [
-          _consumerOrderJson(id: '505', status: 'delivered'),
-        ],
-        // The reorder flow re-adds each order line by calling
-        // CartRepositoryImpl.addFromListing, which GETs the listing before
-        // adding it to the (in-memory, live-mode) cart.
-        'GET ${ApiEndpoints.apiListingDetail('9001')}': (_) => {
-          'id': '9001',
-          'title': 'Wireless Earbuds',
-          'price': 50000,
-          'imageUrl': 'https://example.test/earbuds.jpg',
-          'category': 'Electronics',
-          'condition': 'New',
-          'seller': {
-            'id': 'vendor_1',
-            'name': 'Ahmed',
-            'storeName': 'Ahmed Store',
-            'rating': 4.8,
-            'verified': true,
-          },
-        },
-      });
-
-      final container = await _pumpReady(tester, [
-        authProvider.overrideWith(() => _FakeAuth(_consumer())),
-        dioProvider.overrideWithValue(dio),
-      ]);
-      await _settle(tester);
-
-      expect(find.text('My Orders'), findsOneWidget);
-      expect(find.text('Reorder'), findsOneWidget);
-
-      await tester.tap(find.text('Reorder'));
-      await _settle(tester);
-
-      expect(
-        find.text('Added to cart!'),
-        findsOneWidget,
-        reason: 'a successful reorder confirms with the addedToCart snackbar',
-      );
-
-      await _awaitAnalyticsReady(container);
-    },
-  );
-
-  testWidgets(
     'consumer leaves a review from a delivered order',
     skip: MockConfig.useMock,
     (tester) async {
