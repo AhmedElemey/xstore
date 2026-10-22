@@ -43,6 +43,15 @@ class NewArrivalsGrid extends StatelessWidget {
               children: display.asMap().entries.map((entry) {
                 final i = entry.key;
                 final listing = entry.value;
+                final hasDiscount =
+                    listing.compareAtPrice != null &&
+                    listing.compareAtPrice! > listing.price + 0.009;
+                final discountPercent = hasDiscount
+                    ? ((listing.compareAtPrice! - listing.price) /
+                              listing.compareAtPrice! *
+                              100)
+                          .roundToDouble()
+                    : 0.0;
                 return SizedBox(
                   key: ValueKey<String>(listing.id),
                   width: tileWidth,
@@ -54,7 +63,7 @@ class NewArrivalsGrid extends StatelessWidget {
                       imageUrl: listing.imageUrls.isNotEmpty
                           ? listing.imageUrls.first
                           : null,
-                      discountPercent: 0,
+                      discountPercent: discountPercent,
                       listingId: listing.id,
                       isSoldOut: isSoldOutListing(status: listing.status),
                       onTap: () => onOpenProduct?.call(listing),

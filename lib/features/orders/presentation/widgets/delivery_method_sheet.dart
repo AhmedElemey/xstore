@@ -36,13 +36,14 @@ class DeliveryMethodSheet extends StatelessWidget {
               subtitle: context.l10n.deliveryMethodSelfSubtitle,
               onTap: () => Navigator.pop(context, DeliveryMethod.self),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _MethodOption(
-              icon: LucideIcons.truck,
-              title: context.l10n.deliveryMethodPlatformTitle,
-              subtitle: context.l10n.deliveryMethodPlatformSubtitle,
-              onTap: () => Navigator.pop(context, DeliveryMethod.platform),
-            ),
+            ///TODO: Add platform delivery method next phase
+            // const SizedBox(height: AppSpacing.sm),
+            // _MethodOption(
+            //   icon: LucideIcons.truck,
+            //   title: context.l10n.deliveryMethodPlatformTitle,
+            //   subtitle: context.l10n.deliveryMethodPlatformSubtitle,
+            //   onTap: () => Navigator.pop(context, DeliveryMethod.platform),
+            // ),
           ],
         ),
       ),
