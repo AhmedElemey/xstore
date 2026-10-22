@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -10,7 +9,6 @@ import '../providers/order_detail_provider.dart';
 import '../widgets/order_action_buttons.dart';
 import '../../domain/entities/order_entity.dart';
 import '../widgets/order_detail_scroll_content.dart';
-import '../widgets/order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/auth_back_button.dart';
