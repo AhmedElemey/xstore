@@ -40,6 +40,7 @@
       <h1 id="topTitle">Dashboard</h1>
       <div class="search"><i data-ic="search"></i><input id="searchInput" placeholder="Search this page…"></div>
       <div class="top-actions">
+        <button class="conn" id="connBtn" onclick="openConnect()" title="Connect to the live backend"><span class="conn-dot"></span><span id="connLabel">Prototype</span></button>
         <div class="icon-btn"><i data-ic="bell"></i><span class="dot"></span></div>
         <div class="icon-btn hide-sm"><i data-ic="help"></i></div>
         <div class="avatar" style="background:var(--primary)">A</div>
@@ -52,6 +53,7 @@
 <aside class="drawer" id="drawer"></aside>
 <div class="toast" id="toast"></div>
 
+<script src="api.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
