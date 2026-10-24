@@ -117,7 +117,11 @@ class OrdersNotifier extends _$OrdersNotifier {
         error: f.toString(),
       ),
       (list) {
-        final merged = [...state.orders, ...list];
+        final existingIds = state.orders.map((e) => e.id).toSet();
+        final merged = [
+          ...state.orders,
+          ...list.where((e) => existingIds.add(e.id)),
+        ];
         state = state.copyWith(
           isLoadingMore: false,
           orders: merged,

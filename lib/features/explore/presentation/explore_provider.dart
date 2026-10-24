@@ -26,6 +26,11 @@ class Explore extends _$Explore {
   // throws an unhandled StateError.
   var _disposed = false;
 
+  // Mutators capture `_epoch` before their awaits and bail if a newer
+  // search/filter change has since bumped it, so a slow request can't
+  // overwrite state with results for a query that's no longer current.
+  var _epoch = 0;
+
   @override
   ExploreState build() {
     _disposed = false;
@@ -110,11 +115,12 @@ class Explore extends _$Explore {
   }
 
   Future<void> search(String q) async {
+    final epoch = ++_epoch;
     state = state.copyWith(isSearching: true, page: 1);
     await _persistRecent(q);
-    if (_disposed) return;
+    if (_disposed || _epoch != epoch) return;
     final categoryId = await _serverCategoryId();
-    if (_disposed) return;
+    if (_disposed || _epoch != epoch) return;
     final result = await ref.read(searchListingsUseCaseProvider).call(
           query: q,
           page: 1,
@@ -125,7 +131,7 @@ class Explore extends _$Explore {
           shippingAvailable: state.filters.shippingOnly,
           minimumRating: state.filters.minRating,
         );
-    if (_disposed) return;
+    if (_disposed || _epoch != epoch) return;
     result.fold(
       (f) {
         state = state.copyWith(isSearching: false, results: [], error: f.toString());
@@ -167,10 +173,11 @@ class Explore extends _$Explore {
 
   Future<void> loadMore() async {
     if (state.isLoadingMore || !state.hasMore) return;
+    final epoch = _epoch;
     state = state.copyWith(isLoadingMore: true);
     final next = state.page + 1;
     final categoryId = await _serverCategoryId();
-    if (_disposed) return;
+    if (_disposed || _epoch != epoch) return;
     final result = await ref.read(searchListingsUseCaseProvider).call(
           query: state.query,
           page: next,
@@ -181,12 +188,16 @@ class Explore extends _$Explore {
           shippingAvailable: state.filters.shippingOnly,
           minimumRating: state.filters.minRating,
         );
-    if (_disposed) return;
+    if (_disposed || _epoch != epoch) return;
     result.fold(
       (f) => state = state.copyWith(isLoadingMore: false, error: f.toString()),
       (list) {
         final filtered = _clientFilter(list);
-        final merged = [...state.results, ...filtered];
+        final existingIds = state.results.map((e) => e.id).toSet();
+        final merged = [
+          ...state.results,
+          ...filtered.where((e) => existingIds.add(e.id)),
+        ];
         state = state.copyWith(
           isLoadingMore: false,
           results: _sort(merged),

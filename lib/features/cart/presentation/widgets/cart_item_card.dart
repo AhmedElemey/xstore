@@ -21,6 +21,7 @@ class CartItemCard extends StatelessWidget {
     required this.onRemove,
     required this.onSaveForLater,
     required this.onOpenProduct,
+    this.quantityLocked = false,
   });
 
   final CartItemEntity item;
@@ -32,6 +33,10 @@ class CartItemCard extends StatelessWidget {
   final VoidCallback onRemove;
   final VoidCallback onSaveForLater;
   final VoidCallback onOpenProduct;
+
+  /// True while a cart update is already in flight, so rapid +/- taps
+  /// can't fire overlapping `updateQuantity` calls that race each other.
+  final bool quantityLocked;
 
   static const double _imageSize = 72;
 
@@ -229,7 +234,7 @@ class CartItemCard extends StatelessWidget {
                 QuantityControl(
                   quantity: item.quantity,
                   maxQuantity: item.maxQuantity,
-                  enabled: available,
+                  enabled: available && !quantityLocked,
                   onDecrement: onDecrement,
                   onIncrement: onIncrement,
                   onEditQuantity: onEditQuantity,
