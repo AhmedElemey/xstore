@@ -1203,3 +1203,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-20 — Narrow-screen widget tests resize the test view
 - **Rule:** To test a small phone, set `tester.view.physicalSize`/`devicePixelRatio` and `addTearDown(tester.view.reset)`. Wrapping `MaterialApp` in `MediaQuery`/`Directionality` does nothing — `MaterialApp` builds its own from the view (still 800x600). Use `locale: Locale('ar')` for RTL.
 - **Where it applies:** Overflow/RTL widget tests, `test/*_live_flow_test.dart`.
+
+### 2026-10-25 — A 401 with an `isSuccess:false` envelope is a business rejection, not session expiry
+- **Rule:** The ASP.NET auth middleware answers an expired/invalid/missing token with an EMPTY-body 401; a 401 carrying `{isSuccess:false,errorEn,...}` (e.g. delete-account with a wrong password) is a business error. `TokenRefreshInterceptor` skips refresh for the envelope form, otherwise a consumer without a refresh token is force-logged-out as if the action had succeeded. Test session expiry with an empty-body 401, never an envelope.
+- **Where it applies:** `token_refresh_interceptor.dart`, delete-account, any action that re-checks the password, 401 fixtures in tests.
