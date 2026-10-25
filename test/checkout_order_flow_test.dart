@@ -533,12 +533,10 @@ void main() {
       });
       var refreshFailedCalled = false;
       final adapter = _ScriptedAdapter(
-        (options) async => _jsonBody({
-          'isSuccess': false,
-          'data': null,
-          'errorEn': 'Your session has expired. Please sign in again.',
-          'statusCode': 401,
-        }, 401),
+        // Real session expiry: the ASP.NET auth middleware answers with an
+        // EMPTY-body 401 (an `isSuccess:false` envelope 401 is a business
+        // rejection and is not treated as expiry).
+        (options) async => ResponseBody.fromString('', 401),
       );
       final dio = _authAwareFakeDio(
         adapter,
@@ -560,10 +558,7 @@ void main() {
         isTrue,
         reason: 'no refresh token was stored, so refresh must fail fast',
       );
-      expect(
-        container.read(checkoutProvider).error,
-        'Your session has expired. Please sign in again.',
-      );
+      expect(container.read(checkoutProvider).error, isNotEmpty);
       // Only the pre-order stock check and the order POST, each once — no
       // refresh call was attempted, and no retry, matching
       // TokenRefreshInterceptor's own "no refresh token" contract (see

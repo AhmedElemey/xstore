@@ -47,6 +47,23 @@ void main() {
     expect(mapDioException(unknown).toString(), isNot(contains('raw')));
   });
 
+  test('401 business envelope keeps the server message (en and ar)', () {
+    final body = {
+      'isSuccess': false,
+      'data': null,
+      'errorEn': 'Incorrect password',
+      'errorAr': 'كلمة المرور غير صحيحة',
+      'statusCode': 401,
+    };
+    expect(mapDioException(_badResponse(401, body)).message, 'Incorrect password');
+    errorMessagesInArabic = true;
+    addTearDown(() => errorMessagesInArabic = false);
+    expect(
+      mapDioException(_badResponse(401, body)).message,
+      'كلمة المرور غير صحيحة',
+    );
+  });
+
   test('fallback is Arabic when the app is in Arabic', () {
     errorMessagesInArabic = true;
     final text = mapDioException(_badResponse(400, null)).toString();
