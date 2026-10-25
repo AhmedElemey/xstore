@@ -4,7 +4,14 @@ import '../router/app_routes.dart';
 /// for. Update here — and in the native manifests plus the backend
 /// `.well-known` files — when the production domain is finalized. See
 /// docs_business/launch_todos/07_deep_linking.md.
-const supportedDeepLinkHosts = {'xstore.com', 'www.xstore.com'};
+///
+/// The etempurl.com host is the current hosted backend domain, used by
+/// order links until the production domain is live.
+const supportedDeepLinkHosts = {
+  'xstore.com',
+  'www.xstore.com',
+  'xstoreegy002001-001-site1.etempurl.com',
+};
 
 /// Resolves an incoming Universal/App Link URI to a go_router path, or null
 /// if the link isn't one xStore recognizes.

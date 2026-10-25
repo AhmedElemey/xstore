@@ -17,6 +17,7 @@
 	<array>
 		<string>applinks:xstore.com?mode=developer</string>
 		<string>applinks:www.xstore.com?mode=developer</string>
+		<string>applinks:xstoreegy002001-001-site1.etempurl.com?mode=developer</string>
 	</array>
 </dict>
 </plist>

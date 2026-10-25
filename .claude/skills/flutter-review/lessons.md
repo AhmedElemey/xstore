@@ -1207,3 +1207,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-25 — A 401 with an `isSuccess:false` envelope is a business rejection, not session expiry
 - **Rule:** The ASP.NET auth middleware answers an expired/invalid/missing token with an EMPTY-body 401; a 401 carrying `{isSuccess:false,errorEn,...}` (e.g. delete-account with a wrong password) is a business error. `TokenRefreshInterceptor` skips refresh for the envelope form, otherwise a consumer without a refresh token is force-logged-out as if the action had succeeded. Test session expiry with an empty-body 401, never an envelope.
 - **Where it applies:** `token_refresh_interceptor.dart`, delete-account, any action that re-checks the password, 401 fixtures in tests.
+
+### 2026-10-25 — Path-scope App Links on a host that also serves the API or media
+- **Rule:** A deep-link host that also serves API routes or uploaded images (the etempurl backend) gets its own Android `<intent-filter>` with `pathPrefix` per resolver path; whole-domain filters (fine for a web-only domain like `xstore.com`) would open the app for shared image URLs and do nothing. Adding a host touches `supportedDeepLinkHosts`, `AndroidManifest.xml`, both iOS entitlements, and needs the backend to serve `.well-known` files.
+- **Where it applies:** `deep_link_route.dart`, `AndroidManifest.xml` App Links, `Runner*.entitlements`.

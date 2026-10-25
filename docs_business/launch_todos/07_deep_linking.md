@@ -21,6 +21,8 @@ The mobile-side plumbing supports adding further path patterns (e.g. a future ca
 - `android/app/src/main/AndroidManifest.xml` (the App Links `<intent-filter>` on `MainActivity`)
 - `ios/Runner/Runner.entitlements` + `ios/Runner/RunnerRelease.entitlements` (`applinks:`)
 
+**Added host:** `xstoreegy002001-001-site1.etempurl.com` (the current hosted backend domain, used by order links such as `/order/197`) is also registered in all of the above. Its `/.well-known/assetlinks.json` currently 404s, so Android/iOS verification will not pass until the backend hosts the files from §3.
+
 ---
 
 ## 2. Mobile — what's implemented

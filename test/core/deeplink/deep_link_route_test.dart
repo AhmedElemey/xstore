@@ -20,6 +20,15 @@ void main() {
       );
     });
 
+    test('resolves an order link on the hosted backend domain', () {
+      expect(
+        routeFromDeepLinkUri(
+          Uri.parse('https://xstoreegy002001-001-site1.etempurl.com/order/197'),
+        ),
+        AppRoutes.orderPath('197'),
+      );
+    });
+
     test('rejects an unrecognized host', () {
       expect(
         routeFromDeepLinkUri(Uri.parse('https://evil.test/product/abc-123')),

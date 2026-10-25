@@ -48,6 +48,21 @@
                 <data android:host="xstore.com"/>
                 <data android:host="www.xstore.com"/>
             </intent-filter>
+            <!-- Current hosted backend domain. It also serves the API and
+                 uploaded images, so only the deep-link paths open the app
+                 (whole-domain would hijack shared image links). Needs the
+                 same assetlinks.json under its /.well-known/. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="xstoreegy002001-001-site1.etempurl.com"/>
+                <data android:pathPrefix="/order/"/>
+                <data android:pathPrefix="/product/"/>
+                <data android:pathPrefix="/seller/"/>
+                <data android:pathPrefix="/category/"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
