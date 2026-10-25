@@ -200,6 +200,7 @@ class _Content extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final o = order;
+    debugPrint('o: $o');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -234,7 +235,7 @@ class _Content extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           _ShippingInfoCard(order: o),
         ],
-        if (o.status == OrderStatus.cancelled) ...[
+        if (o.status == OrderStatus.cancelled&&o.cancelReason!=null) ...[
           const SizedBox(height: AppSpacing.lg),
           Container(
             width: double.infinity,
