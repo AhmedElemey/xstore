@@ -48,7 +48,11 @@ class OrderFilterTabs extends ConsumerWidget {
             selected: selected == null,
             onTap: () => notifier.applyFilter(null),
           ),
-          ...OrderStatus.values.map((f) {
+          // Consumers don't get a "Delivery failed" tab; those orders stay
+          // under "All" (and its count).
+          ...OrderStatus.values
+              .where((f) => f != OrderStatus.deliveryFailed)
+              .map((f) {
             return Padding(
               padding: const EdgeInsetsDirectional.only(start: 4),
               child: _chip(
