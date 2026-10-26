@@ -106,7 +106,8 @@ class VendorOrderStatsBanner extends StatelessWidget {
               value,
               maxLines: 1,
               style: AppTypography.mono.copyWith(
-                fontSize: 16,
+                // ignore: unrelated_type_equality_checks
+                fontSize: value == context.formatCurrency(totalRevenue) ? 12 : 16,
                 fontWeight: FontWeight.w700,
                 color: valueColor ?? context.textPrimary,
               ),
