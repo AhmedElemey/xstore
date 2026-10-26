@@ -440,8 +440,4 @@ class _StubListingRepo implements ListingRepository {
     required String id,
     required double newPrice,
   }) => throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, Unit>> deactivateListing(String id) =>
-      throw UnimplementedError();
 }

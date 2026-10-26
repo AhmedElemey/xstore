@@ -111,7 +111,7 @@ void main() {
       expect(hotDealsFallbackCalled, isFalse);
     });
 
-    test('maps a sold-out deal to ListingStatus.sold', () async {
+    test('maps a sold-out deal to zero stock', () async {
       final repo = HomeRepositoryImpl(
         StubHomeRemoteDataSource(
           onFetchHomeAggregate: () async => aggregate(
@@ -129,8 +129,8 @@ void main() {
       result.fold(
         (_) => fail('expected Right'),
         (feed) => expect(
-          feed.newArrivals.map((l) => l.status),
-          [ListingStatus.sold, ListingStatus.active],
+          feed.newArrivals.map((l) => isSoldOutListing(stock: l.stockQuantity)),
+          [true, false],
         ),
       );
     });

@@ -13,7 +13,7 @@ const _editingListing = ListingEntity(
   title: 'Old Title',
   description: 'Old description',
   price: 199.5,
-  status: ListingStatus.paused,
+  status: ListingStatus.rejected,
   titleEn: 'Wireless Mouse',
   descriptionEn: 'A great wireless mouse',
   imageUrls: ['https://example.com/a.jpg', 'https://example.com/b.jpg'],
@@ -43,7 +43,7 @@ void main() {
 
     final state = container.read(listingFormNotifierProvider);
     expect(state.editingListingId, '42');
-    expect(state.editingStatus, ListingStatus.paused);
+    expect(state.editingStatus, ListingStatus.rejected);
     expect(state.name, 'Wireless Mouse');
     expect(state.priceInput, '199.50');
     expect(state.compareAtPriceInput, '249.00');
@@ -166,22 +166,16 @@ void main() {
     expect(state.categoryId, '7');
   });
 
-  test('a valid draft can publish without further field edits', () {
+  test('statusForUpdate falls back to pending when the status is unknown', () {
     SharedPreferences.setMockInitialValues({});
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
     final notifier = container.read(listingFormNotifierProvider.notifier);
-    notifier.loadForEdit(
-      _editingListing.copyWith(status: ListingStatus.draft),
-    );
-
-    expect(notifier.hasEditChanges, isFalse);
-    expect(notifier.canSubmit, isTrue);
     expect(notifier.statusForUpdate, ListingStatus.pending);
   });
 
-  test('paused and active edits still require a real field change', () {
+  test('rejected and active edits still require a real field change', () {
     SharedPreferences.setMockInitialValues({});
     final container = ProviderContainer();
     addTearDown(container.dispose);
@@ -190,10 +184,10 @@ void main() {
     notifier.loadForEdit(_editingListing);
 
     expect(notifier.canSubmit, isFalse);
-    expect(notifier.statusForUpdate, ListingStatus.paused);
+    expect(notifier.statusForUpdate, ListingStatus.rejected);
 
     notifier.updateField('name', 'Wireless Mouse Pro');
     expect(notifier.canSubmit, isTrue);
-    expect(notifier.statusForUpdate, ListingStatus.paused);
+    expect(notifier.statusForUpdate, ListingStatus.rejected);
   });
 }

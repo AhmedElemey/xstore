@@ -78,13 +78,13 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     );
   }
 
-  Future<void> _confirmDelete(ListingEntity listing) async {
+  Future<void> _confirmCancel(ListingEntity listing) async {
     final ok = await showAnimatedDialog<bool>(
       context: context,
       child: Builder(
         builder: (dialogContext) => AlertDialog(
-          title: Text(context.l10n.myListingsDeleteTitle),
-          content: Text(context.l10n.myListingsDeleteBody(listing.title)),
+          title: Text(context.l10n.myListingsCancelTitle),
+          content: Text(context.l10n.myListingsCancelBody(listing.title)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -95,7 +95,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                 backgroundColor: Theme.of(dialogContext).colorScheme.error,
               ),
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(context.l10n.deleteListing),
+              child: Text(context.l10n.cancelListing),
             ),
           ],
         ),
@@ -159,14 +159,6 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     switch (action) {
       case ListingOptionsAction.edit:
         await _openEdit(listing);
-      case ListingOptionsAction.pause:
-        await ref
-            .read(myListingsNotifierProvider.notifier)
-            .pauseListing(listing.id);
-      case ListingOptionsAction.resume:
-        await ref
-            .read(myListingsNotifierProvider.notifier)
-            .resumeListing(listing.id);
       case ListingOptionsAction.stats:
         await showAnimatedBottomSheet<void>(
           context: context,
@@ -177,8 +169,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
             child: ListingStatsSheet(listing: listing),
           ),
         );
-      case ListingOptionsAction.delete:
-        await _confirmDelete(listing);
+      case ListingOptionsAction.cancel:
+        await _confirmCancel(listing);
       case ListingOptionsAction.resubmit:
         await _openResubmitSheet(listing);
     }
@@ -214,8 +206,18 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         final active = all
             .where((e) => e.status == ListingStatus.active)
             .length;
-        final sold = all.where((e) => e.status == ListingStatus.sold).length;
-        return (totalCount: all.length, activeCount: active, soldCount: sold);
+        final soldOut = all
+            .where(
+              (e) =>
+                  e.status == ListingStatus.active &&
+                  isSoldOutListing(stock: e.stockQuantity),
+            )
+            .length;
+        return (
+          totalCount: all.length,
+          activeCount: active,
+          soldOutCount: soldOut,
+        );
       }),
     );
 
@@ -316,7 +318,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                         ListingStatsBanner(
                           totalCount: stats.totalCount,
                           activeCount: stats.activeCount,
-                          soldCount: stats.soldCount,
+                          soldOutCount: stats.soldOutCount,
                         ),
                       ],
                     ),

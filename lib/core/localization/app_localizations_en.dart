@@ -1542,9 +1542,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingTotalListings => 'Total Listings';
 
   @override
-  String get listingSoldStat => 'Sold';
-
-  @override
   String get listingViews => 'Views';
 
   @override
@@ -1566,13 +1563,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subcategoryPickerPrefix => 'Subcategory — ';
 
   @override
-  String get pauseListing => 'Pause';
+  String get cancelListing => 'Cancel listing';
 
   @override
-  String get resumeListing => 'Resume';
-
-  @override
-  String get deleteListing => 'Delete';
+  String get cancelled => 'Cancelled';
 
   @override
   String get myListingsSearchTitle => 'Search listings';
@@ -1587,24 +1581,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myListingsSearchSubmit => 'Search';
 
   @override
-  String get myListingsDeleteTitle => 'Delete listing?';
+  String get myListingsCancelTitle => 'Cancel listing?';
 
   @override
-  String myListingsDeleteBody(String title) {
-    return '“$title” will be removed permanently.';
+  String myListingsCancelBody(String title) {
+    return '“$title” will be cancelled. You can resubmit it for review later.';
   }
 
   @override
-  String get draft => 'Draft';
-
-  @override
   String get active => 'Active';
-
-  @override
-  String get paused => 'Paused';
-
-  @override
-  String get sold => 'Sold';
 
   @override
   String get soldOut => 'Sold out';

@@ -23,12 +23,10 @@ class ListingEmptyState extends StatelessWidget {
     final filter = selectedFilter;
     if (filter == null) return l10n.listingsEmptyNone;
     final label = switch (filter) {
-      ListingStatus.draft => l10n.draft,
       ListingStatus.pending => l10n.pending,
       ListingStatus.active => l10n.active,
-      ListingStatus.paused => l10n.paused,
-      ListingStatus.sold => l10n.sold,
       ListingStatus.rejected => l10n.rejected,
+      ListingStatus.cancelled => l10n.cancelled,
     };
     return l10n.listingsEmptyFiltered(label);
   }

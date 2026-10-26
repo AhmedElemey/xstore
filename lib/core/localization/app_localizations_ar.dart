@@ -1545,9 +1545,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingTotalListings => 'إجمالي الإعلانات';
 
   @override
-  String get listingSoldStat => 'مباع';
-
-  @override
   String get listingViews => 'مشاهدات';
 
   @override
@@ -1569,13 +1566,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get subcategoryPickerPrefix => 'فئة فرعية — ';
 
   @override
-  String get pauseListing => 'إيقاف';
+  String get cancelListing => 'إلغاء الإعلان';
 
   @override
-  String get resumeListing => 'استئناف';
-
-  @override
-  String get deleteListing => 'حذف';
+  String get cancelled => 'ملغي';
 
   @override
   String get myListingsSearchTitle => 'البحث في الإعلانات';
@@ -1590,24 +1584,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get myListingsSearchSubmit => 'بحث';
 
   @override
-  String get myListingsDeleteTitle => 'حذف الإعلان؟';
+  String get myListingsCancelTitle => 'إلغاء الإعلان؟';
 
   @override
-  String myListingsDeleteBody(String title) {
-    return 'سيتم حذف “$title” نهائيًا.';
+  String myListingsCancelBody(String title) {
+    return 'سيتم إلغاء “$title”. يمكنك إعادة إرساله للمراجعة لاحقًا.';
   }
 
   @override
-  String get draft => 'مسودة';
-
-  @override
   String get active => 'نشط';
-
-  @override
-  String get paused => 'موقوف';
-
-  @override
-  String get sold => 'مباع';
 
   @override
   String get soldOut => 'نفدت الكمية';

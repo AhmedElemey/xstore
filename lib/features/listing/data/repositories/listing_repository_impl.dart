@@ -173,18 +173,4 @@ class ListingRepositoryImpl implements ListingRepository {
       return Left(Failure.server(userErrorMessage(e)));
     }
   }
-
-  @override
-  Future<Either<Failure, Unit>> deactivateListing(String id) async {
-    try {
-      await _remote.deactivateListing(id);
-      return const Right(unit);
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.server(userErrorMessage(e)));
-    }
-  }
 }

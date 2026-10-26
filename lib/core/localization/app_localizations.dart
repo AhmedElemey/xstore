@@ -3056,12 +3056,6 @@ abstract class AppLocalizations {
   /// **'Total Listings'**
   String get listingTotalListings;
 
-  /// No description provided for @listingSoldStat.
-  ///
-  /// In en, this message translates to:
-  /// **'Sold'**
-  String get listingSoldStat;
-
   /// No description provided for @listingViews.
   ///
   /// In en, this message translates to:
@@ -3104,23 +3098,17 @@ abstract class AppLocalizations {
   /// **'Subcategory — '**
   String get subcategoryPickerPrefix;
 
-  /// No description provided for @pauseListing.
+  /// No description provided for @cancelListing.
   ///
   /// In en, this message translates to:
-  /// **'Pause'**
-  String get pauseListing;
+  /// **'Cancel listing'**
+  String get cancelListing;
 
-  /// No description provided for @resumeListing.
+  /// No description provided for @cancelled.
   ///
   /// In en, this message translates to:
-  /// **'Resume'**
-  String get resumeListing;
-
-  /// No description provided for @deleteListing.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get deleteListing;
+  /// **'Cancelled'**
+  String get cancelled;
 
   /// No description provided for @myListingsSearchTitle.
   ///
@@ -3146,41 +3134,23 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get myListingsSearchSubmit;
 
-  /// No description provided for @myListingsDeleteTitle.
+  /// No description provided for @myListingsCancelTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete listing?'**
-  String get myListingsDeleteTitle;
+  /// **'Cancel listing?'**
+  String get myListingsCancelTitle;
 
-  /// No description provided for @myListingsDeleteBody.
+  /// No description provided for @myListingsCancelBody.
   ///
   /// In en, this message translates to:
-  /// **'“{title}” will be removed permanently.'**
-  String myListingsDeleteBody(String title);
-
-  /// No description provided for @draft.
-  ///
-  /// In en, this message translates to:
-  /// **'Draft'**
-  String get draft;
+  /// **'“{title}” will be cancelled. You can resubmit it for review later.'**
+  String myListingsCancelBody(String title);
 
   /// No description provided for @active.
   ///
   /// In en, this message translates to:
   /// **'Active'**
   String get active;
-
-  /// No description provided for @paused.
-  ///
-  /// In en, this message translates to:
-  /// **'Paused'**
-  String get paused;
-
-  /// No description provided for @sold.
-  ///
-  /// In en, this message translates to:
-  /// **'Sold'**
-  String get sold;
 
   /// No description provided for @soldOut.
   ///

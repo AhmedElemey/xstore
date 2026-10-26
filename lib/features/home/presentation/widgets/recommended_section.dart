@@ -121,7 +121,9 @@ class _RecommendedList extends StatelessWidget {
                             : null,
                         discountPercent: discountPercent,
                         listingId: listing.id,
-                        isSoldOut: isSoldOutListing(status: listing.status),
+                        isSoldOut: isSoldOutListing(
+                          stock: listing.stockQuantity,
+                        ),
                         onTap: () =>
                             context.push('${AppRoutes.product}/${listing.id}'),
                       )

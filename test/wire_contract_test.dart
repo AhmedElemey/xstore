@@ -162,16 +162,6 @@ void main() {
       expect(only().uri.path, '/api/listings/42/cancel');
       expect(only().data, isNull);
     }, skip: skipMock);
-
-    test('pause is a bodyless PUT /{id}/deactivate', () async {
-      adapter.reply('PUT', '/api/listings/42/deactivate', 200);
-
-      await ListingRemoteDataSourceImpl(dio).deactivateListing('42');
-
-      expect(only().method, 'PUT');
-      expect(only().uri.path, '/api/listings/42/deactivate');
-      expect(only().data, isNull);
-    }, skip: skipMock);
   });
 
   group('orders', () {

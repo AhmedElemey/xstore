@@ -56,8 +56,10 @@ class HomeRepositoryImpl implements HomeRepository {
       title: d.title,
       description: d.title,
       price: d.price,
-      // Backend keeps sold-out listings Active; `sold` greys the tile.
-      status: d.isSoldOut ? ListingStatus.sold : ListingStatus.active,
+      // Home feed rows are live (Active) listings; the deal only carries a
+      // sold-out flag, so stock encodes it (0 = sold out, 1 = available).
+      status: ListingStatus.active,
+      stockQuantity: d.isSoldOut ? 0 : 1,
       imageUrls: imgs,
       categoryLabel: '',
       conditionLabel: 'New',

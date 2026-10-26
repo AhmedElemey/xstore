@@ -1,9 +1,7 @@
-import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
-import '../../../../core/error/failures.dart';
 import '../../domain/entities/listing_entity.dart';
 import 'listing_dependencies.dart';
 import 'my_listings_state.dart';
@@ -84,74 +82,14 @@ class MyListingsNotifier extends _$MyListingsNotifier {
     state = state.copyWith(error: null);
   }
 
-  /// Pauses via the dedicated deactivate endpoint (no multipart body, so
-  /// it can't accidentally clear the listing's images — see
-  /// `deactivateListingUseCaseProvider`).
-  Future<void> pauseListing(String id) async {
-    final listing = _listingById(id);
-    if (listing == null || listing.status != ListingStatus.active) {
-      return;
-    }
-    await _applyOptimisticStatusMutation(
-      listing: listing,
-      nextStatus: ListingStatus.paused,
-      runMutation: () =>
-          ref.read(deactivateListingUseCaseProvider).call(id),
-    );
-  }
-
-  // TODO(backend): no endpoint to resume a paused listing (backend Q3) — the Resume entry is hidden.
-  /// Resumes a paused listing via the generic multipart update
-  /// (`PUT /api/listings`, status Active, existing image URLs kept).
-  ///
-  /// Live status-only writes do **not** unpause:
-  /// `/deactivate` 400s `"Only active listings can be deactivated."`
-  /// `/resubmit` 400s `"Only cancelled listings can be re-submitted."`
-  /// `/activate` 404s (no route). Do not call those for Resume.
-  Future<void> resumeListing(String id) async {
-    final listing = _listingById(id);
-    if (listing == null || listing.status != ListingStatus.paused) {
-      return;
-    }
-    await _applyOptimisticStatusMutation(
-      listing: listing,
-      nextStatus: ListingStatus.active,
-      runMutation: () => ref.read(updateListingUseCaseProvider).call(
-            id: listing.id,
-            titleEn:
-                listing.titleEn.isNotEmpty ? listing.titleEn : listing.title,
-            titleAr: listing.titleAr,
-            descriptionEn: listing.descriptionEn.isNotEmpty
-                ? listing.descriptionEn
-                : listing.description,
-            descriptionAr: listing.descriptionAr,
-            price: listing.price,
-            compareAtPrice: listing.compareAtPrice,
-            categoryId: listing.categoryId ?? 0,
-            subcategoryId: listing.subcategoryId,
-            condition: listing.condition ?? ListingCondition.newItem,
-            brand: listing.brand,
-            stockQuantity: listing.stockQuantity,
-            shippingAvailable: listing.shippingAvailable,
-            shippingCost: listing.shippingCost,
-            location: listing.location,
-            attributes: listing.attributes,
-            imagePaths: const [],
-            keepImageUrls: listing.imageUrls,
-            status: ListingStatus.active,
-          ),
-    );
-  }
-
-  // TODO(backend): no endpoint to resubmit an admin-rejected listing (backend Q3) — the Resubmit entry is hidden.
-  /// Sends a rejected listing back for admin review with a corrected
+  /// Sends a cancelled listing back for admin review with a corrected
   /// price. Returns null on success, or the server's reason ('' when there
   /// is none). The failure is returned instead of stored on `state.error`:
   /// the resubmit sheet shows it inline, and the screen's error listener
   /// would otherwise toast it a second time behind the sheet.
   Future<String?> resubmitListing(String id, double newPrice) async {
     final listing = _listingById(id);
-    if (listing == null || listing.status != ListingStatus.rejected) {
+    if (listing == null || listing.status != ListingStatus.cancelled) {
       return '';
     }
 
@@ -204,56 +142,14 @@ class MyListingsNotifier extends _$MyListingsNotifier {
     return null;
   }
 
-  /// Shared optimistic-update/rollback scaffolding for any single-listing
-  /// status mutation. Applies [nextStatus] immediately, runs [runMutation],
-  /// then either keeps the server's returned entity or rolls back to the
-  /// pre-mutation state and surfaces the failure via `state.error`.
-  Future<void> _applyOptimisticStatusMutation({
-    required ListingEntity listing,
-    required ListingStatus nextStatus,
-    required Future<Either<Failure, Object>> Function() runMutation,
-  }) async {
-    final beforeMutation = state;
-    final optimistic = listing.copyWith(status: nextStatus);
-    final optimisticList = beforeMutation.listings
-        .map((e) => e.id == listing.id ? optimistic : e)
-        .toList();
-    state = _withComputed(
-      beforeMutation.copyWith(listings: optimisticList, error: null),
-    );
-
-    final result = await runMutation();
-
-    if (_disposed) return;
-    result.fold(
-      (f) => state = _withComputed(
-        beforeMutation.copyWith(error: f.toString()),
-      ),
-      (_) {
-        // Status-only endpoints often echo the pre-mutation listing (or
-        // omit status, which parses as draft). Keep the listing we already
-        // showed and pin nextStatus — never replace the row with the
-        // response body.
-        final shown = listing.copyWith(status: nextStatus);
-        final list = state.listings
-            .map((e) => e.id == listing.id ? shown : e)
-            .toList();
-        state = _withComputed(state.copyWith(listings: list, error: null));
-        ref.read(analyticsServiceProvider).track(
-          AnalyticsEvents.listingStatusChanged,
-          properties: {
-            AnalyticsProps.itemId: listing.id,
-            AnalyticsProps.status: nextStatus.name,
-          },
-        );
-      },
-    );
-  }
-
   Future<void> deleteListing(String id) async {
     final snapshot = state;
-    final pruned = snapshot.listings.where((e) => e.id != id).toList();
-    state = _withComputed(snapshot.copyWith(listings: pruned, error: null));
+    final cancelled = snapshot.listings
+        .map(
+          (e) => e.id == id ? e.copyWith(status: ListingStatus.cancelled) : e,
+        )
+        .toList();
+    state = _withComputed(snapshot.copyWith(listings: cancelled, error: null));
 
     final result = await ref.read(deleteListingUseCaseProvider).call(id);
     if (_disposed) return;
@@ -268,14 +164,9 @@ class MyListingsNotifier extends _$MyListingsNotifier {
         );
       },
     );
-    // Deliberately no fetchListings() refresh here: the backend has no
-    // hard-delete for listings (see ApiEndpoints.apiListingCancel), so a
-    // "deleted" listing is really just cancelled server-side. A refetch
-    // could pull it straight back into view — and since the cancelled
-    // status code isn't confirmed, it would parse to an unmapped/wrong
-    // status (defaults to draft) rather than something recognizable.
-    // Trusting the optimistic local removal keeps the "removed" UX
-    // correct until the next natural refresh (pull-to-refresh).
+    // Deliberately no fetchListings() refresh here: the listing stays in the
+    // list as Cancelled (soft `PUT .../cancel`), so the local update is the
+    // final state until the next natural refresh (pull-to-refresh).
   }
 }
 

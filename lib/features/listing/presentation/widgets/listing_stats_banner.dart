@@ -12,12 +12,12 @@ class ListingStatsBanner extends StatelessWidget {
     super.key,
     required this.totalCount,
     required this.activeCount,
-    required this.soldCount,
+    required this.soldOutCount,
   });
 
   final int totalCount;
   final int activeCount;
-  final int soldCount;
+  final int soldOutCount;
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +53,8 @@ class ListingStatsBanner extends StatelessWidget {
             Expanded(
               child: _MiniStat(
                 icon: LucideIcons.truck,
-                value: soldCount,
-                label: context.l10n.listingSoldStat,
+                value: soldOutCount,
+                label: context.l10n.soldOut,
                 valueColor: context.linkColor,
               ),
             ),

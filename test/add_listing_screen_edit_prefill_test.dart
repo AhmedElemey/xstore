@@ -56,7 +56,7 @@ const _existingListing = ListingEntity(
   title: 'Old Title',
   description: 'Old description',
   price: 199.5,
-  status: ListingStatus.paused,
+  status: ListingStatus.rejected,
   titleEn: 'Wireless Mouse',
   descriptionEn: 'A great wireless mouse',
   imageUrls: ['https://example.com/a.jpg'],

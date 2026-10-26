@@ -548,7 +548,6 @@
   "onlyLeftPrefix": "Only ",
   "onlyLeftSuffix": " left!",
   "listingTotalListings": "Total Listings",
-  "listingSoldStat": "Sold",
   "listingViews": "Views",
   "listingSaves": "Saves",
   "listingInquiries": "Inquiries",
@@ -556,19 +555,15 @@
   "viewStatsMenu": "View Stats",
   "listingStatsHeading": "Listing stats",
   "subcategoryPickerPrefix": "Subcategory — ",
-  "pauseListing": "Pause",
-  "resumeListing": "Resume",
-  "deleteListing": "Delete",
+  "cancelListing": "Cancel listing",
+  "cancelled": "Cancelled",
   "myListingsSearchTitle": "Search listings",
   "myListingsSearchHint": "Search by title",
   "myListingsSearchClear": "Clear",
   "myListingsSearchSubmit": "Search",
-  "myListingsDeleteTitle": "Delete listing?",
-  "myListingsDeleteBody": "“{title}” will be removed permanently.",
-  "draft": "Draft",
+  "myListingsCancelTitle": "Cancel listing?",
+  "myListingsCancelBody": "“{title}” will be cancelled. You can resubmit it for review later.",
   "active": "Active",
-  "paused": "Paused",
-  "sold": "Sold",
   "soldOut": "Sold out",
   "addToCartSoldOut": "This item is sold out and can't be added to your cart.",
   "pending": "Pending",
@@ -794,7 +789,7 @@
       }
     }
   },
-  "@myListingsDeleteBody": {
+  "@myListingsCancelBody": {
     "placeholders": {
       "title": {
         "type": "String"

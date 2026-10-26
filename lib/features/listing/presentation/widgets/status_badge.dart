@@ -9,9 +9,8 @@ Color listingStatusAccent(BuildContext context, ListingStatus status) =>
     switch (status) {
       ListingStatus.pending => AppColors.warning,
       ListingStatus.active => AppColors.success,
-      ListingStatus.sold => AppColors.primary,
       ListingStatus.rejected => AppColors.error,
-      ListingStatus.paused || ListingStatus.draft => context.textSecondary,
+      ListingStatus.cancelled => context.textSecondary,
     };
 
 class StatusBadge extends StatelessWidget {
@@ -23,12 +22,10 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = switch (status) {
-      ListingStatus.draft => context.l10n.draft,
       ListingStatus.pending => context.l10n.pending,
       ListingStatus.active => context.l10n.active,
-      ListingStatus.paused => context.l10n.paused,
-      ListingStatus.sold => context.l10n.sold,
       ListingStatus.rejected => context.l10n.rejected,
+      ListingStatus.cancelled => context.l10n.cancelled,
     };
     final (bg, fg) = _colors(context, status);
     final pad = compact
@@ -66,18 +63,11 @@ class StatusBadge extends StatelessWidget {
         return (AppColors.success.withValues(alpha: 0.15), AppColors.success);
       case ListingStatus.pending:
         return (AppColors.warning.withValues(alpha: 0.18), AppColors.warning);
-      case ListingStatus.paused:
-        return (
-          context.textDisabled.withValues(alpha: 0.35),
-          context.textSecondary,
-        );
-      case ListingStatus.sold:
-        return (AppColors.primary.withValues(alpha: 0.12), AppColors.primary);
       case ListingStatus.rejected:
         return (AppColors.error.withValues(alpha: 0.12), AppColors.error);
-      case ListingStatus.draft:
+      case ListingStatus.cancelled:
         return (
-          context.textDisabled.withValues(alpha: 0.45),
+          context.textDisabled.withValues(alpha: 0.35),
           context.textSecondary,
         );
     }

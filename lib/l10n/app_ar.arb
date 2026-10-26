@@ -541,7 +541,6 @@
   "onlyLeftPrefix": "متبقي ",
   "onlyLeftSuffix": " فقط!",
   "listingTotalListings": "إجمالي الإعلانات",
-  "listingSoldStat": "مباع",
   "listingViews": "مشاهدات",
   "listingSaves": "محفوظات",
   "listingInquiries": "استفسارات",
@@ -549,19 +548,15 @@
   "viewStatsMenu": "عرض الإحصائيات",
   "listingStatsHeading": "إحصائيات الإعلان",
   "subcategoryPickerPrefix": "فئة فرعية — ",
-  "pauseListing": "إيقاف",
-  "resumeListing": "استئناف",
-  "deleteListing": "حذف",
+  "cancelListing": "إلغاء الإعلان",
+  "cancelled": "ملغي",
   "myListingsSearchTitle": "البحث في الإعلانات",
   "myListingsSearchHint": "ابحث بالعنوان",
   "myListingsSearchClear": "مسح",
   "myListingsSearchSubmit": "بحث",
-  "myListingsDeleteTitle": "حذف الإعلان؟",
-  "myListingsDeleteBody": "سيتم حذف “{title}” نهائيًا.",
-  "draft": "مسودة",
+  "myListingsCancelTitle": "إلغاء الإعلان؟",
+  "myListingsCancelBody": "سيتم إلغاء “{title}”. يمكنك إعادة إرساله للمراجعة لاحقًا.",
   "active": "نشط",
-  "paused": "موقوف",
-  "sold": "مباع",
   "soldOut": "نفدت الكمية",
   "addToCartSoldOut": "المنتج ده نفدت كميته ومينفعش يتضاف للسلة.",
   "pending": "قيد الانتظار",
@@ -780,7 +775,7 @@
       }
     }
   },
-  "@myListingsDeleteBody": {
+  "@myListingsCancelBody": {
     "placeholders": {
       "title": {
         "type": "String"

@@ -63,7 +63,7 @@ Map<String, dynamic> _normalizeListingJson(Map<String, dynamic> json) {
   // CONFIRMED: `status` is a JSON number (e.g. 2), not a string — coerce
   // before the String-typed model field parses it. See
   // _listingStatusFromDto for the ordinal mapping.
-  m['status'] = m['status']?.toString() ?? 'draft';
+  m['status'] = m['status']?.toString() ?? '1';
   return m;
 }
 
@@ -164,18 +164,14 @@ String listingConditionToDto(ListingCondition c) =>
 
 int listingStatusToWire(ListingStatus status) {
   switch (status) {
-    case ListingStatus.draft:
-      return 0;
     case ListingStatus.pending:
       return 1;
     case ListingStatus.active:
       return 2;
-    case ListingStatus.paused:
-      return 3;
-    case ListingStatus.sold:
-      return 4;
     case ListingStatus.rejected:
       return 5;
+    case ListingStatus.cancelled:
+      return 6;
   }
 }
 
@@ -186,7 +182,7 @@ class ListingModel with _$ListingModel {
     required String title,
     required String description,
     required double price,
-    @Default('draft') String status,
+    @Default('1') String status,
     @Default(<String>[]) List<String> imageUrls,
     @Default('') String categoryLabel,
     @Default('') String conditionLabel,
@@ -216,45 +212,32 @@ class ListingModel with _$ListingModel {
       _$ListingModelFromJson(_normalizeListingJson(json));
 }
 
-// CONFIRMED against live listings: `status` is a JSON integer, not a string
-// (only code 2 observed, on publicly-searchable listings — high confidence
-// that's "Active", matching this enum's declared ordinal position). Values
-// 0/1/3/4/5 are inferred by ordinal position matching ListingStatus's
-// declaration order (draft/pending/active/paused/sold/rejected) since no
-// samples with those codes were available — MODERATE confidence, not
-// confirmed. Adjust if a live draft/paused/sold/rejected listing surfaces
-// a different code.
-// TODO(backend): need the C# ListingStatus declaration — unknown codes (e.g. Cancelled)
-// currently fall back to Draft.
+// CONFIRMED against the backend C# declaration (like `ListingCondition`):
+// `public enum ListingStatus { Pending = 1, Active = 2, Rejected = 5,
+// Cancelled = 6 }`. `status` arrives as a JSON integer. Unknown/legacy codes
+// ('0', '3', '4', garbage) fall back to Pending — not live, not orderable.
 ListingStatus _listingStatusFromDto(String value) {
   switch (value) {
-    case '0':
-      return ListingStatus.draft;
     case '1':
       return ListingStatus.pending;
     case '2':
       return ListingStatus.active;
-    case '3':
-      return ListingStatus.paused;
-    case '4':
-      return ListingStatus.sold;
     case '5':
       return ListingStatus.rejected;
+    case '6':
+      return ListingStatus.cancelled;
   }
   switch (value.toLowerCase()) {
-    case 'pending':
-      return ListingStatus.pending;
     case 'active':
       return ListingStatus.active;
-    case 'paused':
-      return ListingStatus.paused;
-    case 'sold':
-      return ListingStatus.sold;
     case 'rejected':
       return ListingStatus.rejected;
-    case 'draft':
+    case 'cancelled':
+    case 'canceled':
+      return ListingStatus.cancelled;
+    case 'pending':
     default:
-      return ListingStatus.draft;
+      return ListingStatus.pending;
   }
 }
 
@@ -271,9 +254,7 @@ bool isPublicLiveListingStatus(Object? raw) {
 /// [isSoldOutListing] for a raw listing DTO.
 bool isSoldOutListingJson(Map<String, dynamic> json) {
   final rawStock = json['stockQuantity'] ?? json['stock'] ?? json['quantity'];
-  final rawStatus = json['status']?.toString().trim() ?? '';
   return isSoldOutListing(
-    status: rawStatus.isEmpty ? null : _listingStatusFromDto(rawStatus),
     stock: rawStock is num ? rawStock : num.tryParse(rawStock?.toString() ?? ''),
   );
 }

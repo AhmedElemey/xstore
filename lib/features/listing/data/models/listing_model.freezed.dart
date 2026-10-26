@@ -455,7 +455,7 @@ class _$ListingModelImpl implements _ListingModel {
       required this.title,
       required this.description,
       required this.price,
-      this.status = 'draft',
+      this.status = '1',
       final List<String> imageUrls = const <String>[],
       this.categoryLabel = '',
       this.conditionLabel = '',

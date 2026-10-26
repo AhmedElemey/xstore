@@ -49,7 +49,6 @@ abstract final class AnalyticsEvents {
   // Phase C.
   static const String listingPublished = 'listing_published';
   static const String listingUpdated = 'listing_updated';
-  static const String listingStatusChanged = 'listing_status_changed';
   static const String listingResubmitted = 'listing_resubmitted';
   static const String listingDeleted = 'listing_deleted';
   static const String orderStatusChanged = 'order_status_changed';

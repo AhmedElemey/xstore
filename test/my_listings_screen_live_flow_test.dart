@@ -4,7 +4,7 @@
 // screen + real ListingRepositoryImpl -> ListingRemoteDataSourceImpl
 // chain, only the Dio HTTP transport is scripted.
 //
-// ListingRemoteDataSourceImpl.fetchMyListings/deactivateListing have no
+// ListingRemoteDataSourceImpl.fetchMyListings has no
 // MockConfig.useMock branch at all — always live, regardless of the MOCK
 // build define — so these tests run (and must pass) under both
 // `flutter test` and `flutter test --dart-define=MOCK=true`, no `skip:`
@@ -170,81 +170,15 @@ void main() {
   );
 
   testWidgets(
-    'vendor pauses an active listing via the live deactivate wire call',
-    (tester) async {
-      RequestOptions? putRequest;
-      final dio = _fakeDio({
-        'GET ${ApiEndpoints.apiMyListings}': (_) => [_listingJson()],
-        'PUT ${ApiEndpoints.apiListingDeactivate('9001')}': (options) {
-          putRequest = options;
-          // The live endpoint replies with a message, not a listing DTO —
-          // parsing it as a listing threw "Null is not a subtype of num".
-          return {'message': 'Listing deactivated successfully.'};
-        },
-      });
-
-      await tester.pumpWidget(
-        _harness([
-          authProvider.overrideWith(() => _FakeAuth(_vendor())),
-          dioProvider.overrideWithValue(dio),
-        ]),
-      );
-      await _settle(tester);
-
-      expect(find.text('Wireless Earbuds'), findsOneWidget);
-      await tester.tap(find.byIcon(LucideIcons.moreVertical));
-      await _settle(tester);
-
-      expect(find.text('Pause'), findsOneWidget);
-      await tester.tap(find.text('Pause'));
-      await _settle(tester);
-
-      expect(putRequest, isNotNull);
-      expect(find.byType(SnackBar), findsNothing);
-      expect(
-        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
-        ListingStatus.paused,
-      );
-    },
-  );
-
-  // TODO(backend): no endpoint to resume a paused listing (backend Q3) —
-  // restore the old resume wire-call test when the Resume entry returns.
-  testWidgets(
-    'a paused listing offers no Resume entry',
-    (tester) async {
-      final dio = _fakeDio({
-        'GET ${ApiEndpoints.apiMyListings}': (_) =>
-            [_listingJson(status: 3)],
-      });
-
-      await tester.pumpWidget(
-        _harness([
-          authProvider.overrideWith(() => _FakeAuth(_vendor())),
-          dioProvider.overrideWithValue(dio),
-        ]),
-      );
-      await _settle(tester);
-
-      expect(
-        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
-        ListingStatus.paused,
-      );
-      await tester.tap(find.byIcon(LucideIcons.moreVertical));
-      await _settle(tester);
-
-      expect(find.text('Edit Listing'), findsOneWidget);
-      expect(find.text('Resume'), findsNothing);
-    },
-  );
-
-  testWidgets(
-    'vendor deletes a draft listing via the live cancel wire call',
+    'cancelling a listing keeps it as Cancelled and offers Resubmit',
     (tester) async {
       RequestOptions? cancelRequest;
+      var fetches = 0;
       final dio = _fakeDio({
-        'GET ${ApiEndpoints.apiMyListings}': (_) =>
-            [_listingJson(title: 'Draft lamp', status: 0)],
+        'GET ${ApiEndpoints.apiMyListings}': (_) {
+          fetches++;
+          return [_listingJson(title: 'Old lamp')];
+        },
         'PUT ${ApiEndpoints.apiListingCancel('9001')}': (options) {
           cancelRequest = options;
           return <String, dynamic>{};
@@ -259,21 +193,60 @@ void main() {
       );
       await _settle(tester);
 
-      expect(find.text('Draft lamp'), findsOneWidget);
+      expect(find.text('Old lamp'), findsOneWidget);
       await tester.tap(find.byIcon(LucideIcons.moreVertical));
       await _settle(tester);
 
-      await tester.tap(find.text('Delete'));
+      expect(find.text('Resubmit'), findsNothing);
+      await tester.tap(find.text('Cancel listing'));
       await _settle(tester);
 
-      expect(find.textContaining('will be removed permanently'), findsOneWidget);
-      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      expect(find.textContaining('will be cancelled'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, 'Cancel listing'));
       await _settle(tester);
 
       expect(cancelRequest, isNotNull);
-      expect(find.text('Draft lamp'), findsNothing);
+      expect(fetches, 1, reason: 'no refetch after a successful cancel');
+      expect(find.text('Old lamp'), findsOneWidget);
+      expect(
+        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
+        ListingStatus.cancelled,
+      );
+
+      await tester.tap(find.byIcon(LucideIcons.moreVertical));
+      await _settle(tester);
+
+      expect(find.text('Resubmit'), findsOneWidget);
+      expect(find.text('Cancel listing'), findsNothing);
     },
   );
+
+  testWidgets('the Cancelled filter tab lists only cancelled listings', (
+    tester,
+  ) async {
+    final dio = _fakeDio({
+      'GET ${ApiEndpoints.apiMyListings}': (_) => [
+        _listingJson(id: '1', title: 'Live lamp'),
+        _listingJson(id: '2', title: 'Gone vase', status: 6),
+      ],
+    });
+
+    await tester.pumpWidget(
+      _harness([
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ]),
+    );
+    await _settle(tester);
+
+    expect(find.text('Paused'), findsNothing);
+    expect(find.text('Sold'), findsNothing);
+    await tester.tap(find.widgetWithText(InkWell, 'Cancelled').first);
+    await _settle(tester);
+
+    expect(find.text('Gone vase'), findsOneWidget);
+    expect(find.text('Live lamp'), findsNothing);
+  });
 
   testWidgets(
     'searching listings does not assert during the dialog exit animation',
@@ -310,8 +283,7 @@ void main() {
     },
   );
 
-  // TODO(backend): no endpoint to resubmit an admin-rejected listing (backend Q3) —
-  // restore the old failed-resubmit sheet test when the Resubmit entry returns.
+  // The backend only resubmits cancelled listings (rejected ones 400).
   testWidgets(
     'a rejected listing offers no Resubmit entry',
     (tester) async {

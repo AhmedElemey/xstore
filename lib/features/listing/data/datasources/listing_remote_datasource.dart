@@ -64,21 +64,13 @@ abstract interface class ListingRemoteDataSource {
 
   Future<void> deleteListing(String id);
 
-  /// Sends a rejected listing back for review with a corrected price.
+  /// Sends a cancelled listing back for review with a corrected price.
   /// CONFIRMED (Postman collection): unlike create/update, this is a plain
   /// JSON PUT — `{"newPrice": <double>}` — not multipart.
   Future<ListingModel> resubmitListing({
     required String id,
     required double newPrice,
   });
-
-  /// Pauses a listing via the dedicated status-only endpoint. CONFIRMED
-  /// (Postman collection) to exist as a plain PUT with no body — used
-  /// instead of the generic multipart update so pausing never sends an
-  /// empty `imageFiles` set (see `_listingFormData`'s image-wipe risk).
-  /// The response body is not a listing DTO, so it's ignored — callers
-  /// already know the resulting status.
-  Future<void> deactivateListing(String id);
 
   /// Drops the offline-scaffold cache. Must be called on logout — the
   /// datasource is a keepAlive singleton, so without this a second account
@@ -225,10 +217,8 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           location: location,
           attributes: attributes,
           imagePaths: imagePaths,
-          // C# `ListingStatus` defaults to 0 = Draft when this field is
-          // omitted, so Publish created rows that never entered the admin
-          // PENDING queue. Live Active listings have `reviewedAt` set by
-          // `PUT /api/admin/listings/{id}/approve` — vendors submit Pending.
+          // Vendors always submit Pending (1); live Active listings have
+          // `reviewedAt` set by `PUT /api/admin/listings/{id}/approve`.
           status: ListingStatus.pending,
         ),
         options: ApiAuthHeaders.authenticated(),
@@ -418,18 +408,16 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   Future<void> deleteListing(String id) async {
     try {
       // CONFIRMED (Postman collection): there is no DELETE endpoint for
-      // listings — only /cancel and /deactivate exist. "Delete listing"
-      // in the UI maps to /cancel (see ApiEndpoints.apiListingCancel for
-      // why not /deactivate). This is a soft, terminal status change on
-      // the backend, not a hard row delete.
+      // listings. "Cancel listing" in the UI maps to /cancel — a soft status
+      // change to Cancelled on the backend, not a hard row delete.
       await _dio.put<void>(
         ApiEndpoints.apiListingCancel(id),
         options: ApiAuthHeaders.authenticated(),
       );
-      _localMine.removeWhere((e) => e.id == id);
+      _markCachedCancelled(id);
     } on DioException catch (e) {
       if (_isOffline(e)) {
-        _localMine.removeWhere((e) => e.id == id);
+        _markCachedCancelled(id);
         return;
       }
       throw mapDioException(e);
@@ -479,27 +467,11 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     }
   }
 
-  @override
-  Future<void> deactivateListing(String id) async {
-    try {
-      await _dio.put<void>(
-        ApiEndpoints.apiListingDeactivate(id),
-        options: ApiAuthHeaders.authenticated(),
-      );
-      _markCachedPaused(id);
-    } on DioException catch (e) {
-      // Same caveat as resubmitListing above: the offline fallback only
-      // applies when the listing is already in the local cache.
-      if (_isOffline(e) && _markCachedPaused(id)) return;
-      throw mapDioException(e);
-    }
-  }
-
-  bool _markCachedPaused(String id) {
+  bool _markCachedCancelled(String id) {
     final idx = _localMine.indexWhere((e) => e.id == id);
     if (idx == -1) return false;
     _localMine[idx] = _localMine[idx].copyWith(
-      status: listingStatusToWire(ListingStatus.paused).toString(),
+      status: listingStatusToWire(ListingStatus.cancelled).toString(),
     );
     return true;
   }

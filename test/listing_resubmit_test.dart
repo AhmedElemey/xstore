@@ -51,28 +51,6 @@ void main() {
     });
   });
 
-  group('ListingRemoteDataSource deactivateListing', () {
-    late Dio dio;
-    late _CapturingInterceptor interceptor;
-    late ListingRemoteDataSourceImpl datasource;
-
-    setUp(() {
-      dio = Dio(BaseOptions(baseUrl: 'https://example.test'));
-      interceptor = _CapturingInterceptor();
-      dio.interceptors.add(interceptor);
-      datasource = ListingRemoteDataSourceImpl(dio);
-    });
-
-    test('PUTs to /listings/{id}/deactivate with no body', () async {
-      await datasource.deactivateListing('7');
-
-      final options = interceptor.captured!;
-      expect(options.method, 'PUT');
-      expect(options.path, '/api/listings/7/deactivate');
-      expect(options.data, isNull);
-    });
-  });
-
   group('ListingRemoteDataSource deleteListing', () {
     late Dio dio;
     late _CapturingInterceptor interceptor;

@@ -398,10 +398,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   child:
                       ProductStickyBar(
                         showAddToCart: !isVendor,
-                        isSoldOut: isSoldOutListing(
-                          status: listing.status,
-                          stock: data.stockQuantity,
-                        ),
+                        isSoldOut: isSoldOutListing(stock: data.stockQuantity),
                         isAddingToCart: data.isAddingToCart,
                         // TODO(phase-2): WhatsApp contact — pass onChat again when the button returns.
                         // onChat: () => _messageSeller(

@@ -54,7 +54,7 @@ class CartRecommendedStrip extends ConsumerWidget {
                           : null,
                       discountPercent: 0,
                       listingId: listing.id,
-                      isSoldOut: isSoldOutListing(status: listing.status),
+                      isSoldOut: isSoldOutListing(stock: listing.stockQuantity),
                       onTap: () =>
                           context.push('${AppRoutes.product}/${listing.id}'),
                     ),

@@ -21,19 +21,16 @@ class ListingFilterTabs extends StatelessWidget {
     null,
     ListingStatus.active,
     ListingStatus.pending,
-    ListingStatus.paused,
-    ListingStatus.sold,
     ListingStatus.rejected,
+    ListingStatus.cancelled,
   ];
 
   static String _label(BuildContext context, ListingStatus? s) => switch (s) {
     null => context.l10n.ordersFilterAll,
     ListingStatus.active => context.l10n.active,
     ListingStatus.pending => context.l10n.pending,
-    ListingStatus.paused => context.l10n.paused,
-    ListingStatus.sold => context.l10n.sold,
     ListingStatus.rejected => context.l10n.rejected,
-    ListingStatus.draft => context.l10n.draft,
+    ListingStatus.cancelled => context.l10n.cancelled,
   };
 
   @override

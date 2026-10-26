@@ -290,8 +290,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
 
     final formBeforeSubmit = ref.read(listingFormNotifierProvider);
     final isEditing = formBeforeSubmit.editingListingId.isNotEmpty;
-    final isPublishingDraft =
-        formBeforeSubmit.editingStatus == ListingStatus.draft;
     final retryLabel = context.l10n.retry;
     final ok = await notifier.submit(context.l10n);
     if (!mounted) {
@@ -300,7 +298,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     if (ok) {
       AppSnackbar.success(
         context,
-        isEditing && !isPublishingDraft
+        isEditing
             ? context.l10n.listingUpdatedSuccess
             : context.l10n.listingPublishedSuccess,
       );
@@ -543,7 +541,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                   AppSpacing.lg,
                 ),
                 child: XstoreButton(
-                  label: isEditing && form.editingStatus != ListingStatus.draft
+                  label: isEditing
                       ? context.l10n.updateListing
                       : context.l10n.publishListing,
                   isLoading: form.isSubmitting,

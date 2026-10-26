@@ -136,19 +136,11 @@ abstract final class ApiEndpoints {
   static String apiListingSimilar(String id, {int count = 6}) =>
       '$apiListings/$id/similar?count=$count';
   // CONFIRMED live 400: `"Only cancelled listings can be re-submitted."`
-  // — not paused, not rejected.
+  // — not rejected.
   static String apiListingResubmit(String id) => '$apiListings/$id/resubmit';
-  // CONFIRMED (Postman + live 400): bodyless pause PUT. Rejects unless
-  // the listing is already Active (`"Only active listings can be
-  // deactivated."`). `/activate` is not a route (empty 404). Do not use
-  // /deactivate or /resubmit to resume a paused listing.
-  static String apiListingDeactivate(String id) => '$apiListings/$id/deactivate';
   // CONFIRMED (Postman collection): dedicated status-only PUT, no body.
-  // Used for "Delete listing" — the collection has no DELETE endpoint for
-  // listings at all, only /cancel and /deactivate. /deactivate is already
-  // pause's endpoint (reusing it for delete would make a "deleted"
-  // listing reappear as merely paused-and-resumable), so /cancel is the
-  // closer semantic match for a listing the vendor wants gone for good.
+  // Used for "Cancel listing" — the collection has no DELETE endpoint for
+  // listings at all; this soft status change (-> Cancelled) is the closest match.
   static String apiListingCancel(String id) => '$apiListings/$id/cancel';
   // CONFIRMED (Postman + live probe, 2026-09-24): public GET, Result
   // envelope with a bool `data` — "can this listing fill `quantity` right

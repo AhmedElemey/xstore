@@ -150,7 +150,7 @@ void main() {
           const ListingStatsBanner(
             totalCount: 6,
             activeCount: 5,
-            soldCount: 0,
+            soldOutCount: 0,
           ),
           locale: _ar,
         ),

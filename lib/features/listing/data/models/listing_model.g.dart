@@ -12,7 +12,7 @@ _$ListingModelImpl _$$ListingModelImplFromJson(Map<String, dynamic> json) =>
       title: json['title'] as String,
       description: json['description'] as String,
       price: (json['price'] as num).toDouble(),
-      status: json['status'] as String? ?? 'draft',
+      status: json['status'] as String? ?? '1',
       imageUrls: (json['imageUrls'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??

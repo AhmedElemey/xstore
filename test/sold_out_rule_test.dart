@@ -7,30 +7,25 @@ import 'package:xstore/features/home/presentation/widgets/new_arrivals_grid.dart
 import 'package:xstore/features/listing/data/models/listing_model.dart';
 import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 
-ListingEntity _listing(ListingStatus status) => ListingEntity(
+ListingEntity _listing({required int stock}) => ListingEntity(
   id: '1',
   title: 'Keyboard',
   description: 'Keyboard',
   price: 100,
-  status: status,
+  status: ListingStatus.active,
+  stockQuantity: stock,
 );
 
 void main() {
   group('isSoldOutListing', () {
-    test('status sold is sold out whatever the stock', () {
-      expect(isSoldOutListing(status: ListingStatus.sold), isTrue);
-      expect(isSoldOutListing(status: ListingStatus.sold, stock: 5), isTrue);
-    });
-
     test('known stock <= 0 is sold out', () {
-      expect(isSoldOutListing(status: ListingStatus.active, stock: 0), isTrue);
+      expect(isSoldOutListing(stock: 0), isTrue);
       expect(isSoldOutListing(stock: -1), isTrue);
     });
 
-    test('missing stock is available', () {
-      expect(isSoldOutListing(status: ListingStatus.active), isFalse);
+    test('missing or positive stock is available', () {
       expect(isSoldOutListing(), isFalse);
-      expect(isSoldOutListing(status: ListingStatus.active, stock: 1), isFalse);
+      expect(isSoldOutListing(stock: 1), isFalse);
     });
   });
 
@@ -39,17 +34,13 @@ void main() {
       expect(isSoldOutListingJson({'status': 2}), isFalse);
       expect(isSoldOutListingJson({'status': 2, 'stockQuantity': 0}), isTrue);
       expect(isSoldOutListingJson({'status': 2, 'stock': '3'}), isFalse);
-      expect(isSoldOutListingJson({'status': 4, 'stockQuantity': 3}), isTrue);
-      expect(isSoldOutListingJson({'status': 'sold'}), isTrue);
+      expect(isSoldOutListingJson({'status': 'sold'}), isFalse);
     });
   });
 
-  for (final (status, soldOut) in [
-    (ListingStatus.sold, true),
-    (ListingStatus.active, false),
-  ]) {
+  for (final (stock, soldOut) in [(0, true), (3, false)]) {
     testWidgets(
-      'a ${status.name} listing ${soldOut ? 'is' : 'is not'} greyed on the card',
+      'a listing with stock $stock ${soldOut ? 'is' : 'is not'} greyed on the card',
       (tester) async {
         await tester.pumpWidget(
           ProviderScope(
@@ -61,7 +52,9 @@ void main() {
                 GlobalCupertinoLocalizations.delegate,
               ],
               supportedLocales: AppLocalizations.supportedLocales,
-              home: Scaffold(body: NewArrivalsGrid(items: [_listing(status)])),
+              home: Scaffold(
+                body: NewArrivalsGrid(items: [_listing(stock: stock)]),
+              ),
             ),
           ),
         );
