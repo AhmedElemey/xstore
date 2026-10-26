@@ -966,6 +966,12 @@ mixin _$OrderEntity {
   String? get trackingLocation => throw _privateConstructorUsedError;
   DateTime? get estimatedDelivery => throw _privateConstructorUsedError;
   String? get cancelReason => throw _privateConstructorUsedError;
+
+  /// Who cancelled (DTO `cancelledBy`). Null when not cancelled.
+  OrderCanceller? get cancelledBy => throw _privateConstructorUsedError;
+
+  /// DTO `isReviewed` — the buyer already reviewed this order.
+  bool get isReviewed => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
@@ -1013,6 +1019,8 @@ abstract class $OrderEntityCopyWith<$Res> {
       String? trackingLocation,
       DateTime? estimatedDelivery,
       String? cancelReason,
+      OrderCanceller? cancelledBy,
+      bool isReviewed,
       String? notes,
       DateTime createdAt,
       DateTime updatedAt,
@@ -1064,6 +1072,8 @@ class _$OrderEntityCopyWithImpl<$Res, $Val extends OrderEntity>
     Object? trackingLocation = freezed,
     Object? estimatedDelivery = freezed,
     Object? cancelReason = freezed,
+    Object? cancelledBy = freezed,
+    Object? isReviewed = null,
     Object? notes = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -1178,6 +1188,14 @@ class _$OrderEntityCopyWithImpl<$Res, $Val extends OrderEntity>
           ? _value.cancelReason
           : cancelReason // ignore: cast_nullable_to_non_nullable
               as String?,
+      cancelledBy: freezed == cancelledBy
+          ? _value.cancelledBy
+          : cancelledBy // ignore: cast_nullable_to_non_nullable
+              as OrderCanceller?,
+      isReviewed: null == isReviewed
+          ? _value.isReviewed
+          : isReviewed // ignore: cast_nullable_to_non_nullable
+              as bool,
       notes: freezed == notes
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
@@ -1257,6 +1275,8 @@ abstract class _$$OrderEntityImplCopyWith<$Res>
       String? trackingLocation,
       DateTime? estimatedDelivery,
       String? cancelReason,
+      OrderCanceller? cancelledBy,
+      bool isReviewed,
       String? notes,
       DateTime createdAt,
       DateTime updatedAt,
@@ -1307,6 +1327,8 @@ class __$$OrderEntityImplCopyWithImpl<$Res>
     Object? trackingLocation = freezed,
     Object? estimatedDelivery = freezed,
     Object? cancelReason = freezed,
+    Object? cancelledBy = freezed,
+    Object? isReviewed = null,
     Object? notes = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -1421,6 +1443,14 @@ class __$$OrderEntityImplCopyWithImpl<$Res>
           ? _value.cancelReason
           : cancelReason // ignore: cast_nullable_to_non_nullable
               as String?,
+      cancelledBy: freezed == cancelledBy
+          ? _value.cancelledBy
+          : cancelledBy // ignore: cast_nullable_to_non_nullable
+              as OrderCanceller?,
+      isReviewed: null == isReviewed
+          ? _value.isReviewed
+          : isReviewed // ignore: cast_nullable_to_non_nullable
+              as bool,
       notes: freezed == notes
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
@@ -1487,6 +1517,8 @@ class _$OrderEntityImpl implements _OrderEntity {
       this.trackingLocation,
       this.estimatedDelivery,
       this.cancelReason,
+      this.cancelledBy,
+      this.isReviewed = false,
       this.notes,
       required this.createdAt,
       required this.updatedAt,
@@ -1563,6 +1595,15 @@ class _$OrderEntityImpl implements _OrderEntity {
   final DateTime? estimatedDelivery;
   @override
   final String? cancelReason;
+
+  /// Who cancelled (DTO `cancelledBy`). Null when not cancelled.
+  @override
+  final OrderCanceller? cancelledBy;
+
+  /// DTO `isReviewed` — the buyer already reviewed this order.
+  @override
+  @JsonKey()
+  final bool isReviewed;
   @override
   final String? notes;
   @override
@@ -1582,7 +1623,7 @@ class _$OrderEntityImpl implements _OrderEntity {
 
   @override
   String toString() {
-    return 'OrderEntity(id: $id, consumerId: $consumerId, consumerName: $consumerName, consumerPhone: $consumerPhone, consumerAvatar: $consumerAvatar, vendorId: $vendorId, vendorName: $vendorName, vendorStoreName: $vendorStoreName, vendorAvatar: $vendorAvatar, vendorRating: $vendorRating, items: $items, status: $status, paymentMethod: $paymentMethod, isPaid: $isPaid, deliveryAddress: $deliveryAddress, subtotal: $subtotal, shippingCost: $shippingCost, discount: $discount, total: $total, trackingNumber: $trackingNumber, deliveryMethod: $deliveryMethod, courierId: $courierId, courierName: $courierName, trackingLocation: $trackingLocation, estimatedDelivery: $estimatedDelivery, cancelReason: $cancelReason, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, confirmedAt: $confirmedAt, processingAt: $processingAt, shippedAt: $shippedAt, deliveredAt: $deliveredAt, cancelledAt: $cancelledAt)';
+    return 'OrderEntity(id: $id, consumerId: $consumerId, consumerName: $consumerName, consumerPhone: $consumerPhone, consumerAvatar: $consumerAvatar, vendorId: $vendorId, vendorName: $vendorName, vendorStoreName: $vendorStoreName, vendorAvatar: $vendorAvatar, vendorRating: $vendorRating, items: $items, status: $status, paymentMethod: $paymentMethod, isPaid: $isPaid, deliveryAddress: $deliveryAddress, subtotal: $subtotal, shippingCost: $shippingCost, discount: $discount, total: $total, trackingNumber: $trackingNumber, deliveryMethod: $deliveryMethod, courierId: $courierId, courierName: $courierName, trackingLocation: $trackingLocation, estimatedDelivery: $estimatedDelivery, cancelReason: $cancelReason, cancelledBy: $cancelledBy, isReviewed: $isReviewed, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, confirmedAt: $confirmedAt, processingAt: $processingAt, shippedAt: $shippedAt, deliveredAt: $deliveredAt, cancelledAt: $cancelledAt)';
   }
 
   @override
@@ -1637,6 +1678,10 @@ class _$OrderEntityImpl implements _OrderEntity {
                 other.estimatedDelivery == estimatedDelivery) &&
             (identical(other.cancelReason, cancelReason) ||
                 other.cancelReason == cancelReason) &&
+            (identical(other.cancelledBy, cancelledBy) ||
+                other.cancelledBy == cancelledBy) &&
+            (identical(other.isReviewed, isReviewed) ||
+                other.isReviewed == isReviewed) &&
             (identical(other.notes, notes) || other.notes == notes) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -1683,6 +1728,8 @@ class _$OrderEntityImpl implements _OrderEntity {
         trackingLocation,
         estimatedDelivery,
         cancelReason,
+        cancelledBy,
+        isReviewed,
         notes,
         createdAt,
         updatedAt,
@@ -1728,6 +1775,8 @@ abstract class _OrderEntity implements OrderEntity {
       final String? trackingLocation,
       final DateTime? estimatedDelivery,
       final String? cancelReason,
+      final OrderCanceller? cancelledBy,
+      final bool isReviewed,
       final String? notes,
       required final DateTime createdAt,
       required final DateTime updatedAt,
@@ -1794,6 +1843,14 @@ abstract class _OrderEntity implements OrderEntity {
   DateTime? get estimatedDelivery;
   @override
   String? get cancelReason;
+  @override
+
+  /// Who cancelled (DTO `cancelledBy`). Null when not cancelled.
+  OrderCanceller? get cancelledBy;
+  @override
+
+  /// DTO `isReviewed` — the buyer already reviewed this order.
+  bool get isReviewed;
   @override
   String? get notes;
   @override

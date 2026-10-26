@@ -27,7 +27,8 @@ class VendorOrderActionSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (order.status == OrderStatus.delivered ||
-        order.status == OrderStatus.cancelled) {
+        order.status == OrderStatus.cancelled ||
+        order.status == OrderStatus.deliveryFailed) {
       return const SizedBox.shrink();
     }
     // Same sticky footer chrome as the consumer order detail.

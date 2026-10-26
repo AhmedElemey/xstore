@@ -12,7 +12,8 @@ Color orderStatusColor(OrderStatus s) => switch (s) {
   OrderStatus.processing => AppColors.orderStatusProcessing,
   OrderStatus.shipped => AppColors.orderStatusShipped,
   OrderStatus.delivered => AppColors.orderStatusDelivered,
-  OrderStatus.cancelled => AppColors.orderStatusCancelled,
+  OrderStatus.cancelled ||
+  OrderStatus.deliveryFailed => AppColors.orderStatusCancelled,
 };
 
 String orderStatusLabel(BuildContext context, OrderStatus s) => switch (s) {
@@ -22,6 +23,13 @@ String orderStatusLabel(BuildContext context, OrderStatus s) => switch (s) {
   OrderStatus.shipped => context.l10n.ordersFilterShipped,
   OrderStatus.delivered => context.l10n.ordersFilterDelivered,
   OrderStatus.cancelled => context.l10n.ordersFilterCancelled,
+  OrderStatus.deliveryFailed => context.l10n.ordersFilterDeliveryFailed,
+};
+
+String orderCancellerLabel(BuildContext context, OrderCanceller c) => switch (c) {
+  OrderCanceller.admin => context.l10n.ordersCancelledByAdmin,
+  OrderCanceller.consumer => context.l10n.ordersCancelledByConsumer,
+  OrderCanceller.vendor => context.l10n.ordersCancelledByVendor,
 };
 
 /// Orbit status pill: the status colour at 16% behind its own text. Light

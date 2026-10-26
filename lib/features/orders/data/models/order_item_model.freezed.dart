@@ -25,6 +25,8 @@ mixin _$OrderItemModel {
   double get price => throw _privateConstructorUsedError;
   int get quantity => throw _privateConstructorUsedError;
   double get total => throw _privateConstructorUsedError;
+  List<({String key, String value})> get attributes =>
+      throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $OrderItemModelCopyWith<OrderItemModel> get copyWith =>
@@ -46,7 +48,8 @@ abstract class $OrderItemModelCopyWith<$Res> {
       String condition,
       double price,
       int quantity,
-      double total});
+      double total,
+      List<({String key, String value})> attributes});
 }
 
 /// @nodoc
@@ -71,6 +74,7 @@ class _$OrderItemModelCopyWithImpl<$Res, $Val extends OrderItemModel>
     Object? price = null,
     Object? quantity = null,
     Object? total = null,
+    Object? attributes = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -109,6 +113,10 @@ class _$OrderItemModelCopyWithImpl<$Res, $Val extends OrderItemModel>
           ? _value.total
           : total // ignore: cast_nullable_to_non_nullable
               as double,
+      attributes: null == attributes
+          ? _value.attributes
+          : attributes // ignore: cast_nullable_to_non_nullable
+              as List<({String key, String value})>,
     ) as $Val);
   }
 }
@@ -130,7 +138,8 @@ abstract class _$$OrderItemModelImplCopyWith<$Res>
       String condition,
       double price,
       int quantity,
-      double total});
+      double total,
+      List<({String key, String value})> attributes});
 }
 
 /// @nodoc
@@ -153,6 +162,7 @@ class __$$OrderItemModelImplCopyWithImpl<$Res>
     Object? price = null,
     Object? quantity = null,
     Object? total = null,
+    Object? attributes = null,
   }) {
     return _then(_$OrderItemModelImpl(
       id: null == id
@@ -191,6 +201,10 @@ class __$$OrderItemModelImplCopyWithImpl<$Res>
           ? _value.total
           : total // ignore: cast_nullable_to_non_nullable
               as double,
+      attributes: null == attributes
+          ? _value._attributes
+          : attributes // ignore: cast_nullable_to_non_nullable
+              as List<({String key, String value})>,
     ));
   }
 }
@@ -207,7 +221,10 @@ class _$OrderItemModelImpl implements _OrderItemModel {
       required this.condition,
       required this.price,
       required this.quantity,
-      required this.total});
+      required this.total,
+      final List<({String key, String value})> attributes =
+          const <OrderItemAttribute>[]})
+      : _attributes = attributes;
 
   @override
   final String id;
@@ -227,10 +244,18 @@ class _$OrderItemModelImpl implements _OrderItemModel {
   final int quantity;
   @override
   final double total;
+  final List<({String key, String value})> _attributes;
+  @override
+  @JsonKey()
+  List<({String key, String value})> get attributes {
+    if (_attributes is EqualUnmodifiableListView) return _attributes;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_attributes);
+  }
 
   @override
   String toString() {
-    return 'OrderItemModel(id: $id, listingId: $listingId, listingName: $listingName, listingImage: $listingImage, category: $category, condition: $condition, price: $price, quantity: $quantity, total: $total)';
+    return 'OrderItemModel(id: $id, listingId: $listingId, listingName: $listingName, listingImage: $listingImage, category: $category, condition: $condition, price: $price, quantity: $quantity, total: $total, attributes: $attributes)';
   }
 
   @override
@@ -252,12 +277,24 @@ class _$OrderItemModelImpl implements _OrderItemModel {
             (identical(other.price, price) || other.price == price) &&
             (identical(other.quantity, quantity) ||
                 other.quantity == quantity) &&
-            (identical(other.total, total) || other.total == total));
+            (identical(other.total, total) || other.total == total) &&
+            const DeepCollectionEquality()
+                .equals(other._attributes, _attributes));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, listingId, listingName,
-      listingImage, category, condition, price, quantity, total);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      listingId,
+      listingName,
+      listingImage,
+      category,
+      condition,
+      price,
+      quantity,
+      total,
+      const DeepCollectionEquality().hash(_attributes));
 
   @JsonKey(ignore: true)
   @override
@@ -269,15 +306,17 @@ class _$OrderItemModelImpl implements _OrderItemModel {
 
 abstract class _OrderItemModel implements OrderItemModel {
   const factory _OrderItemModel(
-      {required final String id,
-      required final String listingId,
-      required final String listingName,
-      required final String listingImage,
-      required final String category,
-      required final String condition,
-      required final double price,
-      required final int quantity,
-      required final double total}) = _$OrderItemModelImpl;
+          {required final String id,
+          required final String listingId,
+          required final String listingName,
+          required final String listingImage,
+          required final String category,
+          required final String condition,
+          required final double price,
+          required final int quantity,
+          required final double total,
+          final List<({String key, String value})> attributes}) =
+      _$OrderItemModelImpl;
 
   @override
   String get id;
@@ -297,6 +336,8 @@ abstract class _OrderItemModel implements OrderItemModel {
   int get quantity;
   @override
   double get total;
+  @override
+  List<({String key, String value})> get attributes;
   @override
   @JsonKey(ignore: true)
   _$$OrderItemModelImplCopyWith<_$OrderItemModelImpl> get copyWith =>

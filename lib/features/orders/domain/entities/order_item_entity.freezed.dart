@@ -25,6 +25,8 @@ mixin _$OrderItemEntity {
   double get price => throw _privateConstructorUsedError;
   int get quantity => throw _privateConstructorUsedError;
   double get total => throw _privateConstructorUsedError;
+  List<({String key, String value})> get attributes =>
+      throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $OrderItemEntityCopyWith<OrderItemEntity> get copyWith =>
@@ -46,7 +48,8 @@ abstract class $OrderItemEntityCopyWith<$Res> {
       String condition,
       double price,
       int quantity,
-      double total});
+      double total,
+      List<({String key, String value})> attributes});
 }
 
 /// @nodoc
@@ -71,6 +74,7 @@ class _$OrderItemEntityCopyWithImpl<$Res, $Val extends OrderItemEntity>
     Object? price = null,
     Object? quantity = null,
     Object? total = null,
+    Object? attributes = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -109,6 +113,10 @@ class _$OrderItemEntityCopyWithImpl<$Res, $Val extends OrderItemEntity>
           ? _value.total
           : total // ignore: cast_nullable_to_non_nullable
               as double,
+      attributes: null == attributes
+          ? _value.attributes
+          : attributes // ignore: cast_nullable_to_non_nullable
+              as List<({String key, String value})>,
     ) as $Val);
   }
 }
@@ -130,7 +138,8 @@ abstract class _$$OrderItemEntityImplCopyWith<$Res>
       String condition,
       double price,
       int quantity,
-      double total});
+      double total,
+      List<({String key, String value})> attributes});
 }
 
 /// @nodoc
@@ -153,6 +162,7 @@ class __$$OrderItemEntityImplCopyWithImpl<$Res>
     Object? price = null,
     Object? quantity = null,
     Object? total = null,
+    Object? attributes = null,
   }) {
     return _then(_$OrderItemEntityImpl(
       id: null == id
@@ -191,6 +201,10 @@ class __$$OrderItemEntityImplCopyWithImpl<$Res>
           ? _value.total
           : total // ignore: cast_nullable_to_non_nullable
               as double,
+      attributes: null == attributes
+          ? _value._attributes
+          : attributes // ignore: cast_nullable_to_non_nullable
+              as List<({String key, String value})>,
     ));
   }
 }
@@ -207,7 +221,10 @@ class _$OrderItemEntityImpl implements _OrderItemEntity {
       required this.condition,
       required this.price,
       required this.quantity,
-      required this.total});
+      required this.total,
+      final List<({String key, String value})> attributes =
+          const <OrderItemAttribute>[]})
+      : _attributes = attributes;
 
   @override
   final String id;
@@ -227,10 +244,18 @@ class _$OrderItemEntityImpl implements _OrderItemEntity {
   final int quantity;
   @override
   final double total;
+  final List<({String key, String value})> _attributes;
+  @override
+  @JsonKey()
+  List<({String key, String value})> get attributes {
+    if (_attributes is EqualUnmodifiableListView) return _attributes;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_attributes);
+  }
 
   @override
   String toString() {
-    return 'OrderItemEntity(id: $id, listingId: $listingId, listingName: $listingName, listingImage: $listingImage, category: $category, condition: $condition, price: $price, quantity: $quantity, total: $total)';
+    return 'OrderItemEntity(id: $id, listingId: $listingId, listingName: $listingName, listingImage: $listingImage, category: $category, condition: $condition, price: $price, quantity: $quantity, total: $total, attributes: $attributes)';
   }
 
   @override
@@ -252,12 +277,24 @@ class _$OrderItemEntityImpl implements _OrderItemEntity {
             (identical(other.price, price) || other.price == price) &&
             (identical(other.quantity, quantity) ||
                 other.quantity == quantity) &&
-            (identical(other.total, total) || other.total == total));
+            (identical(other.total, total) || other.total == total) &&
+            const DeepCollectionEquality()
+                .equals(other._attributes, _attributes));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, listingId, listingName,
-      listingImage, category, condition, price, quantity, total);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      listingId,
+      listingName,
+      listingImage,
+      category,
+      condition,
+      price,
+      quantity,
+      total,
+      const DeepCollectionEquality().hash(_attributes));
 
   @JsonKey(ignore: true)
   @override
@@ -269,15 +306,17 @@ class _$OrderItemEntityImpl implements _OrderItemEntity {
 
 abstract class _OrderItemEntity implements OrderItemEntity {
   const factory _OrderItemEntity(
-      {required final String id,
-      required final String listingId,
-      required final String listingName,
-      required final String listingImage,
-      required final String category,
-      required final String condition,
-      required final double price,
-      required final int quantity,
-      required final double total}) = _$OrderItemEntityImpl;
+          {required final String id,
+          required final String listingId,
+          required final String listingName,
+          required final String listingImage,
+          required final String category,
+          required final String condition,
+          required final double price,
+          required final int quantity,
+          required final double total,
+          final List<({String key, String value})> attributes}) =
+      _$OrderItemEntityImpl;
 
   @override
   String get id;
@@ -297,6 +336,8 @@ abstract class _OrderItemEntity implements OrderItemEntity {
   int get quantity;
   @override
   double get total;
+  @override
+  List<({String key, String value})> get attributes;
   @override
   @JsonKey(ignore: true)
   _$$OrderItemEntityImplCopyWith<_$OrderItemEntityImpl> get copyWith =>

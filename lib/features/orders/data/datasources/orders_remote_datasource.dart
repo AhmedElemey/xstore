@@ -12,6 +12,7 @@ import '../../../../core/mock/mock_users.dart';
 import '../../../commission/domain/commission_constants.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../../listing/data/models/listing_model.dart';
+import '../../domain/entities/order_item_entity.dart';
 import '../models/order_item_model.dart';
 import '../models/order_model.dart';
 
@@ -170,6 +171,18 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     if (t.contains('dahabi')) return PaymentMethod.dahabiCard;
     if (t.contains('baridi')) return PaymentMethod.baridimob;
     return PaymentMethod.cashOnDelivery;
+  }
+
+  /// OrderDto `payment` string (default `"cod"`). Unknown labels are null so
+  /// the caller keeps its fallback.
+  PaymentMethod? _paymentFromWire(String? raw) {
+    if (raw == null) return null;
+    final t = raw.toLowerCase();
+    if (t == 'cod' || t.contains('cash')) return PaymentMethod.cashOnDelivery;
+    if (t.contains('cib')) return PaymentMethod.cibCard;
+    if (t.contains('dahabi')) return PaymentMethod.dahabiCard;
+    if (t.contains('baridi')) return PaymentMethod.baridimob;
+    return null;
   }
 
   OrderStatus _statusFromMock(MockOrderStatus s) => switch (s) {
@@ -1087,11 +1100,11 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     final subtotal = _envelopeDouble(data, 'subtotal') ?? computedTotal;
     final discount = _envelopeDouble(data, 'discount') ?? 0;
     final total = _envelopeDouble(data, 'total') ?? computedTotal;
-    // Live orders send `total` with the listing's shipping already added
-    // (500 item + 20 shipping = 520) but no shipping field, so the
-    // breakdown read 0 and didn't add up. Without an explicit fee, the
-    // gap between total and subtotal − discount is the shipping charge.
-    final shippingCost = _envelopeDouble(data, 'shippingCost') ??
+    // OrderDto sends `shipping`. Older/other payloads that omit every
+    // shipping key fall back to the gap between total and subtotal −
+    // discount.
+    final shippingCost = _envelopeDouble(data, 'shipping') ??
+        _envelopeDouble(data, 'shippingCost') ??
         _envelopeDouble(data, 'shippingFee') ??
         _envelopeDouble(data, 'deliveryFee') ??
         (total - subtotal + discount).clamp(0, double.infinity).toDouble();
@@ -1150,12 +1163,13 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
 
     return OrderModel(
       id: _optString(data, 'id') ?? _optString(data, 'orderId') ?? '',
-      consumerId: _optString(data, 'consumerId') ??
+      consumerId: _optString(data, 'buyerUserId') ??
+          _optString(data, 'consumerId') ??
           _optString(data, 'buyerId') ??
           _optString(buyerNode ?? const {}, 'id') ??
           '',
-      consumerName: _optString(data, 'consumerName') ??
-          _optString(data, 'buyerName') ??
+      consumerName: _optString(data, 'buyerName') ??
+          _optString(data, 'consumerName') ??
           _optString(data, 'customerName') ??
           _personName(data, allowGenericName: false) ??
           _personName(buyerNode) ??
@@ -1163,7 +1177,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
               ? deliveryAddress.fullName
               : null) ??
           '',
-      consumerPhone: _optString(data, 'consumerPhone') ??
+      consumerPhone: _optString(data, 'phone') ??
+          _optString(data, 'consumerPhone') ??
           _optString(data, 'buyerPhone') ??
           _optString(data, 'phoneNumber') ??
           _optString(buyerNode ?? const {}, 'phoneNumber') ??
@@ -1184,7 +1199,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       vendorRating: vendorRating,
       items: items,
       status: status,
-      paymentMethod: fallbackPayment ?? PaymentMethod.cashOnDelivery,
+      paymentMethod: _paymentFromWire(_optString(data, 'payment')) ??
+          fallbackPayment ??
+          PaymentMethod.cashOnDelivery,
       isPaid: _envelopeBool(data, 'isPaid'),
       deliveryAddress: deliveryAddress,
       subtotal: subtotal,
@@ -1204,7 +1221,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       estimatedDelivery: DateTime.tryParse(
         _optString(data, 'estimatedDelivery') ?? '',
       ),
-      cancelReason: _optString(data, 'cancelReason'),
+      cancelReason: _optString(data, 'cancellationReason') ??
+          _optString(data, 'cancelReason'),
+      cancelledBy: orderCancellerFromWire(_envelopeValue(data, 'cancelledBy')),
+      isReviewed: _envelopeBool(data, 'isReviewed'),
       notes: _optString(data, 'notes') ?? fallbackNotes,
       createdAt:
           DateTime.tryParse(_optString(data, 'createdAt') ?? '') ?? DateTime.now(),
@@ -1230,6 +1250,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         _optString(src, 'fullNameEn') ??
         _optString(src, 'fullNameAr') ??
         _optString(src, 'name') ??
+        _optString(data, 'buyerName') ??
         _optString(data, 'consumerName') ??
         _optString(data, 'fullName') ??
         fallback?.fullName ??
@@ -1261,6 +1282,15 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         _optString(data, 'governmentByGoogleMaps') ??
         fallback?.wilaya ??
         '';
+    // OrderDto `latitude`/`longitude` are non-null decimals; 0/0 means the
+    // order carries no pin.
+    final rawLat = _envelopeDouble(data, 'latitude');
+    final rawLng = _envelopeDouble(data, 'longitude');
+    final pinned = rawLat != null &&
+        rawLng != null &&
+        !(rawLat == 0 && rawLng == 0);
+    final lat = pinned ? rawLat : null;
+    final lng = pinned ? rawLng : null;
     return OrderAddressModel(
       fullName: fullName,
       phone: phone,
@@ -1269,13 +1299,20 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       wilaya: wilaya,
       postalCode: _optString(src, 'postalCode') ?? fallback?.postalCode,
       isDefault: fallback?.isDefault ?? false,
+      latitude: lat ?? fallback?.latitude,
+      longitude: lng ?? fallback?.longitude,
     );
   }
 
   OrderItemModel _itemFromApiMap(Map<String, dynamic> e) {
     final nested = _asMap(_envelopeValue(e, 'listing')) ?? e;
-    final quantity = _envelopeInt(e, 'quantity') ?? 1;
-    final price = _envelopeDouble(e, 'price') ??
+    // OrderItemDto: `qty`, `unitPrice` (charged per unit), `priceSnapshot`,
+    // `titleSnapshot`, `imageUrls`, `attributes`. Listing-shaped keys stay
+    // as fallbacks for order payloads that nest a `listing`.
+    final quantity = _envelopeInt(e, 'qty') ?? _envelopeInt(e, 'quantity') ?? 1;
+    final price = _envelopeDouble(e, 'unitPrice') ??
+        _envelopeDouble(e, 'priceSnapshot') ??
+        _envelopeDouble(e, 'price') ??
         _envelopeDouble(nested, 'price') ??
         0;
     return OrderItemModel(
@@ -1283,7 +1320,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       listingId: _optString(e, 'listingId') ??
           _optString(nested, 'id') ??
           '',
-      listingName: _listingTitle(nested) ?? _listingTitle(e) ?? '',
+      listingName: _optString(e, 'titleSnapshot') ??
+          _listingTitle(nested) ??
+          _listingTitle(e) ??
+          '',
       listingImage: _firstImageUrl(nested) ?? _firstImageUrl(e) ?? '',
       category: _listingCategory(nested),
       condition: listingConditionLabelFromRaw(
@@ -1293,7 +1333,24 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       price: price,
       quantity: quantity,
       total: _envelopeDouble(e, 'total') ?? price * quantity,
+      attributes: _itemAttributes(e),
     );
+  }
+
+  /// `ListingAttribute { key, value }` rows; malformed rows are skipped.
+  List<OrderItemAttribute> _itemAttributes(Map<String, dynamic> e) {
+    final raw = _envelopeValue(e, 'attributes');
+    if (raw is! List) return const [];
+    final out = <OrderItemAttribute>[];
+    for (final row in raw) {
+      if (row is! Map) continue;
+      final map = Map<String, dynamic>.from(row);
+      final key = _optString(map, 'key');
+      final value = _optString(map, 'value');
+      if (key == null || value == null) continue;
+      out.add((key: key, value: value));
+    }
+    return out;
   }
 
   /// Builds a single synthetic line item from a flat (non-`items`) order

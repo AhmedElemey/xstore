@@ -115,6 +115,7 @@ class OrderActionButtons extends ConsumerWidget {
         );
       case OrderStatus.delivered:
       case OrderStatus.cancelled:
+      case OrderStatus.deliveryFailed:
         return const SizedBox.shrink();
     }
   }
@@ -253,6 +254,7 @@ class OrderActionButtons extends ConsumerWidget {
           onPressed: () => context.go(AppRoutes.explore),
         );
       case OrderStatus.processing:
+      case OrderStatus.deliveryFailed:
         return const SizedBox.shrink();
     }
   }

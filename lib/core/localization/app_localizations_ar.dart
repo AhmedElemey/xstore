@@ -894,6 +894,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersFilterCancelled => 'ملغي';
 
   @override
+  String get ordersFilterDeliveryFailed => 'فشل التوصيل';
+
+  @override
   String get ordersQtyTotalLinePrefix => 'الكمية';
 
   @override
@@ -1102,6 +1105,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get statusSubtitleCancelled => 'الطلب ده اتلغى';
+
+  @override
+  String get statusSubtitleDeliveryFailed => 'توصيل الطلب ده فشل';
+
+  @override
+  String get ordersCancelledByAdmin => 'تم الإلغاء بواسطة الإدارة';
+
+  @override
+  String get ordersCancelledByConsumer => 'تم الإلغاء بواسطة العميل';
+
+  @override
+  String get ordersCancelledByVendor => 'تم الإلغاء بواسطة البائع';
 
   @override
   String get orderHashPrefix => 'طلب #';
@@ -1787,6 +1802,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorStatusCancelled => 'تم إلغاء هذا الطلب';
+
+  @override
+  String get vendorStatusDeliveryFailed => 'توصيل هذا الطلب فشل';
 
   @override
   String get didntReceiveCode => 'موصلكش الكود؟';

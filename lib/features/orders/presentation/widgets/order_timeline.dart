@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/order_entity.dart';
+import 'order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/pulsing_animation_builder.dart';
 
@@ -60,6 +61,7 @@ class OrderTimeline extends StatelessWidget {
                 ? '${context.formatMediumDate(date)} · ${context.formatTime(date)}'
                 : (filled ? null : context.l10n.ordersTimelinePending),
             cancelReason: isCancelNode ? o.cancelReason : null,
+            cancelledBy: isCancelNode ? o.cancelledBy : null,
           );
         }),
       ],
@@ -74,6 +76,8 @@ class OrderTimeline extends StatelessWidget {
     OrderStatus.shipped => 3,
     OrderStatus.delivered => 4,
     OrderStatus.cancelled => 0,
+    // Reached shipped at least; failed on the last mile.
+    OrderStatus.deliveryFailed => 3,
   };
 
   int _idxBeforeCancel(OrderEntity o) {
@@ -125,6 +129,7 @@ class _TimelineRow extends StatelessWidget {
     required this.label,
     this.subtitle,
     this.cancelReason,
+    this.cancelledBy,
   });
 
   final bool nodeFilled;
@@ -135,6 +140,7 @@ class _TimelineRow extends StatelessWidget {
   final String label;
   final String? subtitle;
   final String? cancelReason;
+  final OrderCanceller? cancelledBy;
 
   @override
   Widget build(BuildContext context) {
@@ -241,6 +247,13 @@ class _TimelineRow extends StatelessWidget {
                       subtitle,
                       style: AppTypography.labelMedium.copyWith(
                         color: context.labelColor,
+                      ),
+                    ),
+                  if (isCancelNode && cancelledBy != null)
+                    Text(
+                      orderCancellerLabel(context, cancelledBy!),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.error,
                       ),
                     ),
                   if (isCancelNode && cancelReason != null) ...[

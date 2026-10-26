@@ -890,6 +890,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersFilterCancelled => 'Cancelled';
 
   @override
+  String get ordersFilterDeliveryFailed => 'Delivery failed';
+
+  @override
   String get ordersQtyTotalLinePrefix => 'Qty';
 
   @override
@@ -1098,6 +1101,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusSubtitleCancelled => 'This order was cancelled';
+
+  @override
+  String get statusSubtitleDeliveryFailed => 'Delivery of this order failed';
+
+  @override
+  String get ordersCancelledByAdmin => 'Cancelled by admin';
+
+  @override
+  String get ordersCancelledByConsumer => 'Cancelled by the buyer';
+
+  @override
+  String get ordersCancelledByVendor => 'Cancelled by the vendor';
 
   @override
   String get orderHashPrefix => 'Order #';
@@ -1787,6 +1802,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorStatusCancelled => 'This order was cancelled';
+
+  @override
+  String get vendorStatusDeliveryFailed => 'Delivery of this order failed';
 
   @override
   String get didntReceiveCode => 'Didn\'t receive the code?';

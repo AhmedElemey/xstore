@@ -1207,3 +1207,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-26 — Keep diffs scoped: no repo-wide format or codegen churn
 - **Rule:** Never run `dart format .`/`lib test` or a full `build_runner` pass whose output reflows files you didn't change — the repo isn't uniformly formatted, so it buries the real change in hundreds of files. Format only files you edited (and only if it doesn't reflow the whole file); keep regenerated files only for sources you changed and `git checkout` the rest.
 - **Where it applies:** Every change, especially enum/model refactors that touch generated `.freezed.dart`/`.g.dart` files.
+
+### 2026-10-26 — OrderDto wire keys differ from the app's field names
+- **Rule:** Read `OrderDto`/`OrderItemDto` DTO keys first, legacy keys as fallback: `buyerUserId`/`buyerName`/`phone`/`shipping`/`payment`/`cancellationReason`/`cancelledBy`(int)/`isReviewed`; items `titleSnapshot`/`unitPrice`/`priceSnapshot`/`qty`/`imageUrls`/`attributes[{key,value}]`. `OrderStatus` has 7 members (`DeliveryFailed=6`, terminal, no actions) — a new member must be added to every exhaustive switch (`rg "OrderStatus\."`), incl. `commission_status.dart` — and to every non-exhaustive `== delivered || == cancelled` terminal check (the compiler won't flag those; `vendor_order_action_sheet.dart` fell through to "Mark shipped").
+- **Where it applies:** `orders_remote_datasource.dart` `_orderFromApiMap`/`_itemFromApiMap`, `order_entity.dart`, order status switches.

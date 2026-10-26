@@ -2,6 +2,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'order_item_entity.freezed.dart';
 
+/// Backend `ListingAttribute { key, value }` snapshotted on an order line.
+typedef OrderItemAttribute = ({String key, String value});
+
 @freezed
 class OrderItemEntity with _$OrderItemEntity {
   const factory OrderItemEntity({
@@ -14,5 +17,6 @@ class OrderItemEntity with _$OrderItemEntity {
     required double price,
     required int quantity,
     required double total,
+    @Default(<OrderItemAttribute>[]) List<OrderItemAttribute> attributes,
   }) = _OrderItemEntity;
 }

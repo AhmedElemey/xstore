@@ -16,6 +16,7 @@ class OrderItemModel with _$OrderItemModel {
     required double price,
     required int quantity,
     required double total,
+    @Default(<OrderItemAttribute>[]) List<OrderItemAttribute> attributes,
   }) = _OrderItemModel;
 }
 
@@ -30,6 +31,7 @@ extension OrderItemModelX on OrderItemModel {
         price: price,
         quantity: quantity,
         total: total,
+        attributes: attributes,
       );
 
   static OrderItemModel fromEntity(OrderItemEntity e) => OrderItemModel(
@@ -42,5 +44,6 @@ extension OrderItemModelX on OrderItemModel {
         price: e.price,
         quantity: e.quantity,
         total: e.total,
+        attributes: e.attributes,
       );
 }

@@ -225,6 +225,7 @@ class _StatusBanner extends StatelessWidget {
     OrderStatus.shipped => Icons.local_shipping_outlined,
     OrderStatus.delivered => Icons.verified_rounded,
     OrderStatus.cancelled => Icons.cancel_outlined,
+    OrderStatus.deliveryFailed => Icons.error_outline,
   };
 
   String _subtitle(BuildContext context, OrderStatus s) => switch (s) {
@@ -234,6 +235,7 @@ class _StatusBanner extends StatelessWidget {
     OrderStatus.shipped => context.l10n.statusSubtitleShipped,
     OrderStatus.delivered => context.l10n.statusSubtitleDelivered,
     OrderStatus.cancelled => context.l10n.statusSubtitleCancelled,
+    OrderStatus.deliveryFailed => context.l10n.statusSubtitleDeliveryFailed,
   };
 }
 

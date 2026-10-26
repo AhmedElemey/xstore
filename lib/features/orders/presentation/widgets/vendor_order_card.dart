@@ -46,7 +46,8 @@ class VendorOrderCard extends StatelessWidget {
     // finished ones keep the plain glass border.
     final active =
         order.status != OrderStatus.delivered &&
-        order.status != OrderStatus.cancelled;
+        order.status != OrderStatus.cancelled &&
+        order.status != OrderStatus.deliveryFailed;
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,

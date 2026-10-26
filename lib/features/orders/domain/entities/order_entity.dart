@@ -5,8 +5,9 @@ import 'order_item_entity.dart';
 part 'order_entity.freezed.dart';
 
 /// C# `OrderStatus { Pending=0, Confirmed=1, Processing=2, Shipped=3,
-/// Delivered=4, Cancelled=5 }`. Unlike listing condition, **0 is a real
-/// member** (Pending), not "unset".
+/// Delivered=4, Cancelled=5, DeliveryFailed=6 }`. Unlike listing condition,
+/// **0 is a real member** (Pending), not "unset". `deliveryFailed` is a
+/// terminal state with no actions.
 enum OrderStatus {
   pending,
   confirmed,
@@ -14,6 +15,23 @@ enum OrderStatus {
   shipped,
   delivered,
   cancelled,
+  deliveryFailed,
+}
+
+/// C# `OrderCanceller { Admin=0, Consumer=1, Vendor=2 }` — who cancelled
+/// ([OrderEntity.cancelledBy]). Null when the order isn't cancelled.
+enum OrderCanceller { admin, consumer, vendor }
+
+/// Parses the C# `OrderCanceller` code (int, numeric string) or name.
+OrderCanceller? orderCancellerFromWire(Object? raw) {
+  if (raw == null) return null;
+  final s = raw.toString().trim().toLowerCase();
+  return switch (int.tryParse(s) ?? s) {
+    0 || 'admin' => OrderCanceller.admin,
+    1 || 'consumer' => OrderCanceller.consumer,
+    2 || 'vendor' => OrderCanceller.vendor,
+    _ => null,
+  };
 }
 
 /// C# `OrderStatus` member name. `PUT /vendor/orders/status` binds
@@ -26,6 +44,7 @@ String orderStatusToWireName(OrderStatus status) => switch (status) {
       OrderStatus.shipped => 'Shipped',
       OrderStatus.delivered => 'Delivered',
       OrderStatus.cancelled => 'Cancelled',
+      OrderStatus.deliveryFailed => 'DeliveryFailed',
     };
 
 /// Parses the C# numeric code, a numeric string, or a name (`pending`,
@@ -44,6 +63,7 @@ OrderStatus? orderStatusFromWire(Object? raw) {
     'shipped' => OrderStatus.shipped,
     'delivered' => OrderStatus.delivered,
     'cancelled' || 'rejected' => OrderStatus.cancelled,
+    'deliveryfailed' => OrderStatus.deliveryFailed,
     _ => null,
   };
 }
@@ -55,6 +75,7 @@ OrderStatus? _orderStatusFromCode(int code) => switch (code) {
       3 => OrderStatus.shipped,
       4 => OrderStatus.delivered,
       5 => OrderStatus.cancelled,
+      6 => OrderStatus.deliveryFailed,
       _ => null,
     };
 
@@ -178,6 +199,10 @@ class OrderEntity with _$OrderEntity {
     String? trackingLocation,
     DateTime? estimatedDelivery,
     String? cancelReason,
+    /// Who cancelled (DTO `cancelledBy`). Null when not cancelled.
+    OrderCanceller? cancelledBy,
+    /// DTO `isReviewed` — the buyer already reviewed this order.
+    @Default(false) bool isReviewed,
     String? notes,
     required DateTime createdAt,
     required DateTime updatedAt,
@@ -220,6 +245,7 @@ extension OrderEntityX on OrderEntity {
     return copyWith(
       status: incoming.status,
       cancelReason: incoming.cancelReason ?? cancelReason,
+      cancelledBy: incoming.cancelledBy ?? cancelledBy,
       cancelledAt: incoming.cancelledAt ?? cancelledAt,
       updatedAt: incoming.updatedAt,
       confirmedAt: incoming.confirmedAt ?? confirmedAt,

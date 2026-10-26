@@ -30,7 +30,8 @@ class OrderCard extends ConsumerWidget {
     // finished ones keep the plain glass border.
     final active =
         order.status != OrderStatus.delivered &&
-        order.status != OrderStatus.cancelled;
+        order.status != OrderStatus.cancelled &&
+        order.status != OrderStatus.deliveryFailed;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -215,6 +216,7 @@ class OrderCard extends ConsumerWidget {
           ),
         );
       case OrderStatus.processing:
+      case OrderStatus.deliveryFailed:
         return SizedBox(
           width: double.infinity,
           child: OutlinedButton(
@@ -260,6 +262,7 @@ class _ProgressTrack extends StatelessWidget {
       OrderStatus.confirmed => 2,
       OrderStatus.processing => 3,
       OrderStatus.shipped => 4,
+      OrderStatus.deliveryFailed => 4,
       OrderStatus.delivered || OrderStatus.cancelled => 5,
     };
     final on = context.isDark ? AppColors.primaryLight : AppColors.primary;

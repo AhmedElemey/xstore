@@ -1790,6 +1790,12 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get ordersFilterCancelled;
 
+  /// No description provided for @ordersFilterDeliveryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery failed'**
+  String get ordersFilterDeliveryFailed;
+
   /// No description provided for @ordersQtyTotalLinePrefix.
   ///
   /// In en, this message translates to:
@@ -2209,6 +2215,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This order was cancelled'**
   String get statusSubtitleCancelled;
+
+  /// No description provided for @statusSubtitleDeliveryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery of this order failed'**
+  String get statusSubtitleDeliveryFailed;
+
+  /// No description provided for @ordersCancelledByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by admin'**
+  String get ordersCancelledByAdmin;
+
+  /// No description provided for @ordersCancelledByConsumer.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by the buyer'**
+  String get ordersCancelledByConsumer;
+
+  /// No description provided for @ordersCancelledByVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by the vendor'**
+  String get ordersCancelledByVendor;
 
   /// No description provided for @orderHashPrefix.
   ///
@@ -3535,6 +3565,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This order was cancelled'**
   String get vendorStatusCancelled;
+
+  /// No description provided for @vendorStatusDeliveryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery of this order failed'**
+  String get vendorStatusDeliveryFailed;
 
   /// No description provided for @didntReceiveCode.
   ///

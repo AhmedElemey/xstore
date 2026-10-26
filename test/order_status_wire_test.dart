@@ -6,7 +6,7 @@ void main() {
     test('wire codes match the confirmed C# enum exactly', () {
       // public enum OrderStatus {
       //   Pending = 0, Confirmed = 1, Processing = 2,
-      //   Shipped = 3, Delivered = 4, Cancelled = 5
+      //   Shipped = 3, Delivered = 4, Cancelled = 5, DeliveryFailed = 6
       // }
       expect(orderStatusFromWire(0), OrderStatus.pending);
       expect(orderStatusFromWire(1), OrderStatus.confirmed);
@@ -14,6 +14,7 @@ void main() {
       expect(orderStatusFromWire(3), OrderStatus.shipped);
       expect(orderStatusFromWire(4), OrderStatus.delivered);
       expect(orderStatusFromWire(5), OrderStatus.cancelled);
+      expect(orderStatusFromWire(6), OrderStatus.deliveryFailed);
     });
 
     test('PUT /vendor/orders/status sends the C# enum name', () {
@@ -23,6 +24,10 @@ void main() {
       expect(orderStatusToWireName(OrderStatus.shipped), 'Shipped');
       expect(orderStatusToWireName(OrderStatus.delivered), 'Delivered');
       expect(orderStatusToWireName(OrderStatus.cancelled), 'Cancelled');
+      expect(
+        orderStatusToWireName(OrderStatus.deliveryFailed),
+        'DeliveryFailed',
+      );
     });
 
     test('every status parses from its int and string wire code', () {
@@ -45,13 +50,29 @@ void main() {
       expect(orderStatusFromWire('Pending'), OrderStatus.pending);
       expect(orderStatusFromWire('CONFIRMED'), OrderStatus.confirmed);
       expect(orderStatusFromWire('rejected'), OrderStatus.cancelled);
+      expect(orderStatusFromWire('DeliveryFailed'), OrderStatus.deliveryFailed);
     });
 
     test('unknown values are null so the caller can fall back', () {
       expect(orderStatusFromWire(null), isNull);
       expect(orderStatusFromWire(''), isNull);
-      expect(orderStatusFromWire(6), isNull);
+      expect(orderStatusFromWire(7), isNull);
       expect(orderStatusFromWire('refunded'), isNull);
+    });
+  });
+
+  group('OrderCanceller wire mapping (C# Admin=0, Consumer=1, Vendor=2)', () {
+    test('int, numeric string and name parse', () {
+      expect(orderCancellerFromWire(0), OrderCanceller.admin);
+      expect(orderCancellerFromWire(1), OrderCanceller.consumer);
+      expect(orderCancellerFromWire('2'), OrderCanceller.vendor);
+      expect(orderCancellerFromWire('Vendor'), OrderCanceller.vendor);
+    });
+
+    test('absent or unknown is null', () {
+      expect(orderCancellerFromWire(null), isNull);
+      expect(orderCancellerFromWire(''), isNull);
+      expect(orderCancellerFromWire(3), isNull);
     });
   });
 }

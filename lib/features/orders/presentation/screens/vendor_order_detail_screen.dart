@@ -244,8 +244,15 @@ class _Content extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: AppColors.error.withValues(alpha: 0.4)),
             ),
-            child: Text(
-              '${context.l10n.ordersCancelReasonSection}: ${o.cancelReason ?? '-'}',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (o.cancelledBy case final by?)
+                  Text(orderCancellerLabel(context, by)),
+                Text(
+                  '${context.l10n.ordersCancelReasonSection}: ${o.cancelReason ?? '-'}',
+                ),
+              ],
             ),
           ),
         ],
@@ -499,6 +506,7 @@ class _StatusHeader extends StatelessWidget {
       OrderStatus.shipped => context.l10n.vendorStatusShipped,
       OrderStatus.delivered => context.l10n.vendorStatusDelivered,
       OrderStatus.cancelled => context.l10n.vendorStatusCancelled,
+      OrderStatus.deliveryFailed => context.l10n.vendorStatusDeliveryFailed,
     };
     final icon = switch (order.status) {
       OrderStatus.pending => Icons.hourglass_top_rounded,
@@ -507,6 +515,7 @@ class _StatusHeader extends StatelessWidget {
       OrderStatus.shipped => Icons.local_shipping_outlined,
       OrderStatus.delivered => Icons.verified_rounded,
       OrderStatus.cancelled => Icons.cancel_outlined,
+      OrderStatus.deliveryFailed => Icons.error_outline,
     };
     return Container(
       width: double.infinity,

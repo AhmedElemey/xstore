@@ -80,6 +80,19 @@ class OrderItemTile extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (item.attributes.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    item.attributes
+                        .map((a) => '${a.key}: ${a.value}')
+                        .join(' · '),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.textSecondary,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   '${context.formatCurrency(item.price)} × ${context.formatInt(item.quantity)} = ${context.formatCurrency(item.total)}',
