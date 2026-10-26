@@ -95,7 +95,10 @@ class OrderPriceBreakdown extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
         _row(context, context.l10n.ordersSubtotal, order.subtotal),
         _row(context, context.l10n.ordersShipping, order.shippingCost),
-        _row(context, context.l10n.ordersDiscount, order.discount),
+        // OrderDto has no discount yet, so it's usually 0 — don't show a
+        // "Discount 0" row.
+        if (order.discount != 0)
+          _row(context, context.l10n.ordersDiscount, order.discount),
         Divider(height: AppSpacing.lg, color: context.borderColor),
         Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,

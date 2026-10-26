@@ -137,9 +137,10 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
             shippedAt: base.shippedAt ?? DateTime.now(),
           ),
         );
-      } else {
-        await fetchOrder();
       }
+      // The list endpoint omits tracking, so the local patch above is what
+      // fetchOrder() keeps (via `prev`) when the server doesn't echo it.
+      await fetchOrder();
     }
     return ok;
   }

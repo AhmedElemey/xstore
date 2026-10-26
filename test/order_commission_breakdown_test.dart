@@ -8,7 +8,7 @@ import 'package:xstore/features/commission/domain/entities/commission_status.dar
 import 'package:xstore/features/orders/domain/entities/order_entity.dart';
 import 'package:xstore/features/orders/presentation/widgets/order_price_breakdown.dart';
 
-OrderEntity _order({required OrderStatus status}) {
+OrderEntity _order({required OrderStatus status, double discount = 0}) {
   final now = DateTime(2026, 7, 1);
   return OrderEntity(
     id: 'order_1',
@@ -30,7 +30,7 @@ OrderEntity _order({required OrderStatus status}) {
     ),
     subtotal: 1000,
     shippingCost: 0,
-    discount: 0,
+    discount: discount,
     total: 1000,
     createdAt: now,
     updatedAt: now,
@@ -109,6 +109,26 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Voided'), findsOneWidget);
+    });
+  });
+
+  group('discount row', () {
+    testWidgets('is hidden when the discount is 0', (tester) async {
+      await tester.pumpWidget(
+        _wrap(OrderPriceBreakdown(order: _order(status: OrderStatus.delivered))),
+      );
+      expect(find.text('Discount'), findsNothing);
+    });
+
+    testWidgets('is shown when there is a discount', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          OrderPriceBreakdown(
+            order: _order(status: OrderStatus.delivered, discount: 50),
+          ),
+        ),
+      );
+      expect(find.text('Discount'), findsOneWidget);
     });
   });
 }

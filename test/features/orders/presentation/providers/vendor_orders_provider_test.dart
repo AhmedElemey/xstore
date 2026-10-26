@@ -49,10 +49,108 @@ OrderEntity _order({
       updatedAt: createdAt ?? DateTime(2026, 8, 1),
     );
 
+/// Fake server: the first list fetch seeds its rows, later fetches serve them
+/// with every successful status change applied (like the real backend), and
+/// [listFetches] counts list calls so tests can assert refetch behavior.
+class _ServerRepo extends StubOrdersRepository {
+  _ServerRepo({
+    super.getVendorOrdersResult,
+    super.confirmOrderResult,
+    super.rejectOrderResult,
+    super.markProcessingResult,
+    super.markShippedResult,
+    super.markDeliveredResult,
+  });
+
+  List<OrderEntity>? server;
+  int listFetches = 0;
+  final listCalls = <({int page, int pageSize})>[];
+  bool failList = false;
+
+  Either<Failure, OrderEntity> _apply(Either<Failure, OrderEntity> result) {
+    result.fold((_) {}, (o) {
+      final i = server?.indexWhere((x) => x.id == o.id) ?? -1;
+      if (i >= 0) server![i] = o;
+    });
+    return result;
+  }
+
+  @override
+  Future<Either<Failure, List<OrderEntity>>> getVendorOrders({
+    required String vendorId,
+    required int page,
+    required int pageSize,
+  }) async {
+    listFetches++;
+    listCalls.add((page: page, pageSize: pageSize));
+    if (failList) return Left(Failure.server('list failed'));
+    final result = await super.getVendorOrders(
+      vendorId: vendorId,
+      page: page,
+      pageSize: pageSize,
+    );
+    if (server != null) {
+      return Right(server!.skip((page - 1) * pageSize).take(pageSize).toList());
+    }
+    result.fold((_) {}, (l) => server = [...l]);
+    return result;
+  }
+
+  @override
+  Future<Either<Failure, OrderEntity>> confirmOrder({
+    required String orderId,
+    required DeliveryMethod method,
+    String? vendorId,
+  }) async =>
+      _apply(await super.confirmOrder(
+        orderId: orderId,
+        method: method,
+        vendorId: vendorId,
+      ));
+
+  @override
+  Future<Either<Failure, OrderEntity>> rejectOrder({
+    required String orderId,
+    required String reason,
+    String? vendorId,
+  }) async =>
+      _apply(await super.rejectOrder(
+        orderId: orderId,
+        reason: reason,
+        vendorId: vendorId,
+      ));
+
+  @override
+  Future<Either<Failure, OrderEntity>> markProcessing(
+    String orderId, {
+    String? vendorId,
+  }) async =>
+      _apply(await super.markProcessing(orderId, vendorId: vendorId));
+
+  @override
+  Future<Either<Failure, OrderEntity>> markShipped({
+    required String orderId,
+    required ShippingInfo shippingInfo,
+    String? vendorId,
+  }) async =>
+      _apply(await super.markShipped(
+        orderId: orderId,
+        shippingInfo: shippingInfo,
+        vendorId: vendorId,
+      ));
+
+  @override
+  Future<Either<Failure, OrderEntity>> markDelivered(
+    String orderId, {
+    String? vendorId,
+  }) async =>
+      _apply(await super.markDelivered(orderId, vendorId: vendorId));
+}
+
 /// Waits for [AnalyticsService]'s async init to finish registering its own
 /// internal listener before the test can dispose the container — see
 /// checkout_order_flow_test.dart's `_buildContainer` for the same guard.
-Future<ProviderContainer> _containerWith(StubOrdersRepository repo) async {
+Future<ProviderContainer> _containerWith(_ServerRepo repo) async {
   final container = ProviderContainer(
     overrides: [
       authProvider.overrideWith(() => FakeAuth(mockVendorUser)),
@@ -80,7 +178,7 @@ void main() {
         deliveryMethod: DeliveryMethod.self,
       );
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -102,10 +200,65 @@ void main() {
       expect(container.read(vendorOrdersProvider).error, isNull);
     });
 
+    test('refetches the list once after a success and takes the server rows', () async {
+      final pending = _order(id: 'order_1');
+      final container = await _containerWith(
+        _ServerRepo(
+          getVendorOrdersResult: ({
+            required vendorId,
+            required page,
+            required pageSize,
+          }) =>
+              Right([pending]),
+          confirmOrderResult: (orderId, method) =>
+              Right(pending.copyWith(status: OrderStatus.confirmed)),
+        ),
+      );
+      final repo = container.read(ordersRepositoryProvider) as _ServerRepo;
+      final notifier = container.read(vendorOrdersProvider.notifier);
+      await notifier.fetchOrders();
+      expect(repo.listFetches, 1);
+      repo.server!.add(_order(id: 'order_9')); // created server-side meanwhile
+
+      await notifier.confirmOrder('order_1', DeliveryMethod.self);
+
+      expect(repo.listFetches, 2, reason: 'exactly one reconcile fetch');
+      final orders = container.read(vendorOrdersProvider).orders;
+      expect(orders.map((o) => o.id), ['order_1', 'order_9']);
+      expect(orders.first.status, OrderStatus.confirmed);
+    });
+
+    test('does not refetch on failure and rolls back the optimistic status', () async {
+      final pending = _order(id: 'order_1');
+      final container = await _containerWith(
+        _ServerRepo(
+          getVendorOrdersResult: ({
+            required vendorId,
+            required page,
+            required pageSize,
+          }) =>
+              Right([pending]),
+          confirmOrderResult: (orderId, method) =>
+              Left(Failure.server('backend rejected confirm')),
+        ),
+      );
+      final repo = container.read(ordersRepositoryProvider) as _ServerRepo;
+      final notifier = container.read(vendorOrdersProvider.notifier);
+      await notifier.fetchOrders();
+
+      await notifier.confirmOrder('order_1', DeliveryMethod.self);
+
+      expect(repo.listFetches, 1);
+      expect(
+        container.read(vendorOrdersProvider).orders.single.status,
+        OrderStatus.pending,
+      );
+    });
+
     test('rolls back the optimistic status and surfaces an error on failure', () async {
       final pending = _order(id: 'order_1');
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -136,7 +289,7 @@ void main() {
         _order(id: 'order_3', status: OrderStatus.confirmed),
       ];
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -158,12 +311,46 @@ void main() {
       final okCount = await notifier.confirmAllPending(DeliveryMethod.platform);
 
       expect(okCount, 1, reason: 'only order_1 was pending and succeeded');
+      expect((container.read(ordersRepositoryProvider) as _ServerRepo).listFetches, 2);
       final byId = {
         for (final o in container.read(vendorOrdersProvider).orders) o.id: o.status,
       };
       expect(byId['order_1'], OrderStatus.confirmed);
       expect(byId['order_2'], OrderStatus.pending, reason: 'rolled back after failure');
       expect(byId['order_3'], OrderStatus.confirmed, reason: 'was never pending');
+    });
+  });
+
+  group('VendorOrdersNotifier.confirmAllPending refresh', () {
+    test('refetches once for the whole batch, not once per order', () async {
+      final orders = [
+        _order(id: 'order_1'),
+        _order(id: 'order_2'),
+        _order(id: 'order_3'),
+      ];
+      final container = await _containerWith(
+        _ServerRepo(
+          getVendorOrdersResult: ({
+            required vendorId,
+            required page,
+            required pageSize,
+          }) =>
+              Right(orders),
+          confirmOrderResult: (orderId, method) => Right(
+            orders
+                .firstWhere((o) => o.id == orderId)
+                .copyWith(status: OrderStatus.confirmed),
+          ),
+        ),
+      );
+      final repo = container.read(ordersRepositoryProvider) as _ServerRepo;
+      final notifier = container.read(vendorOrdersProvider.notifier);
+      await notifier.fetchOrders();
+
+      final okCount = await notifier.confirmAllPending(DeliveryMethod.self);
+
+      expect(okCount, 3);
+      expect(repo.listFetches, 2, reason: 'initial fetch + one reconcile');
     });
   });
 
@@ -176,7 +363,7 @@ void main() {
         cancelledAt: DateTime(2026, 8, 2),
       );
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -200,7 +387,7 @@ void main() {
     test('rolls back to pending and keeps the reason unset on failure', () async {
       final pending = _order(id: 'order_1');
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -233,7 +420,7 @@ void main() {
         courierName: 'Aramex',
       );
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -269,7 +456,7 @@ void main() {
         'from the optimistic update only until rollback', () async {
       final confirmed = _order(id: 'order_1', status: OrderStatus.confirmed);
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -296,7 +483,7 @@ void main() {
       final shipped = _order(id: 'order_1', status: OrderStatus.shipped);
       final delivered = shipped.copyWith(status: OrderStatus.delivered);
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -325,7 +512,7 @@ void main() {
       final pending1 = _order(id: 'order_1');
       final pending2 = _order(id: 'order_2');
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -359,7 +546,7 @@ void main() {
       final pending = _order(id: 'order_1');
       final other = _order(id: 'order_2', status: OrderStatus.processing);
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -401,7 +588,7 @@ void main() {
         () async {
       final pending = _order(id: 'order_1');
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -433,7 +620,7 @@ void main() {
       final delivered = _order(id: 'order_1', status: OrderStatus.delivered);
       final pending = _order(id: 'order_2');
       final container = await _containerWith(
-        StubOrdersRepository(
+        _ServerRepo(
           getVendorOrdersResult: ({
             required vendorId,
             required page,
@@ -456,6 +643,76 @@ void main() {
         500,
         reason: 'confirming a different order must not change delivered revenue',
       );
+    });
+  });
+
+  group('VendorOrdersNotifier paging across a reconcile', () {
+    // 25 server rows: pages of 10, 10, 5.
+    Future<(ProviderContainer, _ServerRepo, VendorOrdersNotifier)> loaded2Pages() async {
+      final rows = [for (var i = 0; i < 25; i++) _order(id: 'o$i')];
+      final repo = _ServerRepo(
+        getVendorOrdersResult: ({
+          required vendorId,
+          required page,
+          required pageSize,
+        }) =>
+            const Right([]),
+        confirmOrderResult: (orderId, method) => Right(
+          rows.firstWhere((o) => o.id == orderId).copyWith(status: OrderStatus.confirmed),
+        ),
+      )..server = rows;
+      final container = await _containerWith(repo);
+      final notifier = container.read(vendorOrdersProvider.notifier);
+      await notifier.fetchOrders();
+      await notifier.loadMore();
+      expect(container.read(vendorOrdersProvider).orders, hasLength(20));
+      repo.listCalls.clear();
+      return (container, repo, notifier);
+    }
+
+    test('status change reloads all loaded pages in one request and keeps paging',
+        () async {
+      final (container, repo, notifier) = await loaded2Pages();
+
+      await notifier.confirmOrder('o0', DeliveryMethod.self);
+
+      expect(repo.listCalls, [(page: 1, pageSize: 20)]);
+      final state = container.read(vendorOrdersProvider);
+      expect(state.orders, hasLength(20));
+      expect(state.orders.first.status, OrderStatus.confirmed);
+      expect(state.page, 2);
+      expect(state.hasMore, isTrue);
+
+      await notifier.loadMore();
+
+      expect(repo.listCalls.last, (page: 3, pageSize: 10));
+      expect(container.read(vendorOrdersProvider).orders, hasLength(25));
+      expect(container.read(vendorOrdersProvider).hasMore, isFalse);
+    });
+
+    test('a failed reconcile keeps the shown rows and does not end paging', () async {
+      final (container, repo, notifier) = await loaded2Pages();
+      repo.failList = true;
+
+      final ok = await notifier.confirmOrder('o0', DeliveryMethod.self);
+
+      expect(ok, isTrue);
+      final state = container.read(vendorOrdersProvider);
+      expect(state.orders, hasLength(20));
+      expect(state.page, 2);
+      expect(state.hasMore, isTrue);
+      expect(state.error, isNotNull);
+    });
+
+    test('pull-to-refresh still requests page 1 at the base size', () async {
+      final (container, repo, notifier) = await loaded2Pages();
+
+      await notifier.refreshOrders();
+
+      expect(repo.listCalls, [(page: 1, pageSize: 10)]);
+      final state = container.read(vendorOrdersProvider);
+      expect(state.orders, hasLength(10));
+      expect(state.page, 1);
     });
   });
 }

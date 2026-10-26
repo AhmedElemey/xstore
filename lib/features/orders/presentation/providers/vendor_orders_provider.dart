@@ -4,6 +4,7 @@ import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../commission/presentation/providers/commission_config_provider.dart';
 import '../../data/datasources/orders_remote_datasource.dart';
 import '../../domain/entities/order_entity.dart';
 import 'orders_dependencies.dart';
@@ -138,31 +139,34 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       page: 1,
       hasMore: true,
     );
+    final error = await _load(vendorId, pages: 1);
+    if (!mounted || error == null) return;
+    state = state.copyWith(isLoading: false, hasMore: false, error: error);
+  }
+
+  /// Loads page 1 with `pages * _vendorPageSize` rows in one request and marks
+  /// that many pages as loaded, so a later [loadMore] lines up with the rows
+  /// shown. Returns the failure message, or null on success / when unmounted.
+  Future<String?> _load(String vendorId, {required int pages}) async {
     final result = await ref.read(getVendorOrdersUseCaseProvider).call(
           vendorId: vendorId,
           page: 1,
-          pageSize: _vendorPageSize,
+          pageSize: pages * _vendorPageSize,
         );
-    if (!mounted) return;
-    result.fold(
-      (failure) => state = state.copyWith(
+    if (!mounted) return null;
+    return result.fold((failure) => failure.toString(), (orders) {
+      final previous = {for (final o in state.orders) o.id: o};
+      state = state.copyWith(
         isLoading: false,
-        hasMore: false,
-        error: failure.toString(),
-      ),
-      (orders) {
-        final previous = {for (final o in state.orders) o.id: o};
-        state = state.copyWith(
-          isLoading: false,
-          orders: [
-            for (final o in orders) o.keepingStepTimesFrom(previous[o.id]),
-          ],
-          hasMore: orders.length >= _vendorPageSize,
-          page: 1,
-        );
-        _recompute();
-      },
-    );
+        orders: [
+          for (final o in orders) o.keepingStepTimesFrom(previous[o.id]),
+        ],
+        hasMore: orders.length >= pages * _vendorPageSize,
+        page: pages,
+      );
+      _recompute();
+      return null;
+    });
   }
 
   Future<void> refreshOrders() => fetchOrders();
@@ -211,6 +215,12 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
   }
 
   Future<bool> confirmOrder(String orderId, DeliveryMethod method) async {
+    final ok = await _confirm(orderId, method);
+    if (ok && mounted) await _refreshFromServer();
+    return ok;
+  }
+
+  Future<bool> _confirm(String orderId, DeliveryMethod method) async {
     final snapshot = state.orders;
     _optimisticStatus(orderId, OrderStatus.confirmed, deliveryMethod: method);
     final result = await ref
@@ -235,9 +245,11 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
         .map((o) => o.id)
         .toList();
     for (final id in pending) {
-      if (await confirmOrder(id, method)) ok++;
+      if (await _confirm(id, method)) ok++;
       if (!mounted) break;
     }
+    // One reconcile for the whole batch, not one per order.
+    if (ok > 0 && mounted) await _refreshFromServer();
     return ok;
   }
 
@@ -255,7 +267,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
           vendorId: _vendorId,
         );
     if (!mounted) return result.isRight();
-    return result.fold((failure) {
+    final ok = result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
       return false;
@@ -264,6 +276,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       _trackOrderStatus(orderId, OrderStatus.cancelled);
       return true;
     });
+    if (ok) await _refreshFromServer();
+    return ok;
   }
 
   Future<bool> markProcessing(String orderId) async {
@@ -273,7 +287,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
         .read(markProcessingUseCaseProvider)
         .call(orderId, vendorId: _vendorId);
     if (!mounted) return result.isRight();
-    return result.fold((failure) {
+    final ok = result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
       return false;
@@ -282,6 +296,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       _trackOrderStatus(orderId, OrderStatus.processing);
       return true;
     });
+    if (ok) await _refreshFromServer();
+    return ok;
   }
 
   Future<bool> markShipped(String orderId, ShippingInfo info) async {
@@ -313,7 +329,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
           vendorId: _vendorId,
         );
     if (!mounted) return result.isRight();
-    return result.fold((failure) {
+    final ok = result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
       return false;
@@ -322,6 +338,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       _trackOrderStatus(orderId, OrderStatus.shipped);
       return true;
     });
+    if (ok) await _refreshFromServer();
+    return ok;
   }
 
   Future<bool> markDelivered(String orderId) async {
@@ -346,7 +364,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
           vendorId: _vendorId,
         );
     if (!mounted) return result.isRight();
-    return result.fold((failure) {
+    final ok = result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
       return false;
@@ -355,6 +373,25 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       _trackOrderStatus(orderId, OrderStatus.delivered);
       return true;
     });
+    if (ok) await _refreshFromServer();
+    return ok;
+  }
+
+  /// Reconciles with the server after a successful status change: the
+  /// optimistic/merged row is replaced by fresh list data (silent — orders are
+  /// already loaded) and the commission snapshot (outstanding balance and
+  /// thresholds come from the same vendor-orders envelope) is dropped so the
+  /// wallet refetches on next read. The snapshot doesn't watch this provider,
+  /// so there is no cycle. Every page already loaded is re-requested in one
+  /// call; a failure only sets `error`, leaving the shown rows and paging
+  /// untouched.
+  Future<void> _refreshFromServer() async {
+    ref.invalidate(vendorCommissionSnapshotProvider);
+    final vendorId = _vendorId;
+    if (vendorId == null) return;
+    final error = await _load(vendorId, pages: state.page);
+    if (!mounted || error == null) return;
+    state = state.copyWith(error: error);
   }
 
   void clearError() {

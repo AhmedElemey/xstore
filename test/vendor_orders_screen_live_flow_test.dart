@@ -174,9 +174,11 @@ void main() {
       // of failing fast (see orders_screen_live_flow_test.dart's note on
       // the same issue).
       RequestOptions? putRequest;
+      // The status change is persisted, so the post-change refetch sees it.
+      var serverStatus = 'pending';
       final dio = _fakeDio({
         'GET ${ApiEndpoints.vendorOrders}': (_) => {
-          'orders': [_vendorOrderJson(id: '910', status: 'pending')],
+          'orders': [_vendorOrderJson(id: '910', status: serverStatus)],
           'totalCount': 1,
           'pendingCount': 1,
           'confirmedCount': 0,
@@ -184,6 +186,7 @@ void main() {
         },
         'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
           putRequest = options;
+          serverStatus = 'confirmed';
           return _vendorOrderJson(id: '910', status: 'confirmed');
         },
       });
@@ -271,9 +274,11 @@ void main() {
     skip: MockConfig.useMock,
     (tester) async {
       RequestOptions? putRequest;
+      // The status change is persisted, so the post-change refetch sees it.
+      var serverStatus = 'shipped';
       final dio = _fakeDio({
         'GET ${ApiEndpoints.vendorOrders}': (_) => {
-          'orders': [_vendorOrderJson(id: '912', status: 'shipped')],
+          'orders': [_vendorOrderJson(id: '912', status: serverStatus)],
           'totalCount': 1,
           'pendingCount': 0,
           'confirmedCount': 0,
@@ -281,6 +286,7 @@ void main() {
         },
         'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
           putRequest = options;
+          serverStatus = 'delivered';
           return _vendorOrderJson(id: '912', status: 'delivered');
         },
       });
