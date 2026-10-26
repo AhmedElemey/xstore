@@ -139,31 +139,34 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       page: 1,
       hasMore: true,
     );
+    final error = await _load(vendorId, pages: 1);
+    if (!mounted || error == null) return;
+    state = state.copyWith(isLoading: false, hasMore: false, error: error);
+  }
+
+  /// Loads page 1 with `pages * _vendorPageSize` rows in one request and marks
+  /// that many pages as loaded, so a later [loadMore] lines up with the rows
+  /// shown. Returns the failure message, or null on success / when unmounted.
+  Future<String?> _load(String vendorId, {required int pages}) async {
     final result = await ref.read(getVendorOrdersUseCaseProvider).call(
           vendorId: vendorId,
           page: 1,
-          pageSize: _vendorPageSize,
+          pageSize: pages * _vendorPageSize,
         );
-    if (!mounted) return;
-    result.fold(
-      (failure) => state = state.copyWith(
+    if (!mounted) return null;
+    return result.fold((failure) => failure.toString(), (orders) {
+      final previous = {for (final o in state.orders) o.id: o};
+      state = state.copyWith(
         isLoading: false,
-        hasMore: false,
-        error: failure.toString(),
-      ),
-      (orders) {
-        final previous = {for (final o in state.orders) o.id: o};
-        state = state.copyWith(
-          isLoading: false,
-          orders: [
-            for (final o in orders) o.keepingStepTimesFrom(previous[o.id]),
-          ],
-          hasMore: orders.length >= _vendorPageSize,
-          page: 1,
-        );
-        _recompute();
-      },
-    );
+        orders: [
+          for (final o in orders) o.keepingStepTimesFrom(previous[o.id]),
+        ],
+        hasMore: orders.length >= pages * _vendorPageSize,
+        page: pages,
+      );
+      _recompute();
+      return null;
+    });
   }
 
   Future<void> refreshOrders() => fetchOrders();
@@ -379,10 +382,16 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
   /// already loaded) and the commission snapshot (outstanding balance and
   /// thresholds come from the same vendor-orders envelope) is dropped so the
   /// wallet refetches on next read. The snapshot doesn't watch this provider,
-  /// so there is no cycle.
+  /// so there is no cycle. Every page already loaded is re-requested in one
+  /// call; a failure only sets `error`, leaving the shown rows and paging
+  /// untouched.
   Future<void> _refreshFromServer() async {
     ref.invalidate(vendorCommissionSnapshotProvider);
-    await fetchOrders();
+    final vendorId = _vendorId;
+    if (vendorId == null) return;
+    final error = await _load(vendorId, pages: state.page);
+    if (!mounted || error == null) return;
+    state = state.copyWith(error: error);
   }
 
   void clearError() {

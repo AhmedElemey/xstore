@@ -64,6 +64,8 @@ class _ServerRepo extends StubOrdersRepository {
 
   List<OrderEntity>? server;
   int listFetches = 0;
+  final listCalls = <({int page, int pageSize})>[];
+  bool failList = false;
 
   Either<Failure, OrderEntity> _apply(Either<Failure, OrderEntity> result) {
     result.fold((_) {}, (o) {
@@ -80,12 +82,16 @@ class _ServerRepo extends StubOrdersRepository {
     required int pageSize,
   }) async {
     listFetches++;
+    listCalls.add((page: page, pageSize: pageSize));
+    if (failList) return Left(Failure.server('list failed'));
     final result = await super.getVendorOrders(
       vendorId: vendorId,
       page: page,
       pageSize: pageSize,
     );
-    if (server != null) return Right([...server!]);
+    if (server != null) {
+      return Right(server!.skip((page - 1) * pageSize).take(pageSize).toList());
+    }
     result.fold((_) {}, (l) => server = [...l]);
     return result;
   }
@@ -637,6 +643,76 @@ void main() {
         500,
         reason: 'confirming a different order must not change delivered revenue',
       );
+    });
+  });
+
+  group('VendorOrdersNotifier paging across a reconcile', () {
+    // 25 server rows: pages of 10, 10, 5.
+    Future<(ProviderContainer, _ServerRepo, VendorOrdersNotifier)> loaded2Pages() async {
+      final rows = [for (var i = 0; i < 25; i++) _order(id: 'o$i')];
+      final repo = _ServerRepo(
+        getVendorOrdersResult: ({
+          required vendorId,
+          required page,
+          required pageSize,
+        }) =>
+            const Right([]),
+        confirmOrderResult: (orderId, method) => Right(
+          rows.firstWhere((o) => o.id == orderId).copyWith(status: OrderStatus.confirmed),
+        ),
+      )..server = rows;
+      final container = await _containerWith(repo);
+      final notifier = container.read(vendorOrdersProvider.notifier);
+      await notifier.fetchOrders();
+      await notifier.loadMore();
+      expect(container.read(vendorOrdersProvider).orders, hasLength(20));
+      repo.listCalls.clear();
+      return (container, repo, notifier);
+    }
+
+    test('status change reloads all loaded pages in one request and keeps paging',
+        () async {
+      final (container, repo, notifier) = await loaded2Pages();
+
+      await notifier.confirmOrder('o0', DeliveryMethod.self);
+
+      expect(repo.listCalls, [(page: 1, pageSize: 20)]);
+      final state = container.read(vendorOrdersProvider);
+      expect(state.orders, hasLength(20));
+      expect(state.orders.first.status, OrderStatus.confirmed);
+      expect(state.page, 2);
+      expect(state.hasMore, isTrue);
+
+      await notifier.loadMore();
+
+      expect(repo.listCalls.last, (page: 3, pageSize: 10));
+      expect(container.read(vendorOrdersProvider).orders, hasLength(25));
+      expect(container.read(vendorOrdersProvider).hasMore, isFalse);
+    });
+
+    test('a failed reconcile keeps the shown rows and does not end paging', () async {
+      final (container, repo, notifier) = await loaded2Pages();
+      repo.failList = true;
+
+      final ok = await notifier.confirmOrder('o0', DeliveryMethod.self);
+
+      expect(ok, isTrue);
+      final state = container.read(vendorOrdersProvider);
+      expect(state.orders, hasLength(20));
+      expect(state.page, 2);
+      expect(state.hasMore, isTrue);
+      expect(state.error, isNotNull);
+    });
+
+    test('pull-to-refresh still requests page 1 at the base size', () async {
+      final (container, repo, notifier) = await loaded2Pages();
+
+      await notifier.refreshOrders();
+
+      expect(repo.listCalls, [(page: 1, pageSize: 10)]);
+      final state = container.read(vendorOrdersProvider);
+      expect(state.orders, hasLength(10));
+      expect(state.page, 1);
     });
   });
 }
