@@ -309,6 +309,60 @@ void main() {
     );
   });
 
+  group('VendorOrderDetailNotifier.markShipped', () {
+    test('refetches the order and keeps the shipped tracking the server omits', () async {
+      var detailFetches = 0;
+      final repo = StubOrdersRepository(
+        getVendorOrdersResult:
+            ({required vendorId, required page, required pageSize}) =>
+                Right([_order(status: OrderStatus.processing)]),
+        markShippedResult: (orderId, info) =>
+            Right(_order(status: OrderStatus.shipped)),
+        getOrderDetailResult: ({
+          required orderId,
+          required consumerId,
+          required vendorId,
+          required isVendorSession,
+        }) {
+          detailFetches++;
+          return Right(
+            _order(
+              status: detailFetches == 1
+                  ? OrderStatus.processing
+                  : OrderStatus.shipped,
+            ),
+          );
+        },
+      );
+      final container = ProviderContainer(
+        overrides: [
+          authProvider.overrideWith(() => FakeAuth(mockVendorUser)),
+          ordersRepositoryProvider.overrideWithValue(repo),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.listen(vendorOrderDetailProvider(_orderId), (_, __) {});
+      container.listen(vendorOrdersProvider, (_, __) {});
+      await container.read(analyticsServiceProvider).ready;
+      await container.read(vendorOrdersProvider.notifier).fetchOrders();
+      final notifier =
+          container.read(vendorOrderDetailProvider(_orderId).notifier);
+      await notifier.fetchOrder();
+      expect(detailFetches, 1);
+
+      final ok = await notifier.markShipped(
+        const ShippingInfo(trackingNumber: 'XS-9', courierName: 'Aramex'),
+      );
+
+      expect(ok, isTrue);
+      expect(detailFetches, 2, reason: 'markShipped now refetches like the others');
+      final order = container.read(vendorOrderDetailProvider(_orderId)).order;
+      expect(order?.status, OrderStatus.shipped);
+      expect(order?.trackingNumber, 'XS-9');
+      expect(order?.courierName, 'Aramex');
+    });
+  });
+
   group('VendorOrderDetailNotifier.clearError', () {
     test('resets error without touching the loaded order', () async {
       final container = await _syncedContainer();

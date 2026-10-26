@@ -4,6 +4,7 @@ import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../commission/presentation/providers/commission_config_provider.dart';
 import '../../data/datasources/orders_remote_datasource.dart';
 import '../../domain/entities/order_entity.dart';
 import 'orders_dependencies.dart';
@@ -211,6 +212,12 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
   }
 
   Future<bool> confirmOrder(String orderId, DeliveryMethod method) async {
+    final ok = await _confirm(orderId, method);
+    if (ok && mounted) await _refreshFromServer();
+    return ok;
+  }
+
+  Future<bool> _confirm(String orderId, DeliveryMethod method) async {
     final snapshot = state.orders;
     _optimisticStatus(orderId, OrderStatus.confirmed, deliveryMethod: method);
     final result = await ref
@@ -235,9 +242,11 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
         .map((o) => o.id)
         .toList();
     for (final id in pending) {
-      if (await confirmOrder(id, method)) ok++;
+      if (await _confirm(id, method)) ok++;
       if (!mounted) break;
     }
+    // One reconcile for the whole batch, not one per order.
+    if (ok > 0 && mounted) await _refreshFromServer();
     return ok;
   }
 
@@ -255,7 +264,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
           vendorId: _vendorId,
         );
     if (!mounted) return result.isRight();
-    return result.fold((failure) {
+    final ok = result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
       return false;
@@ -264,6 +273,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       _trackOrderStatus(orderId, OrderStatus.cancelled);
       return true;
     });
+    if (ok) await _refreshFromServer();
+    return ok;
   }
 
   Future<bool> markProcessing(String orderId) async {
@@ -273,7 +284,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
         .read(markProcessingUseCaseProvider)
         .call(orderId, vendorId: _vendorId);
     if (!mounted) return result.isRight();
-    return result.fold((failure) {
+    final ok = result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
       return false;
@@ -282,6 +293,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       _trackOrderStatus(orderId, OrderStatus.processing);
       return true;
     });
+    if (ok) await _refreshFromServer();
+    return ok;
   }
 
   Future<bool> markShipped(String orderId, ShippingInfo info) async {
@@ -313,7 +326,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
           vendorId: _vendorId,
         );
     if (!mounted) return result.isRight();
-    return result.fold((failure) {
+    final ok = result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
       return false;
@@ -322,6 +335,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       _trackOrderStatus(orderId, OrderStatus.shipped);
       return true;
     });
+    if (ok) await _refreshFromServer();
+    return ok;
   }
 
   Future<bool> markDelivered(String orderId) async {
@@ -346,7 +361,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
           vendorId: _vendorId,
         );
     if (!mounted) return result.isRight();
-    return result.fold((failure) {
+    final ok = result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
       return false;
@@ -355,6 +370,19 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       _trackOrderStatus(orderId, OrderStatus.delivered);
       return true;
     });
+    if (ok) await _refreshFromServer();
+    return ok;
+  }
+
+  /// Reconciles with the server after a successful status change: the
+  /// optimistic/merged row is replaced by fresh list data (silent — orders are
+  /// already loaded) and the commission snapshot (outstanding balance and
+  /// thresholds come from the same vendor-orders envelope) is dropped so the
+  /// wallet refetches on next read. The snapshot doesn't watch this provider,
+  /// so there is no cycle.
+  Future<void> _refreshFromServer() async {
+    ref.invalidate(vendorCommissionSnapshotProvider);
+    await fetchOrders();
   }
 
   void clearError() {
