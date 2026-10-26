@@ -151,8 +151,13 @@ class OrderCard extends ConsumerWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: AppSpacing.md),
-                _actions(context, ref, notifier),
+                // A reviewed delivered order has no action left (reorder is
+                // commented out below), so skip the row and its spacer.
+                if (!(order.status == OrderStatus.delivered &&
+                    order.isReviewed)) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  _actions(context, ref, notifier),
+                ],
               ],
             ),
           ),

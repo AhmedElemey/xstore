@@ -221,15 +221,17 @@ class OrderActionButtons extends ConsumerWidget {
       case OrderStatus.delivered:
         return Row(
           children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: busy
-                    ? null
-                    : () => showOrderReviewFlow(context, ref, order),
-                child: Text(context.l10n.ordersLeaveReview),
+            if (!order.isReviewed) ...[
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: busy
+                      ? null
+                      : () => showOrderReviewFlow(context, ref, order),
+                  child: Text(context.l10n.ordersLeaveReview),
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
+              const SizedBox(width: AppSpacing.sm),
+            ],
             Expanded(
               child: FilledButton(
                 onPressed: busy
