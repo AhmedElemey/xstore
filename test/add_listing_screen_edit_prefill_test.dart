@@ -152,6 +152,59 @@ void main() {
   );
 
   testWidgets(
+    're-opening edit on the same listing after a successful submit '
+    'hydrates the form again',
+    (tester) async {
+      // Mirrors the shell branch: one AddListingScreen State, the extra
+      // changes over time. Submit success resets the form (see
+      // _completePublishSuccess) while the old extra is still held.
+      final editing = ValueNotifier<ListingEntity?>(_existingListing);
+      addTearDown(editing.dispose);
+      await tester.pumpWidget(
+        _app(
+          home: ValueListenableBuilder<ListingEntity?>(
+            valueListenable: editing,
+            builder: (_, l, __) => AddListingScreen(editingListing: l),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(AddListingScreen)),
+      );
+
+      container.read(listingFormNotifierProvider.notifier).reset();
+      await tester.pumpAndSettle();
+      expect(container.read(listingFormNotifierProvider).name, isEmpty);
+
+      // Admin approved: the refetched entity is the same id, now Active.
+      editing.value = _existingListing.copyWith(status: ListingStatus.active);
+      await tester.pump();
+      // Let the deferred Future(() => loadForEdit) run, then settle.
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle();
+
+      final form = container.read(listingFormNotifierProvider);
+      expect(form.editingListingId, '42');
+      expect(form.name, 'Wireless Mouse');
+      expect(form.description, 'A great wireless mouse');
+      expect(form.priceInput, '199.50');
+      expect(form.categoryId, '7');
+      expect(form.subcategoryId, '32');
+      expect(form.condition, isNotEmpty);
+      expect(form.quantity, 3);
+      expect(form.existingImageUrls, ['https://example.com/a.jpg']);
+      expect(form.attributes.single.key, 'Color');
+      expect(
+        tester.widget<TextField>(
+          find.widgetWithText(TextField, 'Wireless Mouse'),
+        ).controller!.text,
+        'Wireless Mouse',
+      );
+    },
+  );
+
+  testWidgets(
     'a reset form (e.g. after publishing) scrolls back to the top',
     (tester) async {
       await tester.pumpWidget(_app(home: const AddListingScreen()));

@@ -91,15 +91,19 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   // synced so didUpdateWidget can react to that change; initState alone
   // would miss it.
   bool _hasSyncedEditingListing = false;
-  String? _syncedEditingListingId;
+  ListingEntity? _syncedEditing;
 
   void _syncEditingListing() {
     final editing = widget.editingListing;
-    final id = editing?.id;
     final isFirstSync = !_hasSyncedEditingListing;
-    if (_hasSyncedEditingListing && id == _syncedEditingListingId) return;
+    // Identity, not id: a successful submit resets the form while this State
+    // (and its old `extra`) lives on in the shell branch, so re-opening edit
+    // on the same listing id passes a freshly fetched entity that must
+    // hydrate again. Parent rebuilds re-pass the same instance and are
+    // skipped, so they can't re-hydrate a stale listing over a reset form.
+    if (_hasSyncedEditingListing && identical(editing, _syncedEditing)) return;
     _hasSyncedEditingListing = true;
-    _syncedEditingListingId = id;
+    _syncedEditing = editing;
 
     if (editing != null) {
       // Synchronous field-only flag (see prepareForEdit's doc) so the
