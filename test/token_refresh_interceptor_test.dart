@@ -41,6 +41,21 @@ class _FakeAdapter implements HttpClientAdapter {
     );
     final body = options.data;
     if (body is FormData) formsSeen.add(body);
+    if (options.path == '/business-401') {
+      return ResponseBody.fromString(
+        jsonEncode({
+          'isSuccess': false,
+          'data': null,
+          'errorEn': 'Incorrect password',
+          'errorAr': 'كلمة المرور غير صحيحة',
+          'statusCode': 401,
+        }),
+        401,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
     final authorized = options.headers['X-Auth-Token'] == 'new-token';
     if (!authorized) {
       return ResponseBody.fromString('{"message":"unauthorized"}', 401);
@@ -168,5 +183,31 @@ void main() {
 
     expect(adapter.refreshCallCount, 0);
     expect(refreshFailedCalls, 0);
+  });
+
+  test('does not refresh or log out on a 401 business envelope', () async {
+    try {
+      await dio.delete<dynamic>(
+        '/business-401',
+        options: Options(headers: {'X-Auth-Token': 'old-token'}),
+      );
+      fail('expected a DioException');
+    } on DioException catch (e) {
+      expect(e.response?.statusCode, 401);
+      expect((e.response?.data as Map)['errorEn'], 'Incorrect password');
+    }
+
+    expect(adapter.refreshCallCount, 0);
+    expect(adapter.protectedCallCount, 1);
+    expect(refreshFailedCalls, 0);
+  });
+
+  test('an empty-body 401 still triggers a refresh', () async {
+    final response = await dio.get<Map<String, dynamic>>(
+      '/protected',
+      options: Options(headers: {'X-Auth-Token': 'old-token'}),
+    );
+    expect(response.statusCode, 200);
+    expect(adapter.refreshCallCount, 1);
   });
 }

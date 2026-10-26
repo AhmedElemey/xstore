@@ -836,18 +836,18 @@ class _ListingShippingAttributesSection extends StatelessWidget {
           errorText: errors['location'],
           onChanged: onLocationChanged,
         ),
-        const Gap(AppSpacing.lg),
-        SwitchListTile.adaptive(
-          contentPadding: EdgeInsets.zero,
-          title: Text(
-            context.l10n.listingShippingAvailable,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: context.textPrimary),
-          ),
-          value: form.shippingAvailable,
-          onChanged: (v) => notifier.updateField('shippingAvailable', v),
-        ),
+        // const Gap(AppSpacing.lg),
+        // SwitchListTile.adaptive(
+        //   contentPadding: EdgeInsets.zero,
+        //   title: Text(
+        //     context.l10n.listingShippingAvailable,
+        //     style: Theme.of(
+        //       context,
+        //     ).textTheme.bodyLarge?.copyWith(color: context.textPrimary),
+        //   ),
+        //   value: form.shippingAvailable,
+        //   onChanged: (v) => notifier.updateField('shippingAvailable', v),
+        // ),
         if (form.shippingAvailable) ...[
           const Gap(AppSpacing.md),
           ListingFormField(

@@ -134,6 +134,45 @@ void main() {
     );
 
     test(
+      'surfaces the server message from a 401 wrong-password envelope',
+      skip: MockConfig.useMock
+          ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
+          : false,
+      () async {
+        dio = buildDio(
+          (options) => _badResponse(
+            options,
+            401,
+            data: {
+              'isSuccess': false,
+              'data': null,
+              'errorEn': 'Incorrect password',
+              'errorAr': 'كلمة المرور غير صحيحة',
+              'statusCode': 401,
+            },
+          ),
+        );
+        datasource = ProfileRemoteDataSourceImpl(dio);
+
+        // The mapper types every 401 as UnauthorizedException; the
+        // repository turns any AppException into Failure.server(message).
+        expect(
+          () => datasource.deleteAccount(
+            password: 'wrong',
+            confirmationText: 'DELETE',
+          ),
+          throwsA(
+            isA<AppException>().having(
+              (e) => e.message,
+              'message',
+              'Incorrect password',
+            ),
+          ),
+        );
+      },
+    );
+
+    test(
       'treats a 200 {isSuccess: false} wrong-password envelope as a failure',
       skip: MockConfig.useMock
           ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'

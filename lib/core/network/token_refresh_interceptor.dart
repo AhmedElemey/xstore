@@ -12,6 +12,14 @@ import 'api_endpoints.dart';
 /// calls when several requests race each other and all come back
 /// unauthorized around the same time).
 ///
+/// Only a session-level 401 triggers a refresh. Live probes (2026-10) show the
+/// ASP.NET auth middleware answers an expired/invalid/missing token with an
+/// EMPTY-body 401, whereas a business rejection (e.g. `DELETE
+/// /api/auth/delete-account` with a wrong password) is a 401 carrying the
+/// `{"isSuccess":false,...}` envelope. The latter is passed through untouched:
+/// refreshing would fail for accounts without a refresh token and force-log
+/// the user out as if the action had succeeded.
+///
 /// Requests that never carried the per-user `X-Auth-Token` header (public
 /// endpoints, or a login attempt that legitimately failed) are left alone —
 /// only a session that *was* authenticated and got rejected is worth
@@ -40,7 +48,11 @@ class TokenRefreshInterceptor extends Interceptor {
     final alreadyRetried = options.extra[_retriedKey] == true;
     final isRefreshCall = options.path == ApiEndpoints.refreshToken;
 
+    final body = err.response?.data;
+    final isBusinessRejection = body is Map && body['isSuccess'] == false;
+
     if (err.response?.statusCode != 401 ||
+        isBusinessRejection ||
         !wasAuthenticated ||
         alreadyRetried ||
         isRefreshCall) {
@@ -76,8 +88,8 @@ class TokenRefreshInterceptor extends Interceptor {
       options.headers['X-Auth-Token'] = outcome.token;
       // Dio finalizes a FormData when sending it and throws if it's sent
       // again, so the retry needs a fresh copy.
-      final body = options.data;
-      if (body is FormData) options.data = body.clone();
+      final requestBody = options.data;
+      if (requestBody is FormData) options.data = requestBody.clone();
       final retried = await _dio.fetch(options);
       return handler.resolve(retried);
     } on DioException catch (e) {
