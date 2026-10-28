@@ -450,30 +450,35 @@ class _ReceiptPreview extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(22),
-          child: Container(
-            height: 280,
-            width: double.infinity,
-            color: context.surfaceVariantColor,
-            child: Image.file(
-              File(path),
-              fit: BoxFit.contain,
-              cacheWidth: cacheWidth,
-              // The cache file can be evicted while the screen is open.
-              errorBuilder: (_, __, ___) => Icon(
-                Icons.broken_image_outlined,
-                size: 48,
-                color: context.textSecondary,
-              ),
+          child: Image.file(
+            File(path),
+            // fit: BoxFit.contain,
+            cacheWidth: cacheWidth,
+            // The cache file can be evicted while the screen is open.
+            errorBuilder: (_, __, ___) => Icon(
+              Icons.broken_image_outlined,
+              size: 48,
+              color: context.textSecondary,
             ),
           ),
         ),
         PositionedDirectional(
           top: AppSpacing.sm,
           end: AppSpacing.sm,
-          child: IconButton.filledTonal(
-            tooltip: context.l10n.commissionPaymentRemoveReceipt,
-            onPressed: onRemove,
-            icon: const Icon(LucideIcons.x, size: 18),
+          
+          child: Container(
+            width: AppSpacing.x3l,
+            height: AppSpacing.x3l,
+            decoration: BoxDecoration(
+              color: Colors.red,
+              shape: BoxShape.circle
+            ),
+            child: IconButton(
+              tooltip: context.l10n.commissionPaymentRemoveReceipt,
+              onPressed: onRemove,
+
+              icon: const Icon(LucideIcons.x, size: 16,color: Colors.white,),
+            ),
           ),
         ),
       ],
